@@ -1,9 +1,11 @@
 /* ---------------------------------------------------------------------------
- * Basis-Layout für die Poll-App.
+ * Basis-Layout fuer die Poll-App.
  *
- * Diese Stildefinitionen sind bewusst neutral gehalten, damit das spätere
- * Figma-Design ohne große Umbauten eingearbeitet werden kann. Klassennamen
- * folgen dem BEM-Schema (block__element--modifier).
+ * Die Tokens leiten sich aus dem Figma-File "Poll-App-Design" ab. Die Color
+ * Styles aus Figma (Primary purple, Primary orange, Secondary orange, Bg card)
+ * sind direkt als CSS-Variablen abgebildet, damit Aenderungen im Designsystem
+ * mit minimalem Diff in den Code wandern. Klassennamen folgen BEM
+ * (block__element--modifier).
  * ------------------------------------------------------------------------ */
 
 *,
@@ -13,36 +15,68 @@
 }
 
 :root {
-  --color-background: #f5f6f8;
-  --color-surface: #ffffff;
-  --color-border: #d8dbe0;
-  --color-text: #1f2933;
-  --color-text-muted: #5b6470;
-  --color-primary: #3f51b5;
-  --color-primary-hover: #303f9f;
-  --color-danger: #c62828;
-  --color-warning: #f57c00;
-  --color-success: #2e7d32;
+  /* Color styles aus Figma. */
+  --color-primary-purple: #35273A;
+  --color-primary-orange: #FFB770;
+  --color-secondary-orange: #FFCFA1;
+  --color-bg-card: #FAF5FE;
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
+  /* Abgeleitete semantische Tokens. */
+  --color-bg: var(--color-primary-purple);
+  --color-text: #FFFFFF;
+  --color-text-muted: rgba(255, 255, 255, 0.72);
+  --color-text-on-card: var(--color-primary-purple);
+  --color-text-on-card-muted: rgba(53, 39, 58, 0.65);
+  --color-border-card: rgba(53, 39, 58, 0.10);
+  --color-danger: #E5484D;
+  --color-warning: var(--color-secondary-orange);
 
+  /* Typografie. */
+  --font-display: "Nerko One", cursive;
+  --font-body: "Mulish", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  /* Type-Scale (Desktop). Werte direkt aus Figma. */
+  --font-size-hero: 80px;
+  --font-size-section-title: 72px;
+  --font-size-subsection: 32px;
+  --font-size-card-title: 26px;
+  --font-size-card-meta: 14px;
+  --font-size-body: 24px;
+  --font-size-base: 16px;
+
+  /* Radien. */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  /* Abstaende. */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 80px;
 
-  --font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  /* Layout. */
+  --content-max-width: 1218px;
+  --surveys-max-width: 1042px;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
-  font-family: var(--font-base);
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
   color: var(--color-text);
-  background: var(--color-background);
+  background: var(--color-bg);
   line-height: 1.5;
+  min-height: 100vh;
 }
 
 h1,
@@ -51,95 +85,23 @@ h3 {
   margin: 0;
 }
 
-/* ---------------------------------------------------------------------------
- * Home Screen
- *
- * Das Figma-Layout basiert auf einem 1920x1080-Frame. Wir nutzen einen
- * Canvas-Container mit `aspect-ratio: 16/9`, der proportional zum Viewport
- * skaliert. Alle Positionen und Größen sind als Prozentwerte des Frames
- * angegeben, damit die Komposition pixelgenau wie in Figma bleibt.
- * ------------------------------------------------------------------------ */
-.home-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: #35273A;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  overflow: hidden;
-}
-
-.home-screen:focus-visible {
-  outline: 3px solid #ffffff;
-  outline-offset: -6px;
-}
-
-/* `--scale` rechnet Figma-Pixel auf den aktuell sichtbaren Canvas um.
-   Damit lassen sich Pixelwerte aus Figma 1:1 übernehmen und alle internen
-   Abstände, Schriftgrößen und Größen skalieren konsistent mit dem Canvas. */
-.home-screen__canvas {
-  --scale: calc(min(100vw, calc(100vh * 16 / 9)) / 1920);
-  position: relative;
-  width: min(100vw, calc(100vh * 16 / 9));
-  aspect-ratio: 16 / 9;
-}
-
-/* Logo: Figma top 39, left 111. Container mit Padding 5 und Gap 10
-   zwischen Bubble (69x50) und Schriftzug "Poll App" (43x32).
-   align-items: flex-start, damit "Poll" oben bündig mit der Bubble abschließt. */
-.home-screen__logo {
-  position: absolute;
-  top: 39px;
-  left: 111px;
-  padding: calc(5px * var(--scale));
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.home-screen__logo-bubble {
-  width: calc(69px * var(--scale));
-  height: calc(50px * var(--scale));
-}
-
-/* Schriftzug "Poll" / "App" auf zwei Zeilen, Figma-Spec:
-   Nerko One 30 / 16 (line-height) / +3% letter-spacing in #FFB770.
-   line-height < font-size erzeugt den engen Stack ("App" rutscht dicht
-   unter "Poll"), der negative margin-top kompensiert das Schrift-Leading
-   damit die Glyphen-Oberkante mit der Bubble bündig ist.
-   Bewusst ohne fixe width/height: die Figma-Box (43x32) entspricht der
-   26px-Version. Bei 30px wäre der Text breiter als der Container, würde
-   im Flex-Layout aber auf 43px begrenzt - dadurch wäre der Größeneffekt
-   optisch nicht sichtbar. Stattdessen wächst die Box mit der Schrift. */
-.home-screen__logo-text {
-  margin: calc(-6px * var(--scale)) 0 0;
-  font-family: "Nerko One", cursive;
-  font-weight: 400;
-  font-style: normal;
-  font-size: calc(30px * var(--scale));
-  line-height: calc(16px * var(--scale));
-  letter-spacing: 0.03em;
-  color: #FFB770;
-}
-
-/* Einzelne Zeilen ohne eigenen Abstand: "Poll" hat margin-bottom: 0,
-   "App" hat margin-top: 0. line-height vom Container wird vererbt,
-   damit die Zeilen weiterhin eng gestapelt bleiben. */
-.home-screen__logo-line {
+img {
   display: block;
-  margin: 0;
-  padding: 0;
+  max-width: 100%;
+  height: auto;
 }
 
-/* Skip-Link */
+/* ---------------------------------------------------------------------------
+ * Skip-Link
+ * ------------------------------------------------------------------------ */
 .skip-link {
   position: absolute;
   left: -9999px;
   top: 0;
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--color-secondary-orange);
+  color: var(--color-primary-purple);
   padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
   z-index: 100;
 }
 
@@ -148,83 +110,453 @@ h3 {
   top: var(--spacing-md);
 }
 
-/* Header */
-.app-header {
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+/* Visually-hidden: bleibt fuer Screenreader sichtbar, ist aber visuell weg. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.app-header__inner {
-  max-width: 1100px;
+/* ---------------------------------------------------------------------------
+ * Site-Header / Logo
+ *
+ * Das Logo besteht aus der Sprechblase (logo-bubble.svg) und dem Schriftzug
+ * "Poll App" auf zwei Zeilen. Die Bubble ist 69x50 (Figma-Asset). Der
+ * Schriftzug nutzt Nerko One in Secondary-Orange, damit er auf dem dunklen
+ * Lila-Hintergrund kraeftig wirkt.
+ * ------------------------------------------------------------------------ */
+.site-header {
+  padding: var(--spacing-2xl) 0 0;
+}
+
+.site-header__inner {
+  max-width: var(--content-max-width);
   margin: 0 auto;
-  padding: var(--spacing-md) var(--spacing-lg);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-md);
+  padding: 0 var(--spacing-xl);
 }
 
-.app-header__title {
-  font-size: 1.5rem;
+.logo {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  text-decoration: none;
+  padding: 5px;
 }
 
-/* Main */
+.logo:focus-visible {
+  outline: 2px solid var(--color-secondary-orange);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.logo__bubble {
+  width: 69px;
+  height: 50px;
+  flex-shrink: 0;
+}
+
+.logo__text {
+  display: inline-flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 0.7;
+  letter-spacing: 0.03em;
+  color: var(--color-secondary-orange);
+}
+
+.logo__line {
+  display: block;
+}
+
+/* ---------------------------------------------------------------------------
+ * App-Main / Hero
+ *
+ * Hero-Layout aus Figma: horizontaler Container, Width Fill (1218px),
+ * Height Hug (420px), Gap 32. Linke Spalte enthaelt Headline, Body und CTA;
+ * rechte Spalte das 426x420-Visual (Home-Visual 3.svg).
+ * ------------------------------------------------------------------------ */
 .app-main {
-  max-width: 1100px;
+  max-width: var(--content-max-width);
   margin: 0 auto;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-2xl) var(--spacing-xl) var(--spacing-3xl);
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-3xl);
+}
+
+.hero {
+  display: flex;
+  align-items: center;
   gap: var(--spacing-xl);
+  min-height: 420px;
 }
 
-/* Section */
+.hero__copy {
+  flex: 1 1 666px;
+  max-width: 666px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.hero__headline {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--font-size-hero);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--color-primary-orange);
+}
+
+.hero__headline-line {
+  display: block;
+}
+
+.hero__body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--font-size-body);
+  line-height: 1;
+  color: var(--color-text);
+  /* Body-Block ist im Figma 666x90 mit drei Zeilen Text bei 1.5er Zeilenhoehe.
+     Wir setzen line-height etwas grosszuegiger als die Figma-100% fuer bessere
+     Lesbarkeit auf echten Displays. */
+  line-height: 1.25;
+}
+
+.hero__visual {
+  flex: 0 0 426px;
+  width: 426px;
+  height: 420px;
+}
+
+.hero__visual-img {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------------------------------------------------------------------------
+ * Buttons
+ * ------------------------------------------------------------------------ */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-secondary-orange);
+  outline-offset: 3px;
+}
+
+/* Hero-CTA "New survey": Secondary-Orange-Pille (Figma: Nokora 700, 18px). */
+.button--cta {
+  align-self: flex-start;
+  background: var(--color-secondary-orange);
+  color: var(--color-primary-purple);
+  padding: 10px 18px;
+  font-family: "Nokora", var(--font-body);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 100%;
+  letter-spacing: 0;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+.button--cta:hover {
+  background: var(--color-primary-orange);
+  transform: translateY(-1px);
+}
+
+.button--primary {
+  background: var(--color-secondary-orange);
+  color: var(--color-primary-purple);
+}
+
+.button--primary:hover {
+  background: var(--color-primary-orange);
+}
+
+.button--secondary {
+  background: transparent;
+  color: var(--color-text);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.button--secondary:hover {
+  border-color: var(--color-secondary-orange);
+  color: var(--color-secondary-orange);
+}
+
+.button--option {
+  width: 100%;
+  background: var(--color-bg-card);
+  border-color: var(--color-border-card);
+  color: var(--color-text-on-card);
+  justify-content: flex-start;
+  padding: var(--spacing-md);
+}
+
+.button--option:hover {
+  border-color: var(--color-primary-orange);
+  color: var(--color-primary-orange);
+}
+
+/* ---------------------------------------------------------------------------
+ * "Your surveys" – Sektionen unterhalb des Hero
+ *
+ * TODO: Tab-Pills, Sort-Dropdown und das untere Karten-Grid (2-spaltig,
+ * dunkles Theme) stehen noch aus. Dieser Block fokussiert die Ending-Soon-
+ * Karten gemaess Figma.
+ * ------------------------------------------------------------------------ */
+.surveys {
+  max-width: var(--surveys-max-width);
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3xl);
+}
+
+.surveys__title {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--font-size-section-title);
+  line-height: 1;
+  color: var(--color-primary-orange);
+  letter-spacing: 0.01em;
+}
+
 .poll-section__title {
-  font-size: 1.2rem;
-  margin-bottom: var(--spacing-md);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--font-size-subsection);
+  line-height: 1;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-lg);
 }
 
-.poll-section--ending-soon .poll-section__title::before {
-  content: "⏰ ";
+/* ---------------------------------------------------------------------------
+ * Filter-Row: Tab-Pills (Active/Past survey) + Sort-Button.
+ *
+ * Layout aus Figma: horizontale Reihe, Pills links, Sort rechts,
+ * justify-content: space-between. Auf schmalen Viewports darf sie umbrechen.
+ * ------------------------------------------------------------------------ */
+.poll-section__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: var(--spacing-lg);
 }
 
-/* Tabs */
+/* "tabs" sind hier die Filter-Pills. Designsystem-Komponente "Filter button"
+   in zwei Property-1-States: active / default. */
 .tabs {
   display: flex;
-  gap: var(--spacing-xs);
-  border-bottom: 1px solid var(--color-border);
-  margin-bottom: var(--spacing-md);
+  gap: 10px;
 }
 
 .tabs__tab {
-  background: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 10px;
+  height: 25px;
   border: none;
-  padding: var(--spacing-sm) var(--spacing-md);
-  font: inherit;
-  color: var(--color-text-muted);
+  border-radius: 20px;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
+  /* Pill-Schrift im Figma: Nokora 400/16. */
+  font-family: "Nokora", var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--color-primary-purple);
+  /* Default: heller Cremeorange-Bg. */
+  background: #FEE9D4;
+  transition: background-color 0.15s ease;
+}
+
+.tabs__tab:hover {
+  background: var(--color-secondary-orange);
 }
 
 .tabs__tab--active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-  font-weight: 600;
+  background: var(--color-primary-orange);
 }
 
 .tabs__tab:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-secondary-orange);
   outline-offset: 2px;
 }
 
-/* Poll-Liste */
+/* ---------------------------------------------------------------------------
+ * Sort-Dropdown
+ *
+ * Trigger: 206x32 Pille ohne Rahmen, Label links + Pfeil-SVG rechts.
+ * Menue: aufklappbare Liste in Primary-Purple, Optionen in Mulish 500/16
+ * Secondary-Orange. Geoeffnet via SortDropdownController.
+ * ------------------------------------------------------------------------ */
+.sort-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.sort {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 206px;
+  height: 32px;
+  padding: 4px 6px 4px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.sort:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sort:focus-visible {
+  outline: 2px solid var(--color-secondary-orange);
+  outline-offset: 2px;
+}
+
+/* Wenn eine Kategorie aktiv ist, faerbt sich das Trigger-Label in den
+   Akzent-Ton, damit der aktive Filter auf einen Blick erkennbar bleibt. */
+.sort.sort--active .sort__label {
+  color: var(--color-secondary-orange);
+}
+
+.sort__chevron {
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.sort[aria-expanded="true"] .sort__chevron {
+  transform: rotate(180deg);
+}
+
+/* Menu: positioniert direkt unter dem Trigger, Bg primary-purple,
+   Optionen Mulish 500/16 in secondary-orange. */
+.sort__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 206px;
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+  background: var(--color-primary-purple);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  z-index: 20;
+}
+
+.sort__option {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--color-secondary-orange);
+  transition: background-color 0.12s ease;
+}
+
+.sort__option:hover {
+  background: rgba(255, 207, 161, 0.08);
+}
+
+/* Aktuell ausgewaehlte Kategorie wird im Menue dezent hervorgehoben. */
+.sort__option--selected {
+  background: rgba(255, 207, 161, 0.14);
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------------------------
+ * Poll-Liste / Poll-Karte
+ *
+ * Zwei Listen-Layouts:
+ *   .poll-list                        Default (untere Bereiche, kommt spaeter)
+ *   .poll-section--ending-soon .poll-list   Drei 321x310 Karten in einer Reihe
+ *
+ * Die Ending-Soon-Karten ("Highlights card" in Figma) haben ein markantes
+ * asymmetrisches Border-Radius nur oben rechts (80px), sehen also aus wie
+ * abgeknickte Kartei-Karten. Innerhalb jeder Karte: oben Category-Label,
+ * darunter Titel, ganz unten der "Ends in X Day"-Pill (auch asymmetrisch
+ * gerundet, nur top-right 14px).
+ * ------------------------------------------------------------------------ */
 .poll-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--spacing-md);
+  /* Default fuer Active/Past-Liste: zweispaltig, 16px Gap. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Ending-Soon-Liste: einreihiges, horizontal scrollbares Karussell.
+   Bewusst KEIN Grid-Wrap: egal wie viele Karten, sie bleiben in einer Reihe
+   und koennen via Maus, Touch oder Tastatur horizontal gescrollt werden.
+   Die Scrollbar wird in allen Engines ausgeblendet (Firefox, Webkit, MS),
+   scroll-snap sorgt fuer ein sauberes Einrasten beim Wischen. */
+.poll-section--ending-soon .poll-list {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 40px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* 6px Innenabstand am unteren Rand vermeidet, dass focus-/hover-Schatten
+     der Karten beim Scroll-Container abgeschnitten werden. */
+  padding-bottom: 6px;
+}
+
+.poll-section--ending-soon .poll-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Karten in der Ending-Soon-Reihe haben feste Breite, schrumpfen nie und
+   rasten beim Scrollen am linken Rand ein. */
+.poll-section--ending-soon .poll-card {
+  flex: 0 0 321px;
+  scroll-snap-align: start;
 }
 
 .empty-state {
@@ -232,8 +564,99 @@ h3 {
   font-style: italic;
 }
 
-/* Poll-Karte – Stretched-Link-Pattern: Article ist semantisch der Inhalt,
-   der unsichtbare Button macht die ganze Karte klickbar. */
+/* ---------------------------------------------------------------------------
+ * Active Tab Panel: Scroll nur im inneren Viewport; natives Balken aus –
+ * eigene Schiene + Thumb (Scroll.svg 8×64), konsistent Chrome/Firefox/Safari.
+ *
+ * Desktop (2 Spalten): genau 6 Karten sichtbar (3 Zeilen à 127px + 2×16 Gap).
+ * Schmalere Viewports (1 Spalte): 6 Karten = 6 Zeilen gleicher Hoehe.
+ * Nur #tab-panel-active – Past-Tab bleibt ohne diese Begrenzung.
+ * ------------------------------------------------------------------------ */
+.tabs__panel--active-scroll {
+  --active-scroll-card-min-h: 127px;
+  --active-scroll-row-gap: 16px;
+  /* 3 Zeilen à Karte + 2 vertikale Gaps */
+  --active-scroll-max-h-desktop: calc(
+    3 * var(--active-scroll-card-min-h) + 2 * var(--active-scroll-row-gap)
+  );
+  /* 6 Zeilen à Karte + 5 vertikale Gaps (einspaltiges Grid) */
+  --active-scroll-max-h-mobile: calc(
+    6 * var(--active-scroll-card-min-h) + 5 * var(--active-scroll-row-gap)
+  );
+
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 24px;
+  max-height: var(--active-scroll-max-h-desktop);
+  overflow: hidden;
+}
+
+.tabs__panel-scroll-view {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  max-height: var(--active-scroll-max-h-desktop);
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tabs__panel-scroll-view::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.tabs__panel-scrollbar {
+  flex: 0 0 8px;
+  width: 8px;
+  align-self: stretch;
+}
+
+.tabs__panel-scrollbar-track {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background-color: var(--color-primary-purple);
+  border-radius: 4px;
+}
+
+.tabs__panel-scrollbar-thumb {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 8px;
+  height: 64px;
+  transform: translateY(0);
+  background: transparent url("./src/assets/img/Scroll.svg") center / 8px 64px
+    no-repeat;
+  cursor: grab;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+.tabs__panel-scrollbar-thumb:active {
+  cursor: grabbing;
+}
+
+.tabs__panel-scrollbar-thumb:hover {
+  filter: brightness(1.05);
+}
+
+/* ---------------------------------------------------------------------------
+ * Poll-Card: zwei Varianten
+ *
+ * 1. Default ("Survey view in the list" aus Figma)
+ *    513x127, transparent dunkler Bg, Category in Secondary-Orange,
+ *    Titel weiss, Pill unten rechts. Asymmetrischer Border-Radius mit
+ *    50px-"Ohr" oben rechts.
+ *
+ * 2. --highlight ("Highlights card" aus Figma)
+ *    321x310, heller Bg, Category & Titel in Primary-Purple, Pill
+ *    unten links. Asymmetrisches "Ohr" mit 80px oben rechts.
+ * ------------------------------------------------------------------------ */
 .poll-card {
   display: flex;
 }
@@ -241,29 +664,48 @@ h3 {
 .poll-card__inner {
   position: relative;
   flex: 1;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  gap: 8px;
+  /* Default-Variante: dunkler, halbtransparenter Bg, weisser Text,
+     asymmetrischer Radius. */
+  background: rgba(217, 217, 217, 0.08);
+  color: var(--color-text);
+  border: none;
+  border-radius: 5px 50px 5px 5px;
+  padding: 12px 20px;
+  min-height: 127px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .poll-card:not(.poll-card--static) .poll-card__inner:hover,
 .poll-card__inner:has(.poll-card__open:focus-visible) {
-  border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+  background: rgba(217, 217, 217, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 .poll-card--static .poll-card__inner {
   opacity: 0.7;
 }
 
+/* "Highlights card" Variante: Ending-Soon-Karte aus Figma. */
 .poll-card--highlight .poll-card__inner {
-  border-color: var(--color-warning);
-  box-shadow: 0 0 0 1px var(--color-warning) inset;
+  width: 321px;
+  height: 310px;
+  min-height: 0;
+  background: var(--color-bg-card);
+  color: var(--color-text-on-card);
+  border-radius: 0 80px 0 0;
+  padding: 40px 18px;
+  gap: 10px;
+}
+
+.poll-card--highlight:not(.poll-card--static) .poll-card__inner:hover,
+.poll-card--highlight .poll-card__inner:has(.poll-card__open:focus-visible) {
+  background: var(--color-bg-card);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
 }
 
 .poll-card__open {
@@ -280,94 +722,77 @@ h3 {
 }
 
 .poll-card__open:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-secondary-orange);
   outline-offset: 2px;
 }
 
-.poll-card__title {
-  font-size: 1.05rem;
-}
-
-.poll-card__description {
+/* Category-Label: Default Mulish 500/16 in Secondary-Orange,
+   Highlight Mulish 600/14 in Primary-Purple. */
+.poll-card__category {
   margin: 0;
-  color: var(--color-text-muted);
-  font-size: 0.95rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--color-secondary-orange);
 }
 
-.poll-card__deadline {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-
-.poll-card--highlight .poll-card__deadline {
-  color: var(--color-warning);
+.poll-card--highlight .poll-card__category {
   font-weight: 600;
+  font-size: var(--font-size-card-meta);
+  color: var(--color-text-on-card);
 }
 
-/* Buttons */
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  font: inherit;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.button:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-.button--primary {
-  background: var(--color-primary);
-  color: #fff;
-}
-
-.button--primary:hover {
-  background: var(--color-primary-hover);
-}
-
-.button--secondary {
-  background: var(--color-surface);
+/* Titel: Default Mulish 700/24 weiss, Highlight Mulish 700/26 dunkel. */
+.poll-card__title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1;
   color: var(--color-text);
-  border-color: var(--color-border);
 }
 
-.button--secondary:hover {
-  background: var(--color-background);
+.poll-card--highlight .poll-card__title {
+  font-size: var(--font-size-card-title);
+  color: var(--color-text-on-card);
 }
 
-.button--option {
-  width: 100%;
-  background: var(--color-surface);
-  border-color: var(--color-border);
-  color: var(--color-text);
-  justify-content: flex-start;
-  padding: var(--spacing-md);
+/* "Ends in X Day"-Pill: Secondary-Orange-Bg mit asymmetrischem Radius.
+   Default: bottom-right, Highlight: bottom-left. */
+.poll-card__pill {
+  margin-top: auto;
+  align-self: flex-end;
+  background: var(--color-secondary-orange);
+  color: var(--color-primary-purple);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0;
+  padding: 3px 6px;
+  border-radius: 0 14px 0 0;
 }
 
-.button--option:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+.poll-card--highlight .poll-card__pill {
+  align-self: flex-start;
 }
 
-/* Modal (allgemein) */
+/* ---------------------------------------------------------------------------
+ * Modale Dialoge (Form & Detail)
+ *
+ * Bewusst noch im neutralen Stil belassen, bis die Detail-/Form-Seiten in
+ * Figma uebernommen werden.
+ * ------------------------------------------------------------------------ */
 .modal {
   border: none;
   border-radius: var(--radius-md);
   padding: 0;
   max-width: 540px;
   width: calc(100% - 2 * var(--spacing-md));
-  background: var(--color-surface);
+  background: var(--color-bg-card);
+  color: var(--color-text-on-card);
 }
 
 .modal--detail {
@@ -375,7 +800,7 @@ h3 {
 }
 
 .modal::backdrop {
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(15, 8, 33, 0.6);
 }
 
 .modal__header {
@@ -383,7 +808,7 @@ h3 {
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-card);
 }
 
 .modal__title {
@@ -395,7 +820,7 @@ h3 {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: var(--color-text-muted);
+  color: var(--color-text-on-card-muted);
   line-height: 1;
 }
 
@@ -411,12 +836,14 @@ h3 {
   justify-content: flex-end;
   gap: var(--spacing-sm);
   padding: var(--spacing-md) var(--spacing-lg);
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border-card);
 }
 
-/* Form */
+/* ---------------------------------------------------------------------------
+ * Formular
+ * ------------------------------------------------------------------------ */
 .poll-form__fieldset {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-card);
   border-radius: var(--radius-sm);
   padding: var(--spacing-md);
   display: flex;
@@ -446,19 +873,20 @@ h3 {
 .form-field__hint {
   margin: 0;
   font-size: 0.85rem;
-  color: var(--color-text-muted);
+  color: var(--color-text-on-card-muted);
 }
 
 .form-field__input {
   font: inherit;
   padding: var(--spacing-sm);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-card);
   border-radius: var(--radius-sm);
-  background: var(--color-surface);
+  background: var(--color-bg-card);
+  color: var(--color-text-on-card);
 }
 
 .form-field__input:focus {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-primary-orange);
   outline-offset: 1px;
 }
 
@@ -477,7 +905,9 @@ h3 {
   font-size: 0.85rem;
 }
 
-/* Detailansicht – Grid-Areas, damit der Body-Wrapper-Div entfällt. */
+/* ---------------------------------------------------------------------------
+ * Detailansicht
+ * ------------------------------------------------------------------------ */
 .poll-detail {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -490,7 +920,7 @@ h3 {
 .poll-detail__header {
   grid-area: header;
   padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-card);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
@@ -512,23 +942,12 @@ h3 {
 
 .poll-detail__meta {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-on-card-muted);
   font-size: 0.9rem;
 }
 
 .poll-detail__description {
   margin: 0;
-}
-
-@media (max-width: 720px) {
-  .poll-detail {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "header"
-      "voting"
-      "results"
-      "footer";
-  }
 }
 
 .poll-detail__section-title {
@@ -546,7 +965,7 @@ h3 {
 }
 
 .poll-detail__info {
-  background: var(--color-background);
+  background: rgba(41, 6, 87, 0.05);
   padding: var(--spacing-md);
   border-radius: var(--radius-sm);
   margin: 0;
@@ -554,19 +973,21 @@ h3 {
 
 .poll-detail__total {
   margin: 0 0 var(--spacing-md);
-  color: var(--color-text-muted);
+  color: var(--color-text-on-card-muted);
   font-size: 0.9rem;
 }
 
 .poll-detail__footer {
   grid-area: footer;
   padding: var(--spacing-md) var(--spacing-lg);
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border-card);
   display: flex;
   justify-content: flex-end;
 }
 
-/* Auswertung */
+/* ---------------------------------------------------------------------------
+ * Auswertung
+ * ------------------------------------------------------------------------ */
 .poll-results {
   list-style: none;
   margin: 0;
@@ -589,7 +1010,7 @@ h3 {
 }
 
 .poll-results__bar {
-  background: var(--color-background);
+  background: rgba(41, 6, 87, 0.08);
   border-radius: var(--radius-sm);
   height: 8px;
   overflow: hidden;
@@ -597,6 +1018,70 @@ h3 {
 
 .poll-results__bar-fill {
   height: 100%;
-  background: var(--color-primary);
+  background: var(--color-primary-orange);
   transition: width 0.3s ease;
+}
+
+/* ---------------------------------------------------------------------------
+ * Responsive
+ *
+ * Aus Figma kommt noch ein Mobile-Flow. Bis dieser ausgelesen ist, fallen wir
+ * unterhalb von 900px auf einen einspaltigen Hero und kleinere Schrift zurueck.
+ * Pixelgenaue Mobile-Vorgaben kommen im naechsten Schritt.
+ * ------------------------------------------------------------------------ */
+@media (max-width: 900px) {
+  :root {
+    --font-size-hero: 56px;
+    --font-size-section-title: 44px;
+    --font-size-body: 18px;
+  }
+
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 0;
+  }
+
+  .hero__visual {
+    width: 100%;
+    max-width: 426px;
+    height: auto;
+    aspect-ratio: 426 / 420;
+  }
+
+  .site-header,
+  .app-main {
+    padding-left: var(--spacing-lg);
+    padding-right: var(--spacing-lg);
+  }
+
+  /* Lower-Cards stacken auf einspaltig, behalten den 50px-Ear oben rechts. */
+  .poll-list {
+    grid-template-columns: 1fr;
+  }
+
+  /* Sort-Button darf bei wenig Platz die volle Zeilenbreite einnehmen. */
+  .sort {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  /* Einspaltiges Active-Panel: 6 Karten-Hoehen fuer vertikalen Scroll */
+  #tab-panel-active.tabs__panel--active-scroll,
+  .tabs__panel--active-scroll {
+    max-height: var(--active-scroll-max-h-mobile);
+  }
+
+  .tabs__panel-scroll-view {
+    max-height: var(--active-scroll-max-h-mobile);
+  }
+
+  .poll-detail {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "voting"
+      "results"
+      "footer";
+  }
 }

@@ -10,110 +10,168 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Nerko+One&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&family=Nerko+One&family=Nokora:wght@400;700&display=swap"
     >
     <link rel="stylesheet" href="/main.css">
   </head>
   <body>
-    <!-- Home Screen: initiale Ansicht, wechselt per Klick/Enter/Space zur App. -->
-    <section
-      class="home-screen"
-      id="home-screen"
-      role="button"
-      tabindex="0"
-      aria-label="Klicken oder Enter drücken, um zur Poll App zu gelangen"
-    >
-      <div class="home-screen__canvas">
-        <div class="home-screen__logo">
-          <img
-            class="home-screen__logo-bubble"
-            src="./src/assets/img/logo-bubble.svg"
-            alt=""
-          >
-          <p class="home-screen__logo-text">
-            <span class="home-screen__logo-line">Poll</span>
-            <span class="home-screen__logo-line">App</span>
-          </p>
-        </div>
-      </div>
-    </section>
-
     <a class="skip-link" href="#main-content">Zum Hauptinhalt springen</a>
 
-    <header class="app-header">
-      <div class="app-header__inner">
-        <h1 class="app-header__title">Poll App</h1>
-        <button
-          type="button"
-          class="button button--primary"
-          id="new-survey-button"
-          aria-haspopup="dialog"
-        >
-          New Survey
-        </button>
+    <!-- Site-Header: Logo oben links, durchgängig über den Dark-Purple-Hintergrund. -->
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="logo" href="#main-content" aria-label="Poll App – zur Startseite">
+          <img class="logo__bubble" src="./src/assets/img/logo-bubble.svg" alt="">
+          <span class="logo__text" aria-hidden="true">
+            <span class="logo__line">Poll</span>
+            <span class="logo__line">App</span>
+          </span>
+        </a>
       </div>
     </header>
 
     <main id="main-content" class="app-main">
-      <!-- User Story 1: Bald endende Umfragen werden bewusst über der Hauptliste angezeigt. -->
-      <section
-        class="poll-section poll-section--ending-soon"
-        id="ending-soon-section"
-        aria-labelledby="ending-soon-heading"
-        hidden
-      >
-        <h2 class="poll-section__title" id="ending-soon-heading">
-          Bald endende Umfragen
-        </h2>
-        <ul class="poll-list" id="ending-soon-list"></ul>
+      <!-- Hero-Section: 1218×420 Layout aus Figma (Text links, Visual rechts, Gap 32). -->
+      <section class="hero" aria-labelledby="hero-headline">
+        <div class="hero__copy">
+          <h1 class="hero__headline" id="hero-headline">
+            <span class="hero__headline-line">Collect Feedback,</span>
+            <span class="hero__headline-line">Unlock Ideas</span>
+          </h1>
+          <p class="hero__body">
+            Create and share surveys in minutes – from team events to
+            workplace culture. Collect opinions, engage your audience,
+            and turn feedback into action.
+          </p>
+          <button
+            type="button"
+            class="button button--cta"
+            id="new-survey-button"
+            aria-haspopup="dialog"
+          >
+            New survey
+          </button>
+        </div>
+        <div class="hero__visual" aria-hidden="true">
+          <img
+            class="hero__visual-img"
+            src="./src/assets/img/Home-Visual 3.svg"
+            alt=""
+          >
+        </div>
       </section>
 
-      <!-- User Story 2: Übersicht aller Umfragen mit Tab-Wechsel zwischen laufend und abgeschlossen. -->
-      <section class="poll-section" aria-labelledby="all-polls-heading">
-        <h2 class="poll-section__title" id="all-polls-heading">
-          Alle Umfragen
-        </h2>
+      <!-- "Your surveys": Container für alle Umfragen-Listen (Ending soon + Tabs). -->
+      <section class="surveys" aria-labelledby="surveys-heading">
+        <h2 class="surveys__title" id="surveys-heading">Your surveys</h2>
+
+        <!-- User Story 1: Bald endende Umfragen werden bewusst über der Hauptliste angezeigt. -->
+        <section
+          class="poll-section poll-section--ending-soon"
+          id="ending-soon-section"
+          aria-labelledby="ending-soon-heading"
+          hidden
+        >
+          <h3 class="poll-section__title" id="ending-soon-heading">
+            Ending soon surveys
+          </h3>
+          <ul class="poll-list" id="ending-soon-list"></ul>
+        </section>
+
+        <!-- User Story 2: Übersicht aller Umfragen mit Tab-Wechsel zwischen laufend und abgeschlossen. -->
+        <section class="poll-section" aria-labelledby="all-polls-heading">
+          <h3 class="poll-section__title visually-hidden" id="all-polls-heading">
+            Alle Umfragen
+          </h3>
 
         <!--
-          Tab-Pattern nach WAI-ARIA: <div role="tablist"> mit <button role="tab">
-          Die Tab-Panels selbst sind <section>, da sie thematische Inhaltsbereiche bilden.
+          Filter-Row aus Figma: links die Tab-Pills (Active/Past survey),
+          rechts der "Sort by categories"-Button. Tab-Pattern nach WAI-ARIA
+          mit role="tablist" / role="tab"; die Tab-Panels darunter sind
+          <section role="tabpanel">.
         -->
-        <div class="tabs" role="tablist" aria-label="Umfragen filtern">
-          <button
-            type="button"
-            class="tabs__tab tabs__tab--active"
-            role="tab"
-            id="tab-active"
-            aria-selected="true"
-            aria-controls="tab-panel-active"
-            data-tab="active"
-          >
-            Laufende Umfragen
-          </button>
-          <button
-            type="button"
-            class="tabs__tab"
-            role="tab"
-            id="tab-past"
-            aria-selected="false"
-            aria-controls="tab-panel-past"
-            data-tab="past"
-            tabindex="-1"
-          >
-            Past Surveys
-          </button>
+        <div class="poll-section__filters">
+          <div class="tabs" role="tablist" aria-label="Umfragen filtern">
+            <button
+              type="button"
+              class="tabs__tab tabs__tab--active"
+              role="tab"
+              id="tab-active"
+              aria-selected="true"
+              aria-controls="tab-panel-active"
+              data-tab="active"
+            >
+              Active survey
+            </button>
+            <button
+              type="button"
+              class="tabs__tab"
+              role="tab"
+              id="tab-past"
+              aria-selected="false"
+              aria-controls="tab-panel-past"
+              data-tab="past"
+              tabindex="-1"
+            >
+              Past survey
+            </button>
+          </div>
+
+          <!--
+            Custom Dropdown "Sort by categories":
+            - Trigger: <button> mit Label und Pfeil-SVG.
+            - Menu: <ul role="listbox"> mit dynamisch eingefuegten Kategorien.
+            Verhalten und A11y steuert SortDropdownController.
+          -->
+          <div class="sort-wrapper">
+            <button
+              type="button"
+              class="sort"
+              id="sort-button"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              aria-controls="sort-menu"
+            >
+              <span class="sort__label" id="sort-label">Sort by categories</span>
+              <img
+                class="sort__chevron"
+                src="./src/assets/img/arrow_drop_down.svg"
+                alt=""
+                width="15"
+                height="8"
+              >
+            </button>
+            <ul
+              class="sort__menu"
+              id="sort-menu"
+              role="listbox"
+              aria-label="Kategorie ausw\u00e4hlen"
+              hidden
+            ></ul>
+          </div>
         </div>
 
         <section
-          class="tabs__panel"
+          class="tabs__panel tabs__panel--active-scroll"
           role="tabpanel"
           id="tab-panel-active"
           aria-labelledby="tab-active"
         >
-          <ul class="poll-list" id="active-polls-list"></ul>
-          <p class="empty-state" id="active-polls-empty" hidden>
-            Aktuell sind keine laufenden Umfragen vorhanden.
-          </p>
+          <div class="tabs__panel-scroll-view" id="tab-panel-active-scroll-view">
+            <ul class="poll-list" id="active-polls-list"></ul>
+            <p class="empty-state" id="active-polls-empty" hidden>
+              Aktuell sind keine laufenden Umfragen vorhanden.
+            </p>
+          </div>
+          <div class="tabs__panel-scrollbar" id="tab-panel-active-scrollbar" hidden>
+            <div class="tabs__panel-scrollbar-track">
+              <div
+                class="tabs__panel-scrollbar-thumb"
+                role="presentation"
+                aria-hidden="true"
+              ></div>
+            </div>
+          </div>
         </section>
 
         <section
@@ -127,6 +185,7 @@
           <p class="empty-state" id="past-polls-empty" hidden>
             Es gibt noch keine abgeschlossenen Umfragen.
           </p>
+        </section>
         </section>
       </section>
     </main>
@@ -154,6 +213,10 @@
               <label class="form-field__label" for="poll-title">
                 Titel <strong class="form-field__required" aria-hidden="true">*</strong>
               </label>
+              <p class="form-field__hint" id="poll-title-hint">
+                Maximal 11 Wörter und 63 Zeichen
+                (Orientierung: langes Listenbeispiel).
+              </p>
               <input
                 class="form-field__input"
                 type="text"
@@ -161,9 +224,9 @@
                 name="title"
                 required
                 minlength="3"
-                maxlength="120"
+                maxlength="63"
                 aria-required="true"
-                aria-describedby="poll-title-error"
+                aria-describedby="poll-title-hint poll-title-error"
               >
               <p class="form-field__error" id="poll-title-error" role="alert"></p>
             </div>
