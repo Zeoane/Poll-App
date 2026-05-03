@@ -7,6 +7,7 @@ import {
 } from '../types/poll.js';
 
 import { requireElementById } from '../utils/dom.js';
+
 const MIN_TITLE_LENGTH = 3;
 const MIN_OPTIONS = 2;
 
@@ -19,13 +20,37 @@ function countTitleWords(title: string): number {
   return trimmed.split(/\s+/).length;
 }
 
+function validationTitleError(title: string): string | undefined {
+  if (title.length < MIN_TITLE_LENGTH) {
+    return `Please enter a title with at least ${MIN_TITLE_LENGTH} characters.`;
+  }
+  if (title.length > POLL_TITLE_MAX_CHARS) {
+    return `Title must be at most ${POLL_TITLE_MAX_CHARS} characters long.`;
+  }
+  if (countTitleWords(title) > POLL_TITLE_MAX_WORDS) {
+    return `Title must be at most ${POLL_TITLE_MAX_WORDS} words.`;
+  }
+  return undefined;
+}
+
+function validationOptionsError(options: ReadonlyArray<string>): string | undefined {
+  const uniqueOptions = new Set(options.map((option) => option.toLowerCase()));
+  if (options.length < MIN_OPTIONS) {
+    return `Please enter at least ${MIN_OPTIONS} answer options (one per line).`;
+  }
+  if (uniqueOptions.size !== options.length) {
+    return 'Answer options must be unique.';
+  }
+  return undefined;
+}
+
 type RequiredField = 'title' | 'options';
 
 export interface PollFormControllerOptions {
   readonly pollService: PollService;
 }
 
-/** Controls the new-survey dialog: opening, validation, and poll creation. */
+/** New-survey modal: open/close, validation, and poll creation. */
 export class PollFormController {
   private readonly pollService: PollService;
   private readonly dialog: HTMLDialogElement;
@@ -56,7 +81,7 @@ export class PollFormController {
     this.attachEvents();
   }
 
-  /** Wires up dialog open/close and form submission events. */
+  /** Binds dialog and form events. */
   private attachEvents(): void {
     this.openButton.addEventListener('click', () => this.open());
     this.closeButton.addEventListener('click', () => this.close());
@@ -69,21 +94,22 @@ export class PollFormController {
     this.optionsInput.addEventListener('input', () => this.clearError('options'));
   }
 
-  /** Resets the form, clears errors, and opens the modal dialog. */
+  /** Opens the modal with a reset form. */
   private open(): void {
     this.form.reset();
     this.clearError('title');
     this.clearError('options');
+    this.openButton.classList.remove('button--cta--success');
     this.dialog.showModal();
     this.titleInput.focus();
   }
 
-  /** Closes the modal dialog without submitting. */
+  /** Closes the modal without submitting. */
   private close(): void {
     this.dialog.close();
   }
 
-  /** Handles form submission by validating and creating a new poll. */
+  /** Validates input, creates the poll, and closes on success. */
   private handleSubmit(): void {
     const input = this.collectInput();
     const errors = this.validate(input);
@@ -92,10 +118,11 @@ export class PollFormController {
       return;
     }
     this.pollService.createPoll(input);
+    this.openButton.classList.add('button--cta--success');
     this.close();
   }
 
-  /** Reads the current form values into a structured NewPollInput. */
+  /** Reads form controls into a {@link NewPollInput}. */
   private collectInput(): NewPollInput {
     const rawOptions = this.optionsInput.value
       .split('\n')
@@ -112,33 +139,28 @@ export class PollFormController {
     };
   }
 
-  /** Returns validation errors keyed by field, or an empty object when valid. */
+  /** Field-level validation for the create-poll form. */
   private validate(input: NewPollInput): ValidationErrors {
     const errors: ValidationErrors = {};
-    if (input.title.length < MIN_TITLE_LENGTH) {
-      errors.title = `Bitte einen Titel mit mindestens ${MIN_TITLE_LENGTH} Zeichen angeben.`;
-    } else if (input.title.length > POLL_TITLE_MAX_CHARS) {
-      errors.title = `Der Titel darf höchstens ${POLL_TITLE_MAX_CHARS} Zeichen haben.`;
-    } else if (countTitleWords(input.title) > POLL_TITLE_MAX_WORDS) {
-      errors.title = `Der Titel darf höchstens ${POLL_TITLE_MAX_WORDS} Wörter haben.`;
+    const titleErr = validationTitleError(input.title);
+    if (titleErr !== undefined) {
+      errors.title = titleErr;
     }
-    const uniqueOptions = new Set(input.options.map((option) => option.toLowerCase()));
-    if (input.options.length < MIN_OPTIONS) {
-      errors.options = `Bitte mindestens ${MIN_OPTIONS} Antwortoptionen angeben (eine pro Zeile).`;
-    } else if (uniqueOptions.size !== input.options.length) {
-      errors.options = 'Antwortoptionen müssen eindeutig sein.';
+    const optionsErr = validationOptionsError(input.options);
+    if (optionsErr !== undefined) {
+      errors.options = optionsErr;
     }
     return errors;
   }
 
-  /** Renders all validation errors and focuses the first invalid field. */
+  /** Applies all errors and focuses the first invalid control. */
   private applyErrors(errors: ValidationErrors): void {
     this.applyFieldError('title', errors.title);
     this.applyFieldError('options', errors.options);
     this.focusFirstInvalid(errors);
   }
 
-  /** Renders or clears the error message for a single field. */
+  /** Sets or clears one field’s inline error. */
   private applyFieldError(field: RequiredField, message: string | undefined): void {
     if (message === undefined) {
       this.clearError(field);
@@ -150,7 +172,7 @@ export class PollFormController {
     inputElement.setAttribute('aria-invalid', 'true');
   }
 
-  /** Moves focus to the first field that has a validation error. */
+  /** Focuses title first, then options, when those keys are set. */
   private focusFirstInvalid(errors: ValidationErrors): void {
     if (errors.title !== undefined) {
       this.titleInput.focus();
@@ -161,7 +183,7 @@ export class PollFormController {
     }
   }
 
-  /** Clears the error message for the given field. */
+  /** Clears error state for one field. */
   private clearError(field: RequiredField): void {
     const errorElement = field === 'title' ? this.titleError : this.optionsError;
     const inputElement = field === 'title' ? this.titleInput : this.optionsInput;

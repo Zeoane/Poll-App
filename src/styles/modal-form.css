@@ -1,0 +1,116 @@
+.modal {
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0;
+  max-width: 540px;
+  width: calc(100% - 2 * var(--spacing-md));
+  background: var(--color-bg-card);
+  color: var(--color-text-on-card);
+}
+
+.modal--detail {
+  max-width: 920px;
+}
+
+.modal::backdrop {
+  background: rgba(15, 8, 33, 0.6);
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border-card);
+}
+
+.modal__title {
+  font-size: 1.2rem;
+}
+
+.modal__close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--color-text-on-card-muted);
+  line-height: 1;
+}
+
+.modal__body {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--color-border-card);
+}
+
+.poll-form__fieldset {
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.poll-form__legend {
+  padding: 0 var(--spacing-xs);
+  font-weight: 600;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.form-field__label {
+  font-weight: 600;
+}
+
+.form-field__required {
+  color: var(--color-danger);
+}
+
+.form-field__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-on-card-muted);
+}
+
+.form-field__input {
+  font: inherit;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-card);
+  color: var(--color-text-on-card);
+}
+
+.form-field__input:focus {
+  outline: 2px solid var(--color-primary-orange);
+  outline-offset: 1px;
+}
+
+.form-field__input[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.form-field__input--textarea {
+  resize: vertical;
+}
+
+.form-field__error {
+  margin: 0;
+  min-height: 1.2em;
+  color: var(--color-danger);
+  font-size: 0.85rem;
+}

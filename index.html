@@ -12,12 +12,11 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&family=Nerko+One&family=Nokora:wght@400;700&display=swap"
     >
-    <link rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" href="/src/styles/main.css">
   </head>
   <body>
     <a class="skip-link" href="#main-content">Zum Hauptinhalt springen</a>
 
-    <!-- Site-Header: Logo oben links, durchgängig über den Dark-Purple-Hintergrund. -->
     <header class="site-header">
       <div class="site-header__inner">
         <a class="logo" href="#main-content" aria-label="Poll App – zur Startseite">
@@ -31,7 +30,6 @@
     </header>
 
     <main id="main-content" class="app-main">
-      <!-- Hero-Section: 1218×420 Layout aus Figma (Text links, Visual rechts, Gap 32). -->
       <section class="hero" aria-labelledby="hero-headline">
         <div class="hero__copy">
           <h1 class="hero__headline" id="hero-headline">
@@ -49,23 +47,42 @@
             id="new-survey-button"
             aria-haspopup="dialog"
           >
-            New survey
+            <span class="button--cta__label">New survey</span>
+            <span class="button--cta__icon-wrap" aria-hidden="true">
+              <img
+                class="button--cta__icon button--cta__icon--add"
+                src="./src/assets/img/add_circle.svg"
+                alt=""
+                width="24"
+                height="24"
+              >
+              <img
+                class="button--cta__icon button--cta__icon--check"
+                src="./src/assets/img/check.svg"
+                alt=""
+                width="24"
+                height="24"
+              >
+            </span>
           </button>
         </div>
         <div class="hero__visual" aria-hidden="true">
           <img
-            class="hero__visual-img"
+            class="hero__visual-img hero__visual-img--base"
             src="./src/assets/img/Home-Visual 3.svg"
+            alt=""
+          >
+          <img
+            class="hero__visual-img hero__visual-img--hover"
+            src="./src/assets/img/visual-3-hover.svg"
             alt=""
           >
         </div>
       </section>
 
-      <!-- "Your surveys": Container für alle Umfragen-Listen (Ending soon + Tabs). -->
       <section class="surveys" aria-labelledby="surveys-heading">
         <h2 class="surveys__title" id="surveys-heading">Your surveys</h2>
 
-        <!-- User Story 1: Bald endende Umfragen werden bewusst über der Hauptliste angezeigt. -->
         <section
           class="poll-section poll-section--ending-soon"
           id="ending-soon-section"
@@ -78,18 +95,11 @@
           <ul class="poll-list" id="ending-soon-list"></ul>
         </section>
 
-        <!-- User Story 2: Übersicht aller Umfragen mit Tab-Wechsel zwischen laufend und abgeschlossen. -->
         <section class="poll-section" aria-labelledby="all-polls-heading">
           <h3 class="poll-section__title visually-hidden" id="all-polls-heading">
             Alle Umfragen
           </h3>
 
-        <!--
-          Filter-Row aus Figma: links die Tab-Pills (Active/Past survey),
-          rechts der "Sort by categories"-Button. Tab-Pattern nach WAI-ARIA
-          mit role="tablist" / role="tab"; die Tab-Panels darunter sind
-          <section role="tabpanel">.
-        -->
         <div class="poll-section__filters">
           <div class="tabs" role="tablist" aria-label="Umfragen filtern">
             <button
@@ -117,12 +127,6 @@
             </button>
           </div>
 
-          <!--
-            Custom Dropdown "Sort by categories":
-            - Trigger: <button> mit Label und Pfeil-SVG.
-            - Menu: <ul role="listbox"> mit dynamisch eingefuegten Kategorien.
-            Verhalten und A11y steuert SortDropdownController.
-          -->
           <div class="sort-wrapper">
             <button
               type="button"
@@ -190,7 +194,6 @@
       </section>
     </main>
 
-    <!-- User Story 3: Modal zum Erstellen einer neuen Umfrage. -->
     <dialog class="modal" id="new-survey-dialog" aria-labelledby="new-survey-title">
       <form class="poll-form" id="new-survey-form" novalidate>
         <header class="modal__header">
@@ -215,7 +218,6 @@
               </label>
               <p class="form-field__hint" id="poll-title-hint">
                 Maximal 11 Wörter und 63 Zeichen
-                (Orientierung: langes Listenbeispiel).
               </p>
               <input
                 class="form-field__input"
@@ -290,10 +292,8 @@
       </form>
     </dialog>
 
-    <!-- User Story 4 + 5: Detailansicht mit Voting und Live-Auswertung. -->
     <dialog class="modal modal--detail" id="poll-detail-dialog" aria-labelledby="poll-detail-title">
       <article class="poll-detail" id="poll-detail-content">
-        <!-- Inhalt wird zur Laufzeit von PollDetailController gerendert. -->
       </article>
     </dialog>
 

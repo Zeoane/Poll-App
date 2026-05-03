@@ -33,11 +33,7 @@ function createCardItem(options: PollCardOptions): HTMLLIElement {
   return item;
 }
 
-/**
- * Creates the <article> body. Layout follows the Figma "Highlights card":
- * category label on top, headline below, "Ends in X Day" pill at the bottom.
- * Category and pill are optional and skipped when the poll has no data for them.
- */
+/** Builds the inner article shell for a poll card. */
 function createCardArticle(poll: Poll): HTMLElement {
   const article = document.createElement('article');
   article.className = 'poll-card__inner';

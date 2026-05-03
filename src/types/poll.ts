@@ -1,8 +1,4 @@
-/**
- * Canonical list of poll categories shown in the "Sort by categories" filter.
- * Adding a category is intentionally a code change so the dropdown stays in
- * sync with what the data layer can produce.
- */
+/** Ordered category labels used by the sort dropdown and mock data. */
 export const POLL_CATEGORIES = [
   'Team activities',
   'Gaming',
@@ -15,12 +11,7 @@ export const POLL_CATEGORIES = [
 /** Categories the data layer recognises for filtering. */
 export type PollCategory = (typeof POLL_CATEGORIES)[number];
 
-/**
- * Upper bound for poll titles in list cards (matches Figma layout).
- * Derived from the reference sentence:
- * "Indoor air quality: should we add CO₂ sensors to meeting rooms?"
- * → 11 words, 63 characters (including spaces and punctuation).
- */
+/** Max word count allowed in a poll title. */
 export const POLL_TITLE_MAX_WORDS = 11;
 export const POLL_TITLE_MAX_CHARS = 63;
 

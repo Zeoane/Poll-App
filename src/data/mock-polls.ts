@@ -8,10 +8,7 @@ function relativeDate(offsetMs: number): Date {
   return new Date(Date.now() + offsetMs);
 }
 
-/**
- * Initial mock data covering all relevant poll states. Categories match the
- * canonical POLL_CATEGORIES list. Three polls sit in the ending-soon window.
- */
+/** Seed polls covering active, past, ending-soon, and category variants. */
 export const MOCK_POLLS: ReadonlyArray<Poll> = [
   {
     id: 'poll-1',

@@ -12,18 +12,18 @@ const relativeFormatter = new Intl.RelativeTimeFormat('de-DE', {
   numeric: 'auto',
 });
 
-/** Formats an absolute date in localized form (e.g. "28.04.2026, 10:00"). */
+/** Formats an absolute date for display; null yields a neutral placeholder. */
 export function formatDateTime(date: Date | null): string {
   if (date === null) {
-    return 'Keine Deadline';
+    return 'No deadline';
   }
   return dateTimeFormatter.format(date);
 }
 
-/** Formats a date as a human-readable relative time (e.g. "in 3 Stunden"). */
+/** Formats a relative time string; null yields a neutral placeholder. */
 export function formatRelative(date: Date | null, reference: Date = new Date()): string {
   if (date === null) {
-    return 'Keine Deadline';
+    return 'No deadline';
   }
   const diffMs = date.getTime() - reference.getTime();
   if (Math.abs(diffMs) >= DAY_IN_MS) {
@@ -35,14 +35,32 @@ export function formatRelative(date: Date | null, reference: Date = new Date()):
   return relativeFormatter.format(Math.round(diffMs / MINUTE_IN_MS), 'minute');
 }
 
-/**
- * Formats a future deadline as a short "Ends in N Day(s)" / "Ends in N Hour(s)"
- * string for the deadline pill on poll cards. Returns `null` for missing or
- * already-elapsed deadlines so the caller can hide the pill entirely.
- *
- * Math.ceil ensures that "20h left" still reads as "Ends in 1 Day", which
- * matches the visual intent of the Figma cards ("Ends in 1/2/3 Days").
- */
+function endsInDaysLabel(diffMs: number): string {
+  const days = Math.ceil(diffMs / DAY_IN_MS);
+  return `Ends in ${days} ${days === 1 ? 'Day' : 'Days'}`;
+}
+
+function endsInHoursLabel(diffMs: number): string {
+  const hours = Math.ceil(diffMs / HOUR_IN_MS);
+  return `Ends in ${hours} ${hours === 1 ? 'Hour' : 'Hours'}`;
+}
+
+function endsInMinutesLabel(diffMs: number): string {
+  const minutes = Math.max(1, Math.ceil(diffMs / MINUTE_IN_MS));
+  return `Ends in ${minutes} ${minutes === 1 ? 'Minute' : 'Minutes'}`;
+}
+
+function endsInFromPositiveDiff(diffMs: number): string {
+  if (diffMs >= DAY_IN_MS) {
+    return endsInDaysLabel(diffMs);
+  }
+  if (diffMs >= HOUR_IN_MS) {
+    return endsInHoursLabel(diffMs);
+  }
+  return endsInMinutesLabel(diffMs);
+}
+
+/** Card pill text for time until deadline, or null when none / already passed. */
 export function formatEndsIn(
   date: Date | null,
   reference: Date = new Date(),
@@ -54,19 +72,10 @@ export function formatEndsIn(
   if (diffMs <= 0) {
     return null;
   }
-  if (diffMs >= DAY_IN_MS) {
-    const days = Math.ceil(diffMs / DAY_IN_MS);
-    return `Ends in ${days} ${days === 1 ? 'Day' : 'Days'}`;
-  }
-  if (diffMs >= HOUR_IN_MS) {
-    const hours = Math.ceil(diffMs / HOUR_IN_MS);
-    return `Ends in ${hours} ${hours === 1 ? 'Hour' : 'Hours'}`;
-  }
-  const minutes = Math.max(1, Math.ceil(diffMs / MINUTE_IN_MS));
-  return `Ends in ${minutes} ${minutes === 1 ? 'Minute' : 'Minutes'}`;
+  return endsInFromPositiveDiff(diffMs);
 }
 
-/** Calculates the percentage share (0–100) of votes within the total. */
+/** Vote share as a 0–100 integer for progress display. */
 export function calculatePercentage(votes: number, total: number): number {
   if (total <= 0) {
     return 0;

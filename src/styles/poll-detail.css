@@ -1,0 +1,110 @@
+.poll-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "header  header"
+    "voting  results"
+    "footer  footer";
+}
+
+.poll-detail__header {
+  grid-area: header;
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.poll-detail__voting {
+  grid-area: voting;
+  padding: var(--spacing-lg);
+}
+
+.poll-detail__results {
+  grid-area: results;
+  padding: var(--spacing-lg);
+}
+
+.poll-detail__title {
+  font-size: 1.4rem;
+}
+
+.poll-detail__meta {
+  margin: 0;
+  color: var(--color-text-on-card-muted);
+  font-size: 0.9rem;
+}
+
+.poll-detail__description {
+  margin: 0;
+}
+
+.poll-detail__section-title {
+  font-size: 1rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.poll-detail__options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.poll-detail__info {
+  background: rgba(41, 6, 87, 0.05);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+  margin: 0;
+}
+
+.poll-detail__total {
+  margin: 0 0 var(--spacing-md);
+  color: var(--color-text-on-card-muted);
+  font-size: 0.9rem;
+}
+
+.poll-detail__footer {
+  grid-area: footer;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--color-border-card);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.poll-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.poll-results__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.poll-results__meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.poll-results__bar {
+  background: rgba(41, 6, 87, 0.08);
+  border-radius: var(--radius-sm);
+  height: 8px;
+  overflow: hidden;
+}
+
+.poll-results__bar-fill {
+  height: 100%;
+  background: var(--color-primary-orange);
+  transition: width 0.3s ease;
+}

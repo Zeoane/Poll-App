@@ -1,8 +1,9 @@
 # Poll-App
 
 Eine Web-Applikation zum Erstellen, Verwalten und Teilnehmen an Umfragen.
-Aufgesetzt mit **TypeScript** und **Vite**, ohne weiteres UI-Framework –
-das spätere Figma-Design lässt sich direkt in das vorhandene CSS einfügen.
+Aufgesetzt mit **TypeScript** und **Vite**, ohne weiteres UI-Framework.
+Die Styles liegen modular unter `src/styles/` und werden über `src/styles/main.css`
+eingebunden.
 
 ## Voraussetzungen
 
@@ -27,9 +28,9 @@ Vite startet einen lokalen Dev-Server (standardmäßig unter
 ## Type-Check und Build
 
 ```bash
-npm run type-check   # nur TypeScript prüfen
-npm run build        # Type-Check + Production-Build nach dist/
-npm run preview      # Production-Build lokal testen
+npm run type-check   
+npm run build      
+npm run preview     
 ```
 
 ## Projektstruktur
@@ -38,21 +39,31 @@ npm run preview      # Production-Build lokal testen
 Poll-App/
 ├── index.html                 # Einstiegspunkt mit semantischem Markup
 ├── main.ts                    # Bootstrap der Anwendung
-├── main.css                   # Basis-CSS (Figma folgt später)
 ├── package.json
 ├── tsconfig.json
 ├── public/
 │   └── favicon.svg
 └── src/
     ├── components/            # UI-Controller
+    │   ├── active-panel-scrollbar.ts  # Eigene Scroll-Leiste (aktives Tab-Panel)
     │   ├── poll-card.ts
-    │   ├── poll-list.ts       # User Story 1 + 2
+    │   ├── poll-list.ts       # User Story 1 + 2 (Listen, Tabs, Karten)
     │   ├── poll-form.ts       # User Story 3
-    │   └── poll-detail.ts     # User Story 4 + 5
+    │   ├── poll-detail.ts     # User Story 4 + 5
+    │   └── sort-dropdown.ts   # Kategorie-Filter für aktive / vergangene Umfragen
     ├── data/
     │   └── mock-polls.ts      # Beispielumfragen
     ├── services/
     │   └── poll-service.ts    # State + Geschäftslogik
+    ├── styles/                # CSS (ohne Kommentare; Einstieg: main.css)
+    │   ├── main.css           # @import der Teil-Stylesheets
+    │   ├── tokens.css
+    │   ├── layout-hero.css
+    │   ├── surveys-panels.css
+    │   ├── poll-card.css
+    │   ├── modal-form.css
+    │   ├── poll-detail.css
+    │   └── responsive.css
     ├── types/
     │   └── poll.ts            # TypeScript-Typen
     └── utils/
@@ -65,7 +76,7 @@ Poll-App/
 | Story | Umsetzung |
 | ----- | --------- |
 | US 1 – Bald endende Umfragen | `PollService.getEndingSoonPolls` + Sektion in `PollListController.renderEndingSoon` |
-| US 2 – Übersicht mit Tabs    | `PollListController` mit `Active`/`Past`-Tabs, Karten zeigen Titel, Beschreibung und Deadline |
+| US 2 – Übersicht mit Tabs    | `PollListController` mit `Active`/`Past`-Tabs; `SortDropdownController` filtert nach Kategorie; Karten mit Titel, Kategorie und Deadline |
 | US 3 – Neue Umfrage anlegen   | `PollFormController` öffnet `<dialog>` mit Pflicht-/Optionalfeldern und Validierung |
 | US 4 – Detailansicht          | `PollDetailController.open` öffnet die Detailansicht; beendete Umfragen sind nicht klickbar |
 | US 5 – Voten + Live-Ergebnis  | `PollDetailController` rendert Voting links und Auswertung rechts; Live-Update via Service-Subscription |
@@ -78,7 +89,13 @@ Poll-App/
 - `aria-*`-Attribute für Tabs, Dialoge und Auswertungs-Balken
 - BEM-Klassennamen (`block__element--modifier`)
 - Keine Inline-Styles und keine Inline-Event-Handler
+- Keine HTML-Kommentare
 - Skip-Link für Tastatur-Navigation
+
+### CSS
+- Keine Kommentare in HTML/CSS-Dateien
+- Zentrale Design-Tokens in `tokens.css`; weiterführende Sektionen in eigenen Dateien unter `src/styles/`
+- Einzelne Stylesheet-Dateien bleiben überschaubar (klein gehalten für Wartung)
 
 ### TypeScript
 - `strict` und alle ergänzenden Strictness-Flags aktiviert
@@ -86,5 +103,5 @@ Poll-App/
 - Klassen für Controller, Interfaces für Datenstrukturen
 - Kein `any`; DOM-Zugriffe über typisierten `requireElementById`-Helper
 - Trennung von Geschäftslogik (`services/`) und UI (`components/`)
-- JSDoc-Kommentare an öffentlichen Klassen und Methoden
-```
+- Kurze englische JSDoc-Zeilen an öffentlichen APIs; komplexe Logik in kleine Helfer aufteilen (Ziel: wenige Zeilen pro Funktion, z. B. maximal ~14)
+- Fehlermeldungen, die der Nutzer sieht (z. B. Validierung), auf Englisch

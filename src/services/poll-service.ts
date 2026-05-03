@@ -2,11 +2,7 @@ import type { NewPollInput, Poll, PollOption } from '../types/poll.js';
 
 const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
-/**
- * Polls whose deadline is within this window from now show up in the
- * "Ending soon surveys" highlight row. Three days matches the Figma cards
- * which display labels up to "Ends in 3 Days".
- */
+/** Look-ahead window (ms) for polls in the “ending soon” highlight row. */
 const ENDING_SOON_THRESHOLD_MS = 3 * DAY_IN_MS;
 const ID_RADIX = 36;
 const RANDOM_ID_LENGTH = 8;
@@ -33,12 +29,7 @@ export class PollService {
     };
   }
 
-  /**
-   * Sets the category filter applied to active/past lists. Pass `null` to
-   * clear the filter. The ending-soon highlight row stays unfiltered on
-   * purpose – it is conceptually a separate "spotlight" of all surveys
-   * ending in the next 3 days.
-   */
+  /** Sets the active/past list filter; `null` clears. Ending-soon row ignores this. */
   public setActiveCategory(category: string | null): void {
     if (this.activeCategory === category) {
       return;
@@ -70,10 +61,7 @@ export class PollService {
       .sort(this.compareByDeadlineDescending);
   }
 
-  /**
-   * Returns active polls whose deadline is within the next threshold window.
-   * Always full data, irrespective of the category filter.
-   */
+  /** Active polls in the configured ending-soon window; ignores category filter. */
   public getEndingSoonPolls(): ReadonlyArray<Poll> {
     const now = Date.now();
     const threshold = now + ENDING_SOON_THRESHOLD_MS;

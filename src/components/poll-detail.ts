@@ -253,7 +253,7 @@ function buildResultBar(label: string, percentage: number): HTMLDivElement {
   bar.setAttribute('aria-valuemin', '0');
   bar.setAttribute('aria-valuemax', '100');
   bar.setAttribute('aria-valuenow', String(percentage));
-  bar.setAttribute('aria-label', `${label}: ${percentage} Prozent`);
+  bar.setAttribute('aria-label', `${label}: ${percentage} percent`);
   const fill = document.createElement('div');
   fill.className = 'poll-results__bar-fill';
   fill.style.width = `${percentage}%`;
@@ -261,18 +261,23 @@ function buildResultBar(label: string, percentage: number): HTMLDivElement {
   return bar;
 }
 
-/** Reads the set of poll IDs the user has already voted on from localStorage. */
+/** Parses stored JSON into poll IDs; invalid shapes yield an empty set. */
+function parseVotedPollIds(raw: string): Set<string> {
+  const parsed: unknown = JSON.parse(raw);
+  if (!Array.isArray(parsed)) {
+    return new Set();
+  }
+  return new Set(parsed.filter((value): value is string => typeof value === 'string'));
+}
+
+/** Reads voted poll IDs from localStorage; failures yield an empty set. */
 function readVotedPolls(): Set<string> {
   try {
     const raw = window.localStorage.getItem(VOTED_POLLS_STORAGE_KEY);
     if (raw === null) {
       return new Set();
     }
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return new Set();
-    }
-    return new Set(parsed.filter((value): value is string => typeof value === 'string'));
+    return parseVotedPollIds(raw);
   } catch {
     return new Set();
   }
@@ -286,6 +291,5 @@ function writeVotedPolls(voted: Set<string>): void {
       JSON.stringify(Array.from(voted)),
     );
   } catch {
-    // Storage may be blocked (e.g. private mode); persistence is best-effort.
   }
 }

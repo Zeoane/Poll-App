@@ -9,18 +9,7 @@ export interface SortDropdownControllerOptions {
   readonly pollService: PollService;
 }
 
-/**
- * Custom dropdown that filters the Active/Past poll lists by category.
- *
- * Behaviour:
- * - Click trigger: toggles the menu.
- * - Click an option: applies the filter and closes the menu. Picking the
- *   currently selected option again clears the filter (toggle-off).
- * - Click outside / press ESC: closes the menu.
- *
- * Categories come from the {@link POLL_CATEGORIES} constant, so adding or
- * renaming a category is a single-source-of-truth change.
- */
+/** Category filter dropdown for active/past lists (outside click / Esc closes). */
 export class SortDropdownController {
   private readonly pollService: PollService;
   private readonly trigger: HTMLButtonElement;
@@ -46,7 +35,7 @@ export class SortDropdownController {
     }
   }
 
-  /** Creates a single option element with proper a11y attributes. */
+  /** Creates a single option element with proper attributes. */
   private createOption(category: string): HTMLLIElement {
     const item = document.createElement('li');
     item.className = 'sort__option';
