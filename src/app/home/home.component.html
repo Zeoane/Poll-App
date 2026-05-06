@@ -2,7 +2,7 @@
 
     <header class="site-header">
       <div class="site-header__inner">
-        <a class="logo" href="#main-content" aria-label="Poll App – zur Startseite">
+        <a class="logo" routerLink="/" aria-label="Poll App – zur Startseite">
           <img class="logo__bubble" src="assets/img/logo-bubble.svg" alt="">
           <span class="logo__text" aria-hidden="true">
             <span class="logo__line">Poll</span>
@@ -24,11 +24,10 @@
             workplace culture. Collect opinions, engage your audience,
             and turn feedback into action.
           </p>
-          <button
-            type="button"
+          <a
+            routerLink="/create"
             class="button button--cta"
-            id="new-survey-button"
-            aria-haspopup="dialog"
+            aria-label="Create new survey"
           >
             <span class="button--cta__label">New survey</span>
             <span class="button--cta__icon-wrap" aria-hidden="true">
@@ -47,7 +46,7 @@
                 height="24"
               >
             </span>
-          </button>
+          </a>
         </div>
         <div class="hero__visual" aria-hidden="true">
           <img

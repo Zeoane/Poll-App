@@ -12,6 +12,16 @@ interface WiredControllers {
   readonly scrollbar: ActivePanelScrollbarController;
 }
 
+let sharedPollService: PollService | null = null;
+
+/** Gemeinsamer Zustand für Home, Modal und Details – bleibt beim Wechsel der Route erhalten. */
+export function getSharedPollService(): PollService {
+  if (sharedPollService === null) {
+    sharedPollService = new PollService(MOCK_POLLS);
+  }
+  return sharedPollService;
+}
+
 function wireControllers(pollService: PollService): WiredControllers {
   const detailController = new PollDetailController({ pollService });
   const listController = new PollListController({
@@ -24,27 +34,29 @@ function wireControllers(pollService: PollService): WiredControllers {
   return { list: listController, detail: detailController, scrollbar };
 }
 
-function subscribeToPollChanges(
+function runListSync(
   pollService: PollService,
   list: PollListController,
   detail: PollDetailController,
   scrollbar: ActivePanelScrollbarController,
 ): void {
-  pollService.subscribe(() => {
-    list.render();
-    detail.refresh();
-    requestAnimationFrame(() => scrollbar.sync());
-  });
-}
-
-function bootstrap(): void {
-  const pollService = new PollService(MOCK_POLLS);
-  const { list, detail, scrollbar } = wireControllers(pollService);
-  subscribeToPollChanges(pollService, list, detail, scrollbar);
   list.render();
+  detail.refresh();
+  requestAnimationFrame(() => scrollbar.sync());
 }
 
-/** Nach Angular-View; DOM der Poll-App liegt innerhalb von `app-root`. */
-export function bootstrapPollApp(): void {
-  bootstrap();
+/**
+ * Startet die Legacy-Controller auf der Home-Seite.
+ * @returns Aufräumen: Listener beim Verlassen der Home-Route entfernen.
+ */
+export function bootstrapPollAppHome(): () => void {
+  const pollService = getSharedPollService();
+  const { list, detail, scrollbar } = wireControllers(pollService);
+  const unsubscribe = pollService.subscribe(() => {
+    runListSync(pollService, list, detail, scrollbar);
+  });
+  runListSync(pollService, list, detail, scrollbar);
+  return () => {
+    unsubscribe();
+  };
 }

@@ -148,6 +148,10 @@
     box-shadow 0.15s ease;
 }
 
+a.button {
+  text-decoration: none;
+}
+
 .button:focus-visible {
   outline: 2px solid var(--color-secondary-orange);
   outline-offset: 3px;
@@ -165,7 +169,7 @@
   gap: 0;
   padding: 0;
   background: var(--color-secondary-orange);
-  color: var(--color-primary-purple);
+  color: #221227;
   font-family: "Nokora", var(--font-body);
   font-size: 18px;
   font-weight: 700;
@@ -222,14 +226,16 @@
 
 .button--cta__label {
   flex-shrink: 0;
+  color: inherit;
 }
 
 .button--cta:hover {
   width: 172px;
   gap: 10px;
   border-radius: 10px;
-  background-color: #FFB770;
+  background-color: #ffb770;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  color: #221227;
 }
 
 .button--cta:hover .button--cta__icon-wrap {
@@ -242,8 +248,9 @@
   width: 166px;
   gap: 10px;
   border-radius: 10px;
-  background-color: #FFB770;
+  background-color: #ffb770;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  color: #221227;
 }
 
 .button--cta.button--cta--success .button--cta__icon-wrap {

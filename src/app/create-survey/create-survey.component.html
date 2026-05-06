@@ -1,0 +1,709 @@
+<div class="create-page">
+  <a class="skip-link" href="#create-main">Skip to main content</a>
+
+  <header class="create-page__top">
+    <div class="create-page__top-inner">
+      <a routerLink="/" class="create-page__brand" aria-label="Poll App – Home">
+        <img
+          class="create-page__logo"
+          src="assets/img/Logo-violett.svg"
+          alt=""
+          width="119"
+          height="44"
+        />
+      </a>
+      <a
+        routerLink="/create"
+        class="create-page__header-btn"
+        aria-current="page"
+      >
+        Create survey
+      </a>
+    </div>
+  </header>
+
+  <main id="create-main" class="create-page__main">
+    <section class="create-page__preview" aria-label="Survey preview">
+      <div class="create-preview-layout">
+        <div class="create-card">
+          <div class="create-card__survey">
+            <div class="create-card__meta">
+              <span
+                class="create-card__status"
+                [class.create-card__status--draft]="surveyStatus === 'draft'"
+                [class.create-card__status--published]="
+                  surveyStatus === 'published'
+                "
+                role="status"
+              >
+                @if (surveyStatus === 'published') {
+                  Published
+                } @else {
+                  Draft
+                }
+              </span>
+              <div class="create-card__meta-row">
+                <span class="create-card__meta-item"
+                  >Ends on {{ endsDisplay }}</span
+                >
+                <span class="create-card__meta-item"
+                  >Category: {{ category }}</span
+                >
+              </div>
+            </div>
+
+            <h2 class="create-card__title">{{ surveyName }}</h2>
+            <p class="create-card__desc">
+              We want to create team activities that everyone will enjoy –
+              share your preferences and ideas in our survey to help us plan
+              better experiences together.
+            </p>
+
+            <div class="create-card__questions">
+              <article class="create-q">
+                <h3 class="create-q__title">
+                  1. Which date would work best for you?
+                </h3>
+                <p class="create-q__hint">
+                  More than one answers are possible.
+                </p>
+                <ul class="create-q__opts">
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q1-a"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">A.</span>
+                        <span class="create-check__body">19.09.2025, Friday</span>
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q1-b"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">B.</span>
+                        <span class="create-check__body">10.10.2025, Saturday</span>
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q1-c"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">C.</span>
+                        <span class="create-check__body">11.10.2025, Saturday</span>
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q1-d"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">D.</span>
+                        <span class="create-check__body">31.10.2025, Friday</span>
+                      </span>
+                    </label>
+                  </li>
+                </ul>
+              </article>
+
+              <article class="create-q">
+                <h3 class="create-q__title">2. Choose the activities you prefer</h3>
+                <p class="create-q__hint">
+                  More than one answers are possible.
+                </p>
+                <ul class="create-q__opts">
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q2-a"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">A.</span>
+                        <span class="create-check__body"
+                          >Outdoor adventure like kayaking</span
+                        >
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q2-b"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">B.</span>
+                        <span class="create-check__body">Office Costume Party</span>
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q2-c"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">C.</span>
+                        <span class="create-check__body"
+                          >Bowling, mini-golf, volleyball</span
+                        >
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q2-d"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">D.</span>
+                        <span class="create-check__body"
+                          >Beach party, Music &amp; cocktails</span
+                        >
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q2-e"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">E.</span>
+                        <span class="create-check__body">Escape room</span>
+                      </span>
+                    </label>
+                  </li>
+                </ul>
+              </article>
+
+              <article class="create-q">
+                <h3 class="create-q__title">
+                  3. What's most important to you in a team event?
+                </h3>
+                <ul class="create-q__opts">
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q3-a"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">A.</span>
+                        <span class="create-check__body">Team bonding</span>
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q3-b"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">B.</span>
+                        <span class="create-check__body">Food and drinks</span>
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q3-c"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">C.</span>
+                        <span class="create-check__body">Trying something new</span>
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q3-d"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">D.</span>
+                        <span class="create-check__body"
+                          >Keeping it low-key and stress-free</span
+                        >
+                      </span>
+                    </label>
+                  </li>
+                </ul>
+              </article>
+
+              <article class="create-q">
+                <h3 class="create-q__title">
+                  4. How long would you prefer the event to last?
+                </h3>
+                <ul class="create-q__opts">
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q4-a"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">A.</span>
+                        <span class="create-check__body">Half a day</span>
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q4-b"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">B.</span>
+                        <span class="create-check__body">Full day</span>
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+                    <label class="create-check">
+                      <input
+                        class="create-check__native"
+                        type="checkbox"
+                        name="p-q4-c"
+                      />
+                      <img
+                        class="create-check__box create-check__box--unchecked"
+                        src="assets/img/check%20box.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <img
+                        class="create-check__box create-check__box--checked"
+                        src="assets/img/checkbox-orange.svg"
+                        alt=""
+                        width="20"
+                        height="20"
+                      />
+                      <span class="create-check__text">
+                        <span class="create-check__letter">C.</span>
+                        <span class="create-check__body">Evening only</span>
+                      </span>
+                    </label>
+                  </li>
+                </ul>
+              </article>
+            </div>
+
+            <div class="create-card__actions">
+              @if (completeError !== null) {
+                <p class="create-card__form-error" role="alert">
+                  {{ completeError }}
+                </p>
+              }
+              <button
+                type="button"
+                class="create-page__complete-btn"
+                (click)="completeSurvey()"
+              >
+                Complete survey
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="create-card__live" aria-label="Live survey results">
+            <h2 class="create-card__live-title">
+              Survey results <span class="create-card__live-accent">LIVE</span>
+            </h2>
+
+            <div class="create-live__block">
+              <h3 class="create-live__q">
+                1. Which date would work best for you?
+              </h3>
+              <ul class="create-live__bars">
+                <li class="create-bar">
+                  <span class="create-bar__letter">A</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 27%"></div>
+                  </div>
+                  <span class="create-bar__pct">27%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">B</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 44%"></div>
+                  </div>
+                  <span class="create-bar__pct">44%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">C</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 3%"></div>
+                  </div>
+                  <span class="create-bar__pct">3%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">D</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 26%"></div>
+                  </div>
+                  <span class="create-bar__pct">26%</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="create-live__block">
+              <h3 class="create-live__q">
+                2. Choose the activities you prefer
+              </h3>
+              <ul class="create-live__bars">
+                <li class="create-bar">
+                  <span class="create-bar__letter">A</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 60%"></div>
+                  </div>
+                  <span class="create-bar__pct">60%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">B</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 0%"></div>
+                  </div>
+                  <span class="create-bar__pct">0%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">C</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 14%"></div>
+                  </div>
+                  <span class="create-bar__pct">14%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">D</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 26%"></div>
+                  </div>
+                  <span class="create-bar__pct">26%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">E</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 0%"></div>
+                  </div>
+                  <span class="create-bar__pct">0%</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="create-live__block">
+              <h3 class="create-live__q">
+                3. What's most important to you in a team event?
+              </h3>
+              <ul class="create-live__bars">
+                <li class="create-bar">
+                  <span class="create-bar__letter">A</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 44%"></div>
+                  </div>
+                  <span class="create-bar__pct">44%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">B</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 3%"></div>
+                  </div>
+                  <span class="create-bar__pct">3%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">C</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 26%"></div>
+                  </div>
+                  <span class="create-bar__pct">26%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">D</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 27%"></div>
+                  </div>
+                  <span class="create-bar__pct">27%</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="create-live__block">
+              <h3 class="create-live__q">
+                4. How long would you prefer the event to last?
+              </h3>
+              <ul class="create-live__bars">
+                <li class="create-bar">
+                  <span class="create-bar__letter">A</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 14%"></div>
+                  </div>
+                  <span class="create-bar__pct">14%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">B</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 86%"></div>
+                  </div>
+                  <span class="create-bar__pct">86%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">C</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 0%"></div>
+                  </div>
+                  <span class="create-bar__pct">0%</span>
+                </li>
+              </ul>
+            </div>
+          </aside>
+      </div>
+    </section>
+  </main>
+</div>

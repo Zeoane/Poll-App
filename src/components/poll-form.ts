@@ -55,7 +55,7 @@ export class PollFormController {
   private readonly pollService: PollService;
   private readonly dialog: HTMLDialogElement;
   private readonly form: HTMLFormElement;
-  private readonly openButton: HTMLButtonElement;
+  private readonly openButton: HTMLButtonElement | null;
   private readonly closeButton: HTMLButtonElement;
   private readonly cancelButton: HTMLButtonElement;
   private readonly titleInput: HTMLInputElement;
@@ -69,7 +69,9 @@ export class PollFormController {
     this.pollService = options.pollService;
     this.dialog = requireElementById('new-survey-dialog', HTMLDialogElement);
     this.form = requireElementById('new-survey-form', HTMLFormElement);
-    this.openButton = requireElementById('new-survey-button', HTMLButtonElement);
+    const openEl = document.getElementById('new-survey-button');
+    this.openButton =
+      openEl instanceof HTMLButtonElement ? openEl : null;
     this.closeButton = requireElementById('new-survey-close', HTMLButtonElement);
     this.cancelButton = requireElementById('new-survey-cancel', HTMLButtonElement);
     this.titleInput = requireElementById('poll-title', HTMLInputElement);
@@ -83,7 +85,7 @@ export class PollFormController {
 
   /** Binds dialog and form events. */
   private attachEvents(): void {
-    this.openButton.addEventListener('click', () => this.open());
+    this.openButton?.addEventListener('click', () => this.open());
     this.closeButton.addEventListener('click', () => this.close());
     this.cancelButton.addEventListener('click', () => this.close());
     this.form.addEventListener('submit', (event) => {
@@ -99,7 +101,7 @@ export class PollFormController {
     this.form.reset();
     this.clearError('title');
     this.clearError('options');
-    this.openButton.classList.remove('button--cta--success');
+    this.openButton?.classList.remove('button--cta--success');
     this.dialog.showModal();
     this.titleInput.focus();
   }
@@ -118,7 +120,7 @@ export class PollFormController {
       return;
     }
     this.pollService.createPoll(input);
-    this.openButton.classList.add('button--cta--success');
+    this.openButton?.classList.add('button--cta--success');
     this.close();
   }
 
