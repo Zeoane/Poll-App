@@ -1,10 +1,10 @@
-import { ActivePanelScrollbarController } from './src/components/active-panel-scrollbar.js';
-import { PollDetailController } from './src/components/poll-detail.js';
-import { PollFormController } from './src/components/poll-form.js';
-import { PollListController } from './src/components/poll-list.js';
-import { SortDropdownController } from './src/components/sort-dropdown.js';
-import { MOCK_POLLS } from './src/data/mock-polls.js';
-import { PollService } from './src/services/poll-service.js';
+import { ActivePanelScrollbarController } from '../components/active-panel-scrollbar';
+import { PollDetailController } from '../components/poll-detail';
+import { PollFormController } from '../components/poll-form';
+import { PollListController } from '../components/poll-list';
+import { SortDropdownController } from '../components/sort-dropdown';
+import { MOCK_POLLS } from '../data/mock-polls';
+import { PollService } from '../services/poll-service';
 
 interface WiredControllers {
   readonly list: PollListController;
@@ -12,7 +12,6 @@ interface WiredControllers {
   readonly scrollbar: ActivePanelScrollbarController;
 }
 
-/** Wires list, detail, form, sort, and custom scrollbar to a shared service. */
 function wireControllers(pollService: PollService): WiredControllers {
   const detailController = new PollDetailController({ pollService });
   const listController = new PollListController({
@@ -25,7 +24,6 @@ function wireControllers(pollService: PollService): WiredControllers {
   return { list: listController, detail: detailController, scrollbar };
 }
 
-/** Subscribes to poll updates to refresh lists, detail, and scrollbar position. */
 function subscribeToPollChanges(
   pollService: PollService,
   list: PollListController,
@@ -39,7 +37,6 @@ function subscribeToPollChanges(
   });
 }
 
-/** Bootstraps the application by wiring services and controllers together. */
 function bootstrap(): void {
   const pollService = new PollService(MOCK_POLLS);
   const { list, detail, scrollbar } = wireControllers(pollService);
@@ -47,8 +44,7 @@ function bootstrap(): void {
   list.render();
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bootstrap, { once: true });
-} else {
+/** Nach Angular-View; DOM der Poll-App liegt innerhalb von `app-root`. */
+export function bootstrapPollApp(): void {
   bootstrap();
 }

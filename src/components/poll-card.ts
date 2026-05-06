@@ -1,6 +1,6 @@
-import type { Poll } from '../types/poll.js';
+import type { Poll } from '../types/poll';
 
-import { formatEndsIn } from '../utils/format.js';
+import { formatEndsIn } from '../utils/format';
 
 export interface PollCardOptions {
   readonly poll: Poll;

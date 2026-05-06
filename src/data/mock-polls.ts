@@ -1,4 +1,4 @@
-import type { Poll } from '../types/poll.js';
+import type { Poll } from '../types/poll';
 
 const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;

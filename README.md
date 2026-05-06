@@ -1,9 +1,12 @@
 # Poll-App
 
 Eine Web-Applikation zum Erstellen, Verwalten und Teilnehmen an Umfragen.
-Aufgesetzt mit **TypeScript** und **Vite**, ohne weiteres UI-Framework.
-Die Styles liegen modular unter `src/styles/` und werden über `src/styles/main.css`
-eingebunden.
+Aufgesetzt mit **Angular 19** (Application Builder) und **TypeScript**.
+Die UI-Logik läuft zunächst als bestehende Controller-Klassen, angebunden über
+`bootstrapPollApp()` in `AppComponent` nach `ngAfterViewInit`.
+
+Styles liegen modular unter `src/styles/` mit Einstieg `main.css` (in
+`angular.json` als globales Stylesheet eingetragen).
 
 ## Voraussetzungen
 
@@ -19,56 +22,66 @@ npm install
 ## Entwicklung
 
 ```bash
-npm run dev
+npm start
 ```
 
-Vite startet einen lokalen Dev-Server (standardmäßig unter
-`http://localhost:5173`) mit Hot-Reload.
+Entspricht `ng serve -o` und öffnet die App im Browser (standardmäßig
+`http://localhost:4200`).
 
-## Type-Check und Build
+## Build
 
 ```bash
-npm run type-check   
-npm run build      
-npm run preview     
+npm run build
+```
+
+Ausgabe unter `dist/poll-app/browser/` (je nach Angular-Version; Inhalt nach `dist/poll-app/` deployen wie in der Angular-Doku beschrieben).
+
+**Deployment unter einem Unterordner** (z. B. `https://example.de/angular-projects/pollapp/`):
+
+- Lokal niemals dauerhaft `<base href="/angular-projects/...">` in der Quell-`index.html` setzen, solange du mit `ng serve` unter `/` arbeitest – sonst bleibt die Seite weiß (Bundles werden unter dem falschen Pfad geladen).
+- Production-Build mit passendem Base:
+
+```bash
+npm run build:fz
+```
+
+Inhalt von `dist/poll-app/browser/` auf den Server unter den Ordner `angular-projects/pollapp/` legen.
+
+Lokales Testen wie auf dem Unterpfad: `npm run start:fz-path` und im Browser
+`http://localhost:4200/angular-projects/pollapp/` aufrufen.
+
+## Tests
+
+```bash
+npm test
 ```
 
 ## Projektstruktur
 
 ```
 Poll-App/
-├── index.html                 # Einstiegspunkt mit semantischem Markup
-├── main.ts                    # Bootstrap der Anwendung
+├── angular.json
 ├── package.json
-├── tsconfig.json
 ├── public/
 │   └── favicon.svg
+├── tsconfig.json
+├── tsconfig.app.json
 └── src/
-    ├── components/            # UI-Controller
-    │   ├── active-panel-scrollbar.ts  # Eigene Scroll-Leiste (aktives Tab-Panel)
-    │   ├── poll-card.ts
-    │   ├── poll-list.ts       # User Story 1 + 2 (Listen, Tabs, Karten)
-    │   ├── poll-form.ts       # User Story 3
-    │   ├── poll-detail.ts     # User Story 4 + 5
-    │   └── sort-dropdown.ts   # Kategorie-Filter für aktive / vergangene Umfragen
+    ├── index.html
+    ├── main.ts
+    ├── app/
+    │   ├── app.component.ts
+    │   ├── app.component.html    # bisheriges Seiten-Markup
+    │   ├── app-legacy-bootstrap.ts
+    │   ├── app.config.ts
+    │   └── app.routes.ts
+    ├── components/
     ├── data/
-    │   └── mock-polls.ts      # Beispielumfragen
     ├── services/
-    │   └── poll-service.ts    # State + Geschäftslogik
-    ├── styles/                # CSS (ohne Kommentare; Einstieg: main.css)
-    │   ├── main.css           # @import der Teil-Stylesheets
-    │   ├── tokens.css
-    │   ├── layout-hero.css
-    │   ├── surveys-panels.css
-    │   ├── poll-card.css
-    │   ├── modal-form.css
-    │   ├── poll-detail.css
-    │   └── responsive.css
+    ├── styles/
     ├── types/
-    │   └── poll.ts            # TypeScript-Typen
-    └── utils/
-        ├── dom.ts             # DOM-Helfer
-        └── format.ts          # Datums- und Prozent-Formatierung
+    ├── utils/
+    └── assets/img/
 ```
 
 ## User-Story-Abdeckung
@@ -98,7 +111,7 @@ Poll-App/
 - Einzelne Stylesheet-Dateien bleiben überschaubar (klein gehalten für Wartung)
 
 ### TypeScript
-- `strict` und alle ergänzenden Strictness-Flags aktiviert
+- `strict` und Angular-Compiler-Strictness
 - Explizite Typen für öffentliche APIs, `readonly` wo möglich
 - Klassen für Controller, Interfaces für Datenstrukturen
 - Kein `any`; DOM-Zugriffe über typisierten `requireElementById`-Helper

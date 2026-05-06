@@ -1,8 +1,8 @@
-import type { PollService } from '../services/poll-service.js';
-import type { Poll, PollOption } from '../types/poll.js';
+import type { PollService } from '../services/poll-service';
+import type { Poll, PollOption } from '../types/poll';
 
-import { requireElementById } from '../utils/dom.js';
-import { calculatePercentage, formatDateTime, formatRelative } from '../utils/format.js';
+import { requireElementById } from '../utils/dom';
+import { calculatePercentage, formatDateTime, formatRelative } from '../utils/format';
 
 const VOTED_POLLS_STORAGE_KEY = 'poll-app:voted-polls';
 

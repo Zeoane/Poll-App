@@ -1,8 +1,8 @@
-import type { PollService } from '../services/poll-service.js';
-import type { Poll, PollTab } from '../types/poll.js';
+import type { PollService } from '../services/poll-service';
+import type { Poll, PollTab } from '../types/poll';
 
-import { requireElementById } from '../utils/dom.js';
-import { createPollCard } from './poll-card.js';
+import { requireElementById } from '../utils/dom';
+import { createPollCard } from './poll-card';
 
 export interface PollListControllerOptions {
   readonly pollService: PollService;

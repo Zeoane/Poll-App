@@ -1,12 +1,12 @@
-import type { PollService } from '../services/poll-service.js';
+import type { PollService } from '../services/poll-service';
 import {
   type NewPollInput,
   type ValidationErrors,
   POLL_TITLE_MAX_CHARS,
   POLL_TITLE_MAX_WORDS,
-} from '../types/poll.js';
+} from '../types/poll';
 
-import { requireElementById } from '../utils/dom.js';
+import { requireElementById } from '../utils/dom';
 
 const MIN_TITLE_LENGTH = 3;
 const MIN_OPTIONS = 2;

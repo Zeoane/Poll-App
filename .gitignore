@@ -1,6 +1,7 @@
 node_modules/
 dist/
 build/
+.angular/
 .vite/
 *.log
 npm-debug.log*

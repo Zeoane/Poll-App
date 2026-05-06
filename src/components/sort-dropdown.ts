@@ -1,7 +1,7 @@
-import type { PollService } from '../services/poll-service.js';
+import type { PollService } from '../services/poll-service';
 
-import { POLL_CATEGORIES } from '../types/poll.js';
-import { requireElementById } from '../utils/dom.js';
+import { POLL_CATEGORIES } from '../types/poll';
+import { requireElementById } from '../utils/dom';
 
 const DEFAULT_LABEL = 'Sort by categories';
 

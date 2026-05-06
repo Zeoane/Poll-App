@@ -1,4 +1,4 @@
-import { requireElementById } from '../utils/dom.js';
+import { requireElementById } from '../utils/dom';
 
 /** Fixed thumb height (px); matches Scroll.svg asset. */
 const THUMB_HEIGHT_PX = 64;
