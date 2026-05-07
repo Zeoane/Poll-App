@@ -22,11 +22,14 @@ export function getSharedPollService(): PollService {
   return sharedPollService;
 }
 
-function wireControllers(pollService: PollService): WiredControllers {
+function wireControllers(
+  pollService: PollService,
+  onPollSelect?: (pollId: string) => void,
+): WiredControllers {
   const detailController = new PollDetailController({ pollService });
   const listController = new PollListController({
     pollService,
-    onPollSelect: (pollId) => detailController.open(pollId),
+    onPollSelect: onPollSelect ?? ((pollId) => detailController.open(pollId)),
   });
   new PollFormController({ pollService });
   new SortDropdownController({ pollService });
@@ -49,9 +52,11 @@ function runListSync(
  * Startet die Legacy-Controller auf der Home-Seite.
  * @returns Aufräumen: Listener beim Verlassen der Home-Route entfernen.
  */
-export function bootstrapPollAppHome(): () => void {
+export function bootstrapPollAppHome(
+  onPollSelect?: (pollId: string) => void,
+): () => void {
   const pollService = getSharedPollService();
-  const { list, detail, scrollbar } = wireControllers(pollService);
+  const { list, detail, scrollbar } = wireControllers(pollService, onPollSelect);
   const unsubscribe = pollService.subscribe(() => {
     runListSync(pollService, list, detail, scrollbar);
   });

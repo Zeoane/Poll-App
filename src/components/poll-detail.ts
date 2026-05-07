@@ -3,8 +3,7 @@ import type { Poll, PollOption } from '../types/poll';
 
 import { requireElementById } from '../utils/dom';
 import { calculatePercentage, formatDateTime, formatRelative } from '../utils/format';
-
-const VOTED_POLLS_STORAGE_KEY = 'poll-app:voted-polls';
+import { hasUserVotedOnPoll, markUserVotedOnPoll } from '../utils/poll-vote-storage';
 
 export interface PollDetailControllerOptions {
   readonly pollService: PollService;
@@ -52,7 +51,7 @@ export class PollDetailController {
   /** Replaces the dialog content with freshly built sections. */
   private render(poll: Poll): void {
     const total = this.pollService.getTotalVotes(poll);
-    const hasVoted = this.hasUserVoted(poll.id);
+    const hasVoted = hasUserVotedOnPoll(poll.id);
     this.content.replaceChildren(
       this.buildHeader(poll),
       this.buildVotingColumn(poll, hasVoted),
@@ -133,27 +132,15 @@ export class PollDetailController {
 
   /** Submits a vote when the user has not voted on this poll yet. */
   private handleVote(pollId: string, optionId: string): void {
-    if (this.hasUserVoted(pollId)) {
+    if (hasUserVotedOnPoll(pollId)) {
       return;
     }
     const updated = this.pollService.vote(pollId, optionId);
     if (updated === undefined) {
       return;
     }
-    this.markUserVoted(pollId);
+    markUserVotedOnPoll(pollId);
     this.refresh();
-  }
-
-  /** Returns whether the current user has already voted on the poll. */
-  private hasUserVoted(pollId: string): boolean {
-    return readVotedPolls().has(pollId);
-  }
-
-  /** Persists that the current user has voted on the given poll. */
-  private markUserVoted(pollId: string): void {
-    const voted = readVotedPolls();
-    voted.add(pollId);
-    writeVotedPolls(voted);
   }
 }
 
@@ -259,37 +246,4 @@ function buildResultBar(label: string, percentage: number): HTMLDivElement {
   fill.style.width = `${percentage}%`;
   bar.append(fill);
   return bar;
-}
-
-/** Parses stored JSON into poll IDs; invalid shapes yield an empty set. */
-function parseVotedPollIds(raw: string): Set<string> {
-  const parsed: unknown = JSON.parse(raw);
-  if (!Array.isArray(parsed)) {
-    return new Set();
-  }
-  return new Set(parsed.filter((value): value is string => typeof value === 'string'));
-}
-
-/** Reads voted poll IDs from localStorage; failures yield an empty set. */
-function readVotedPolls(): Set<string> {
-  try {
-    const raw = window.localStorage.getItem(VOTED_POLLS_STORAGE_KEY);
-    if (raw === null) {
-      return new Set();
-    }
-    return parseVotedPollIds(raw);
-  } catch {
-    return new Set();
-  }
-}
-
-/** Writes the set of voted poll IDs to localStorage, ignoring storage errors. */
-function writeVotedPolls(voted: Set<string>): void {
-  try {
-    window.localStorage.setItem(
-      VOTED_POLLS_STORAGE_KEY,
-      JSON.stringify(Array.from(voted)),
-    );
-  } catch {
-  }
 }

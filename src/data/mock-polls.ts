@@ -16,9 +16,10 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
     description: 'Wir planen unser nächstes Team-Event und sammeln Ideen.',
     category: 'Team activities',
     options: [
-      { id: 'opt-1-a', label: 'Bowling', votes: 5 },
-      { id: 'opt-1-b', label: 'Escape Room', votes: 8 },
-      { id: 'opt-1-c', label: 'Restaurant', votes: 3 },
+      { id: 'opt-1-a', label: '19.09.2025, Friday', votes: 5 },
+      { id: 'opt-1-b', label: '10.10.2025, Saturday', votes: 8 },
+      { id: 'opt-1-c', label: '11.10.2025, Saturday', votes: 3 },
+      { id: 'opt-1-d', label: '31.10.2025, Friday', votes: 4 },
     ],
     createdAt: relativeDate(-2 * DAY_IN_MS),
     deadline: relativeDate(20 * HOUR_IN_MS),
