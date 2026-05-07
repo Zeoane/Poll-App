@@ -45,15 +45,15 @@
               </div>
             </div>
 
-            <h2 class="create-card__title">{{ surveyName }}</h2>
+            <h1 class="create-card__title">{{ surveyName }}</h1>
             <p class="create-card__desc">{{ surveyDescription }}</p>
 
             <div class="create-card__questions">
               @if (viewMode === 'poll' && currentPoll) {
               <article class="create-q">
-                <h3 class="create-q__title">
+                <h2 class="create-q__title">
                   1. Which date would work best for you?
-                </h3>
+                </h2>
                 <p class="create-q__hint">{{ pollVoteHint() }}</p>
                 <ul class="create-q__opts">
                   @for (opt of currentPoll.options; track opt.id; let i = $index) {
@@ -82,9 +82,9 @@
               </article>
               } @else {
               <article class="create-q">
-                <h3 class="create-q__title">
+                <h2 class="create-q__title">
                   1. Which date would work best for you?
-                </h3>
+                </h2>
                 <p class="create-q__hint">
                   More than one answers are possible.
                 </p>
@@ -202,7 +202,7 @@
               }
 
               <article class="create-q">
-                <h3 class="create-q__title">2. Choose the activities you prefer</h3>
+                <h2 class="create-q__title">2. Choose the activities you prefer</h2>
                 <p class="create-q__hint">
                   More than one answers are possible.
                 </p>
@@ -352,9 +352,9 @@
               </article>
 
               <article class="create-q">
-                <h3 class="create-q__title">
+                <h2 class="create-q__title">
                   3. What's most important to you in a team event?
-                </h3>
+                </h2>
                 <ul class="create-q__opts">
                   <li>
                     <label class="create-check">
@@ -470,9 +470,9 @@
               </article>
 
               <article class="create-q">
-                <h3 class="create-q__title">
+                <h2 class="create-q__title">
                   4. How long would you prefer the event to last?
-                </h3>
+                </h2>
                 <ul class="create-q__opts">
                   <li>
                     <label class="create-check">

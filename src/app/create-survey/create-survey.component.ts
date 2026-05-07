@@ -1,6 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 import { getSharedPollService } from '../app-legacy-bootstrap';
 import {
@@ -30,12 +31,13 @@ interface QuestionBlock {
 @Component({
   selector: 'app-create-survey',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [FormsModule],
   templateUrl: './create-survey.component.html',
   styleUrl: './create-survey.component.css',
 })
 export class CreateSurveyComponent {
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
 
   protected readonly categoryOptions = POLL_CATEGORIES;
 
@@ -58,9 +60,16 @@ export class CreateSurveyComponent {
 
   protected publishError = signal<string | null>(null);
   protected toastVisible = signal(false);
+  protected publishOverlayOpen = signal(false);
+
+  /** Shown in invalid fields (Figma copy). */
+  protected readonly fieldFillErrorMessage = 'Please fill out form';
+
+  protected fieldErrors = signal<Record<string, boolean>>({});
 
   protected clearSurveyName(): void {
     this.surveyName = '';
+    this.clearFieldErrorKey('surveyName');
   }
 
   protected clearDescribingText(): void {
@@ -76,6 +85,7 @@ export class CreateSurveyComponent {
     if (q) {
       q.prompt = '';
     }
+    this.clearFieldErrorKey(`q-prompt-${index}`);
   }
 
   protected clearAnswer(qIndex: number, aIndex: number): void {
@@ -103,13 +113,15 @@ export class CreateSurveyComponent {
         { id: nextId('a'), text: '' },
       ],
     });
-  }
-
-  protected removeQuestion(qIndex: number): void {
-    if (this.questions.length <= 1) {
-      return;
-    }
-    this.questions.splice(qIndex, 1);
+    const idx = this.questions.length - 1;
+    queueMicrotask(() => {
+      const doc = this.document;
+      doc.getElementById(`create-q-block-${idx}`)?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'auto',
+      });
+      doc.getElementById(`create-q-prompt-${idx}`)?.focus();
+    });
   }
 
   protected cancel(): void {
@@ -120,6 +132,67 @@ export class CreateSurveyComponent {
     this.toastVisible.set(false);
   }
 
+  @HostListener('document:keydown.escape')
+  protected onEscapeClosePublishOverlay(): void {
+    if (this.publishOverlayOpen()) {
+      this.closePublishOverlay();
+    }
+  }
+
+  protected closePublishOverlay(): void {
+    this.publishOverlayOpen.set(false);
+  }
+
+  protected onPublishOverlayBackdrop(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.closePublishOverlay();
+    }
+  }
+
+  protected hasFieldError(key: string): boolean {
+    return this.fieldErrors()[key] === true;
+  }
+
+  protected clearFieldErrorKey(key: string): void {
+    this.fieldErrors.update((m) => {
+      if (m[key] !== true) {
+        return m;
+      }
+      const next = { ...m };
+      delete next[key];
+      return next;
+    });
+  }
+
+  protected tryPublish(): void {
+    this.publishError.set(null);
+    const errors = this.computeFieldErrors();
+    this.fieldErrors.set(errors);
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+    this.publish();
+  }
+
+  private computeFieldErrors(): Record<string, boolean> {
+    const e: Record<string, boolean> = {};
+    const title = this.surveyName.trim();
+    if (title.length < 3 || title.length > POLL_TITLE_MAX_CHARS) {
+      e['surveyName'] = true;
+    } else {
+      const wordCount = title.split(/\s+/).filter(Boolean).length;
+      if (wordCount > POLL_TITLE_MAX_WORDS) {
+        e['surveyName'] = true;
+      }
+    }
+    this.questions.forEach((q, qi) => {
+      if (q.prompt.trim().length === 0) {
+        e[`q-prompt-${qi}`] = true;
+      }
+    });
+    return e;
+  }
+
   protected optionLetter(index: number): string {
     return `${String.fromCharCode(65 + index)}.`;
   }
@@ -128,38 +201,18 @@ export class CreateSurveyComponent {
     this.publishError.set(null);
 
     const title = this.surveyName.trim();
-    if (title.length < 3) {
-      this.publishError.set(
-        'Bitte einen Umfragennamen mit mindestens 3 Zeichen eingeben.',
-      );
-      return;
-    }
-    if (title.length > POLL_TITLE_MAX_CHARS) {
-      this.publishError.set(
-        `Der Name darf höchstens ${POLL_TITLE_MAX_CHARS} Zeichen haben.`,
-      );
-      return;
-    }
-    const wordCount = title.trim().split(/\s+/).filter(Boolean).length;
-    if (wordCount > POLL_TITLE_MAX_WORDS) {
-      this.publishError.set(
-        `Der Name darf höchstens ${POLL_TITLE_MAX_WORDS} Wörter haben.`,
-      );
-      return;
-    }
-
     const first = this.questions[0];
     if (!first) {
       this.publishError.set('Keine Frage vorhanden.');
       return;
     }
-    const opts = first.answers.map((a) => a.text.trim()).filter(Boolean);
-    if (opts.length < 2) {
-      this.publishError.set(
-        'Bei der ersten Frage bitte mindestens zwei Antworten ausfüllen.',
-      );
-      return;
-    }
+    const filledOpts = first.answers.map((a) => a.text.trim()).filter(Boolean);
+    const opts: string[] =
+      filledOpts.length >= 2
+        ? [...filledOpts]
+        : filledOpts.length === 1
+          ? [...filledOpts, 'Option B']
+          : ['Option A', 'Option B'];
 
     let description = this.describingText.trim();
     const extraQs = this.questions.slice(1);
@@ -194,9 +247,11 @@ export class CreateSurveyComponent {
       deadline,
     });
 
+    this.publishOverlayOpen.set(true);
     this.toastVisible.set(true);
     window.setTimeout(() => {
       this.toastVisible.set(false);
+      this.publishOverlayOpen.set(false);
       void this.router.navigateByUrl('/');
     }, 2800);
   }

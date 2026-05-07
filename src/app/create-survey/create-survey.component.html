@@ -1,34 +1,25 @@
 <div class="create-survey-page">
   <a class="skip-link" href="#create-survey-main">Zum Hauptinhalt springen</a>
 
-  <header class="create-survey-page__top">
-    <div class="create-survey-page__top-inner">
-      <a routerLink="/" class="create-survey-page__brand" aria-label="Poll App – Startseite">
-        <img
-          class="create-survey-page__logo"
-          src="assets/img/Logo-violett.svg"
-          alt=""
-          width="119"
-          height="44"
-        />
-      </a>
-    </div>
-  </header>
-
   <main id="create-survey-main" class="create-survey-page__main">
     <div class="create-survey-card">
       <div class="create-survey-card__head">
-        <div class="create-survey-card__head-left">
-          <span class="create-survey-card__draft">Draft</span>
-          <h1 class="create-survey-card__title">Create new survey</h1>
-        </div>
+        <span class="create-survey-card__draft">Draft</span>
+        <h1 class="create-survey-card__title">Create new survey</h1>
         <button
           type="button"
           class="create-survey-card__cancel"
           (click)="cancel()"
         >
           Cancel
-          <span class="create-survey-card__cancel-x" aria-hidden="true">×</span>
+          <img
+            class="create-survey-card__cancel-icon"
+            src="assets/img/close.svg"
+            alt=""
+            width="24"
+            height="24"
+            aria-hidden="true"
+          />
         </button>
       </div>
 
@@ -45,34 +36,52 @@
                   name="surveyName"
                   [(ngModel)]="surveyName"
                   autocomplete="off"
+                  [class.create-field__input--error]="hasFieldError('surveyName')"
+                  [placeholder]="hasFieldError('surveyName') ? fieldFillErrorMessage : ''"
+                  [attr.aria-invalid]="hasFieldError('surveyName')"
+                  (ngModelChange)="clearFieldErrorKey('surveyName')"
                 />
                 <button
                   type="button"
                   class="create-field__clear"
                   aria-label="Survey name leeren"
                   (click)="clearSurveyName()"
-                >
-                  <img src="assets/img/Delete-white.svg" alt="" width="26" height="26" />
-                </button>
+                ></button>
               </div>
             </div>
 
             <div class="create-field create-field--date-category">
-              <label class="create-field__label" for="survey-end">
-                Set end date <span class="create-field__optional">(optional)</span>
-              </label>
-              <label class="create-field__label create-field__label--with-arrow" for="survey-category">
-                Choose category
-                <img
-                  class="create-field__label-chevron"
-                  src="assets/img/arrow_drop_down.svg"
-                  alt=""
-                  width="15"
-                  height="8"
-                />
+              <label class="create-field__label create-field__label--date-end" for="survey-end">
+                Set end date<span class="create-field__optional"> (optional)</span>
               </label>
 
-              <div class="create-field__row">
+              <div class="create-category-trigger">
+                <span class="create-field__label create-field__label--category-picker" id="survey-category-label">
+                  {{ category !== '' ? category : 'Choose category' }}
+                </span>
+                <span class="create-category-trigger__arrow" aria-hidden="true">
+                  <img
+                    src="assets/img/arrow_drop_down.svg"
+                    alt=""
+                    width="15"
+                    height="8"
+                  />
+                </span>
+                <select
+                  id="survey-category"
+                  class="create-field__select--overlay"
+                  name="category"
+                  aria-labelledby="survey-category-label"
+                  [(ngModel)]="category"
+                >
+                  <option value="" disabled hidden></option>
+                  @for (c of categoryOptions; track c) {
+                    <option [value]="c">{{ c }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="create-field__date-controls-row">
                 <input
                   id="survey-end"
                   class="create-field__input create-field__input--end-date"
@@ -83,39 +92,23 @@
                 />
                 <button
                   type="button"
-                  class="create-field__clear create-field__clear--end-date"
+                  class="create-field__clear"
                   aria-label="Enddatum leeren"
                   (click)="clearEndDate()"
-                >
-                  <img src="assets/img/Delete-white.svg" alt="" width="26" height="26" />
-                </button>
-              </div>
-
-              <div class="create-field__select-wrap">
-                <select
-                  id="survey-category"
-                  class="create-field__select"
-                  name="category"
-                  [(ngModel)]="category"
-                >
-                  <option value="">Choose category</option>
-                  @for (c of categoryOptions; track c) {
-                    <option [value]="c">{{ c }}</option>
-                  }
-                </select>
+                ></button>
               </div>
             </div>
           </div>
 
           <div class="create-survey-card__col">
-            <div class="create-field create-field--grow">
+            <div class="create-field create-field--grow create-field--describe">
               <label class="create-field__label" for="survey-desc">
                 Describing text <span class="create-field__optional">(optional)</span>
               </label>
-              <div class="create-field__row create-field__row--top">
+              <div class="create-field__row create-field__row--top create-field__row--describe">
                 <textarea
                   id="survey-desc"
-                  class="create-field__input create-field__input--textarea"
+                  class="create-field__input create-field__input--textarea create-field__input--describe"
                   name="describingText"
                   rows="5"
                   [(ngModel)]="describingText"
@@ -125,49 +118,62 @@
                   class="create-field__clear create-field__clear--textarea"
                   aria-label="Beschreibung leeren"
                   (click)="clearDescribingText()"
-                >
-                  <img src="assets/img/Delete-white.svg" alt="" width="26" height="26" />
-                </button>
+                ></button>
               </div>
             </div>
           </div>
         </div>
 
         @for (q of questions; track q.id; let qi = $index) {
-          <section class="create-q-block" [attr.aria-labelledby]="'q-label-' + qi">
+          <section
+            class="create-q-block"
+            [id]="'create-q-block-' + qi"
+            [attr.aria-labelledby]="'q-label-' + qi"
+          >
             <div class="create-q-block__head">
               <h2 class="create-q-block__title" [id]="'q-label-' + qi">
                 {{ qi + 1 }}. Question
               </h2>
-              <button
-                type="button"
-                class="create-field__clear create-field__clear--bare"
-                aria-label="Frage entfernen"
-                [disabled]="questions.length <= 1"
-                (click)="removeQuestion(qi)"
-              >
-                <img src="assets/img/Delete-white.svg" alt="" width="26" height="26" />
-              </button>
+              <div class="create-q-block__head-actions">
+                <button
+                  type="button"
+                  class="create-field__clear create-field__clear--q-head"
+                  aria-label="Fragetext leeren"
+                  (click)="clearQuestionPrompt(qi)"
+                ></button>
+                @if (qi === questions.length - 1) {
+                  <button type="button" class="create-btn-add-next" (click)="addQuestion()">
+                    Add next question
+                    <img
+                      class="create-btn-add-next__icon"
+                      src="assets/img/add_circle-white-lightpurple.svg"
+                      alt=""
+                      width="24"
+                      height="24"
+                    />
+                  </button>
+                }
+              </div>
             </div>
 
             <div class="create-field">
-              <div class="create-field__row">
+              <div class="create-field__row create-field__row--q-prompt-only">
                 <input
-                  class="create-field__input"
+                  [id]="'create-q-prompt-' + qi"
+                  class="create-field__input create-field__input--q-prompt"
                   type="text"
                   [name]="'q-prompt-' + qi"
                   [(ngModel)]="q.prompt"
-                  placeholder="Which date would work best for you?"
+                  [placeholder]="
+                    hasFieldError('q-prompt-' + qi)
+                      ? fieldFillErrorMessage
+                      : 'Which date would work best for you?'
+                  "
+                  [class.create-field__input--error]="hasFieldError('q-prompt-' + qi)"
                   [attr.aria-labelledby]="'q-label-' + qi"
+                  [attr.aria-invalid]="hasFieldError('q-prompt-' + qi)"
+                  (ngModelChange)="clearFieldErrorKey('q-prompt-' + qi)"
                 />
-                <button
-                  type="button"
-                  class="create-field__clear"
-                  aria-label="Fragetext leeren"
-                  (click)="clearQuestionPrompt(qi)"
-                >
-                  <img src="assets/img/Delete-white.svg" alt="" width="26" height="26" />
-                </button>
               </div>
             </div>
 
@@ -200,54 +206,61 @@
                       class="create-field__clear"
                       aria-label="Antwort leeren"
                       (click)="clearAnswer(qi, ai)"
-                    >
-                      <img src="assets/img/Delete-white.svg" alt="" width="26" height="26" />
-                    </button>
+                    ></button>
                   </div>
                 </li>
               }
             </ul>
 
             <button type="button" class="create-link-add" (click)="addAnswer(qi)">
+              Add answer
               <img
                 class="create-link-add__icon"
                 src="assets/img/add_circle-white-purple.svg"
                 alt=""
-                width="22"
-                height="22"
+                width="20"
+                height="20"
               />
-              Add answer
             </button>
-
-            @if (qi === questions.length - 1) {
-              <div class="create-add-next-wrap">
-                <button type="button" class="create-btn-secondary" (click)="addQuestion()">
-                  <img
-                    class="create-btn-secondary__icon"
-                    src="assets/img/add_circle-white-lightpurple.svg"
-                    alt=""
-                    width="22"
-                    height="22"
-                  />
-                  Add next question
-                </button>
-              </div>
-            }
           </section>
         }
 
         @if (publishError(); as err) {
           <p class="create-survey-card__error" role="alert">{{ err }}</p>
         }
-
-        <div class="create-survey-card__footer">
-          <button type="button" class="create-btn-publish" (click)="publish()">
-            Publish
-          </button>
-        </div>
       </div>
     </div>
+
+    <div class="create-survey-page__publish">
+      <button type="button" class="create-btn-publish" (click)="tryPublish()">
+        Publish
+      </button>
+    </div>
   </main>
+
+  @if (publishOverlayOpen()) {
+    <div
+      class="create-publish-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-publish-overlay-title"
+      (click)="onPublishOverlayBackdrop($event)"
+    >
+      <div class="create-publish-overlay__panel" (click)="$event.stopPropagation()">
+        <button
+          type="button"
+          class="create-publish-overlay__close"
+          aria-label="Overlay schließen"
+          (click)="closePublishOverlay()"
+        >
+          ×
+        </button>
+        <p id="create-publish-overlay-title" class="create-publish-overlay__text">
+          Your survey is now published
+        </p>
+      </div>
+    </div>
+  }
 
   @if (toastVisible()) {
     <div class="create-toast" role="status">
