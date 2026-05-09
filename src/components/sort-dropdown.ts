@@ -9,7 +9,6 @@ export interface SortDropdownControllerOptions {
   readonly pollService: PollService;
 }
 
-/** Category filter dropdown for active/past lists (outside click / Esc closes). */
 export class SortDropdownController {
   private readonly pollService: PollService;
   private readonly trigger: HTMLButtonElement;
@@ -18,6 +17,7 @@ export class SortDropdownController {
   private isOpen = false;
   private selectedCategory: string | null = null;
 
+  /** Loads trigger and menu nodes, then fills options and events. */
   public constructor(options: SortDropdownControllerOptions) {
     this.pollService = options.pollService;
     this.trigger = requireElementById('sort-button', HTMLButtonElement);

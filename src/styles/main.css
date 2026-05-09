@@ -4,4 +4,10 @@
 @import "./poll-card.css";
 @import "./modal-form.css";
 @import "./poll-detail.css";
+@import "./create-survey-layout.css";
+@import "./create-survey-form-fields.css";
+@import "./create-survey-builder.css";
+@import "./create-survey-overlay.css";
+@import "./survey-view-results-preview.css";
+@import "./survey-view-results-live.css";
 @import "./responsive.css";

@@ -8,7 +8,6 @@ function relativeDate(offsetMs: number): Date {
   return new Date(Date.now() + offsetMs);
 }
 
-/** Seed polls covering active, past, ending-soon, and category variants. */
 export const MOCK_POLLS: ReadonlyArray<Poll> = [
   {
     id: 'poll-1',

@@ -243,7 +243,6 @@ a.button {
   opacity: 1;
 }
 
-/** Navigation zur Create-Survey-Route ohne zeitverzögerte Hover-/Breiten-Animation. */
 .button--cta.button--cta--instant {
   transition: none;
 }

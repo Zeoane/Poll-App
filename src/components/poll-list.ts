@@ -18,7 +18,6 @@ interface ListElements {
   readonly pastEmpty: HTMLElement;
 }
 
-/** Controls the homescreen lists: ending-soon, active, and past polls. */
 export class PollListController {
   private readonly pollService: PollService;
   private readonly onPollSelect: (pollId: string) => void;
@@ -27,6 +26,7 @@ export class PollListController {
   private readonly tabPanels: Readonly<Record<PollTab, HTMLElement>>;
   private currentTab: PollTab = 'active';
 
+  /** Reads list roots from the DOM and attaches tab handlers. */
   public constructor(options: PollListControllerOptions) {
     this.pollService = options.pollService;
     this.onPollSelect = options.onPollSelect;

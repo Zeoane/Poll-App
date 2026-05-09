@@ -2,34 +2,37 @@ import type { NewPollInput, Poll, PollOption } from '../types/poll';
 
 const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
-/** Look-ahead window (ms) for polls in the “ending soon” highlight row. */
 const ENDING_SOON_THRESHOLD_MS = 3 * DAY_IN_MS;
 const ID_RADIX = 36;
 const RANDOM_ID_LENGTH = 8;
 
 type PollListener = (polls: ReadonlyArray<Poll>) => void;
 
-/** Manages poll state and exposes filtering, sorting, creation, and voting. */
 export class PollService {
   private polls: Poll[];
   private readonly listeners: Set<PollListener> = new Set();
-  /** Current category filter applied to active and past poll lists. */
   private activeCategory: string | null = null;
 
+  /** Seeds the service with an initial poll snapshot. */
   public constructor(initialPolls: ReadonlyArray<Poll>) {
     this.polls = [...initialPolls];
   }
 
-  /** Registers a listener and returns its unsubscribe function. */
+  /** Subscribes to poll list changes and returns an unsubscribe function. */
   public subscribe(listener: PollListener): () => void {
     this.listeners.add(listener);
     listener(this.polls);
+    return this.createUnsubscribe(listener);
+  }
+
+  /** Builds a callback that removes one listener from the notification set. */
+  private createUnsubscribe(listener: PollListener): () => void {
     return () => {
       this.listeners.delete(listener);
     };
   }
 
-  /** Sets the active/past list filter; `null` clears. Ending-soon row ignores this. */
+  /** Sets the category filter for active/past lists; null clears the filter. */
   public setActiveCategory(category: string | null): void {
     if (this.activeCategory === category) {
       return;
@@ -38,40 +41,40 @@ export class PollService {
     this.notify();
   }
 
-  /** Returns the currently selected category filter, or `null` when none. */
+  /** Returns the current category filter, or null if none. */
   public getActiveCategory(): string | null {
     return this.activeCategory;
   }
 
-  /** Returns active polls sorted by deadline, polls without deadline last. */
+  /** Lists non-ended polls matching the category filter, sorted by deadline. */
   public getActivePolls(): ReadonlyArray<Poll> {
     const now = Date.now();
     return [...this.polls]
       .filter((poll) => !this.isPollEnded(poll, now))
       .filter((poll) => this.matchesActiveCategory(poll))
-      .sort(this.compareByDeadline);
+      .sort((a, b) => this.compareByDeadline(a, b));
   }
 
-  /** Returns ended polls, most recently ended first. */
+  /** Lists ended polls matching the category filter, newest deadline first. */
   public getPastPolls(): ReadonlyArray<Poll> {
     const now = Date.now();
     return [...this.polls]
       .filter((poll) => this.isPollEnded(poll, now))
       .filter((poll) => this.matchesActiveCategory(poll))
-      .sort(this.compareByDeadlineDescending);
+      .sort((a, b) => this.compareByDeadlineDescending(a, b));
   }
 
-  /** Active polls in the configured ending-soon window; ignores category filter. */
+  /** Lists soon-ending active polls ignoring the category filter. */
   public getEndingSoonPolls(): ReadonlyArray<Poll> {
     const now = Date.now();
     const threshold = now + ENDING_SOON_THRESHOLD_MS;
     return [...this.polls]
       .filter((poll) => !this.isPollEnded(poll, now))
       .filter((poll) => this.isWithinWindow(poll, now, threshold))
-      .sort(this.compareByDeadline);
+      .sort((a, b) => this.compareByDeadline(a, b));
   }
 
-  /** Returns whether the poll matches the current category filter. */
+  /** True when the poll category matches the active filter (or filter is off). */
   private matchesActiveCategory(poll: Poll): boolean {
     if (this.activeCategory === null) {
       return true;
@@ -79,12 +82,12 @@ export class PollService {
     return poll.category === this.activeCategory;
   }
 
-  /** Finds a poll by its ID, or returns undefined when no match exists. */
+  /** Looks up a poll by id. */
   public findPollById(pollId: string): Poll | undefined {
     return this.polls.find((poll) => poll.id === pollId);
   }
 
-  /** Returns whether the poll has reached its deadline. */
+  /** True when the poll deadline has passed relative to reference time. */
   public isPollEnded(poll: Poll, referenceTimeMs: number = Date.now()): boolean {
     if (poll.deadline === null) {
       return false;
@@ -92,7 +95,7 @@ export class PollService {
     return poll.deadline.getTime() <= referenceTimeMs;
   }
 
-  /** Creates a new poll, prepends it to the state, and notifies listeners. */
+  /** Adds a poll at the front of the list and notifies subscribers. */
   public createPoll(input: NewPollInput): Poll {
     const newPoll: Poll = {
       id: this.generateId('poll'),
@@ -108,7 +111,7 @@ export class PollService {
     return newPoll;
   }
 
-  /** Increases an option's vote count by one and returns the updated poll. */
+  /** Records one vote on an option when the poll is still open. */
   public vote(pollId: string, optionId: string): Poll | undefined {
     const poll = this.findPollById(pollId);
     if (poll === undefined || this.isPollEnded(poll)) {
@@ -122,12 +125,12 @@ export class PollService {
     return updatedPoll;
   }
 
-  /** Returns the total number of votes across all options of the poll. */
+  /** Sums votes across all options of a poll. */
   public getTotalVotes(poll: Poll): number {
     return poll.options.reduce((sum, option) => sum + option.votes, 0);
   }
 
-  /** Builds a fresh poll option with zero votes from a label. */
+  /** Creates a poll option node with zero votes. */
   private buildOption(label: string, index: number): PollOption {
     return {
       id: this.generateId(`opt-${index}`),
@@ -136,14 +139,14 @@ export class PollService {
     };
   }
 
-  /** Returns a copy of the poll's options with the matching option's votes incremented. */
+  /** Clones options, bumping votes for the matching option id. */
   private incrementVote(poll: Poll, optionId: string): ReadonlyArray<PollOption> {
     return poll.options.map((option) =>
       option.id === optionId ? { ...option, votes: option.votes + 1 } : option,
     );
   }
 
-  /** Returns whether the poll's deadline lies within the [now, threshold] window. */
+  /** True when deadline lies strictly between now and threshold. */
   private isWithinWindow(poll: Poll, nowMs: number, thresholdMs: number): boolean {
     if (poll.deadline === null) {
       return false;
@@ -152,7 +155,8 @@ export class PollService {
     return deadlineMs > nowMs && deadlineMs <= thresholdMs;
   }
 
-  private compareByDeadline = (a: Poll, b: Poll): number => {
+  /** Sorts by ascending deadline; missing deadlines go last. */
+  private compareByDeadline(a: Poll, b: Poll): number {
     if (a.deadline === null && b.deadline === null) {
       return 0;
     }
@@ -163,22 +167,23 @@ export class PollService {
       return -1;
     }
     return a.deadline.getTime() - b.deadline.getTime();
-  };
+  }
 
-  private compareByDeadlineDescending = (a: Poll, b: Poll): number => {
+  /** Sorts by descending deadline timestamp. */
+  private compareByDeadlineDescending(a: Poll, b: Poll): number {
     const aTime = a.deadline?.getTime() ?? 0;
     const bTime = b.deadline?.getTime() ?? 0;
     return bTime - aTime;
-  };
+  }
 
-  /** Calls every registered listener with the current poll snapshot. */
+  /** Notifies all subscribers with the latest polls array. */
   private notify(): void {
     for (const listener of this.listeners) {
       listener(this.polls);
     }
   }
 
-  /** Generates a unique ID composed of a prefix, timestamp, and random suffix. */
+  /** Generates a prefixed id with time and random parts. */
   private generateId(prefix: string): string {
     const random = Math.random().toString(ID_RADIX).slice(2, 2 + RANDOM_ID_LENGTH);
     return `${prefix}-${Date.now().toString(ID_RADIX)}-${random}`;

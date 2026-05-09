@@ -29,9 +29,8 @@ export function writeVotedPollIds(voted: Set<string>): void {
       VOTED_POLLS_STORAGE_KEY,
       JSON.stringify(Array.from(voted)),
     );
-} catch {
-  /* ignore quota / privacy mode errors */
-}
+  } catch {
+  }
 }
 
 /** Whether the visitor has recorded a vote for this poll ID in storage. */

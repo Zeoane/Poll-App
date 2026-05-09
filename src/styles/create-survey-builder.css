@@ -1,0 +1,252 @@
+.create-q-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  min-width: 0;
+}
+
+.create-q-block__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  min-width: 0;
+  justify-content: space-between;
+}
+
+.create-q-block__title {
+  box-sizing: border-box;
+  margin: 0;
+  flex-shrink: 0;
+  width: 399px;
+  max-width: 100%;
+  height: 22px;
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 22px;
+  letter-spacing: 0;
+  color: #fefdff;
+}
+
+.create-q-block__head-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.create-q-block__head + .create-field {
+  margin-top: -14px;
+}
+
+.create-field__clear--q-head {
+  flex-shrink: 0;
+}
+
+.create-answers-head {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  width: 429px;
+  max-width: 100%;
+  height: 22px;
+  min-height: 22px;
+}
+
+.create-answers-head__label {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #fefdff;
+}
+
+.create-check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  color: var(--create-input-bg);
+}
+
+.create-check-label__text {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.create-check-label__input {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 21px;
+  height: 21px;
+  margin: 0;
+  cursor: pointer;
+  border: none;
+  border-radius: 3px;
+  background-color: rgba(142, 112, 153, 0.16);
+  background-image: url("../assets/img/checkbox-white.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 21px 21px;
+}
+
+.create-check-label__input:checked {
+  background-color: transparent;
+  background-image: url("../assets/img/checkbox-orange.svg");
+  background-size: 21px 21px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.create-check-label__input:focus-visible {
+  outline: 2px solid var(--create-accent-title);
+  outline-offset: 2px;
+}
+
+.create-answer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.create-answer-list__item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 424px;
+  max-width: 100%;
+  height: 37px;
+  min-height: 37px;
+}
+
+.create-answer-list__letter {
+  flex-shrink: 0;
+  width: 28px;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--create-input-bg);
+}
+
+.create-field__row--answer {
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  height: 100%;
+}
+
+.create-field__row--answer .create-field__input {
+  box-sizing: border-box;
+  height: 37px;
+  padding: 7px 13px;
+}
+
+.create-link-add {
+  align-self: flex-start;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0 12px;
+  border: none;
+  border-bottom: 1px solid currentColor;
+  border-radius: 0;
+  background: transparent;
+  color: #fefdff;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: 0;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  width: 146px;
+  max-width: 100%;
+  height: 40px;
+}
+
+.create-link-add:hover,
+.create-link-add:focus-visible {
+  background: rgba(250, 245, 254, 0.2);
+}
+
+.create-link-add__icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.create-link-add:focus-visible {
+  outline: 2px solid var(--create-accent-title);
+  outline-offset: 2px;
+}
+
+.create-answer-list + .create-link-add {
+  margin-top: calc(var(--spacing-md) - var(--spacing-lg));
+  margin-left: calc(28px + 8px);
+}
+
+.create-btn-add-next {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 204px;
+  max-width: 100%;
+  min-width: 0;
+  height: 40px;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 183, 112, 0.3);
+  color: #fefdff;
+  font-family: "Nokora", var(--font-body);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: none;
+  animation: none;
+}
+
+.create-btn-add-next:hover {
+  background: rgba(255, 183, 112, 0.45);
+}
+
+.create-btn-add-next:focus-visible {
+  outline: 2px solid var(--create-accent-title);
+  outline-offset: 3px;
+}
+
+.create-btn-add-next__icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}

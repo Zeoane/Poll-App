@@ -48,7 +48,6 @@
 }
 
 html {
-  /* Verhindert Rundungs-/Viewport-Artefakte; Seite darf mit Inhalt wachsen. */
   -webkit-text-size-adjust: 100%;
 }
 
@@ -68,10 +67,6 @@ body {
   min-height: 100dvh;
 }
 
-/**
- * Routen-Host: ohne display:block bleiben Custom Elements inline und Layout
- * von Kindern (Router-Outlet + View) kann gekürzt wirken oder schlecht scrollen.
- */
 app-root {
   display: block;
   width: 100%;

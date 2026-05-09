@@ -11,7 +11,7 @@ import { requireElementById } from '../utils/dom';
 const MIN_TITLE_LENGTH = 3;
 const MIN_OPTIONS = 2;
 
-/** Counts whitespace-separated words after trim (empty input → 0). */
+/** Counts non-empty trimmed words in a title string. */
 function countTitleWords(title: string): number {
   const trimmed = title.trim();
   if (trimmed.length === 0) {
@@ -20,6 +20,7 @@ function countTitleWords(title: string): number {
   return trimmed.split(/\s+/).length;
 }
 
+/** Returns a title validation message or undefined when valid. */
 function validationTitleError(title: string): string | undefined {
   if (title.length < MIN_TITLE_LENGTH) {
     return `Please enter a title with at least ${MIN_TITLE_LENGTH} characters.`;
@@ -33,6 +34,7 @@ function validationTitleError(title: string): string | undefined {
   return undefined;
 }
 
+/** Returns an options validation message or undefined when valid. */
 function validationOptionsError(options: ReadonlyArray<string>): string | undefined {
   const uniqueOptions = new Set(options.map((option) => option.toLowerCase()));
   if (options.length < MIN_OPTIONS) {
@@ -50,40 +52,95 @@ export interface PollFormControllerOptions {
   readonly pollService: PollService;
 }
 
-/** New-survey modal: open/close, validation, and poll creation. */
+/** Resolves optional open-button element for the new-survey dialog. */
+function readOpenButton(): HTMLButtonElement | null {
+  const openEl = document.getElementById('new-survey-button');
+  return openEl instanceof HTMLButtonElement ? openEl : null;
+}
+
+/** Loads dialog shell elements for the new-survey modal. */
+function readNewSurveyShell(): {
+  dialog: HTMLDialogElement;
+  form: HTMLFormElement;
+  openButton: HTMLButtonElement | null;
+  closeButton: HTMLButtonElement;
+  cancelButton: HTMLButtonElement;
+} {
+  return {
+    dialog: requireElementById('new-survey-dialog', HTMLDialogElement),
+    form: requireElementById('new-survey-form', HTMLFormElement),
+    openButton: readOpenButton(),
+    closeButton: requireElementById('new-survey-close', HTMLButtonElement),
+    cancelButton: requireElementById('new-survey-cancel', HTMLButtonElement),
+  };
+}
+
+/** Loads form fields and error targets for the new-survey modal. */
+function readNewSurveyFields(): {
+  titleInput: HTMLInputElement;
+  optionsInput: HTMLTextAreaElement;
+  descriptionInput: HTMLTextAreaElement;
+  deadlineInput: HTMLInputElement;
+  titleError: HTMLElement;
+  optionsError: HTMLElement;
+} {
+  return {
+    titleInput: requireElementById('poll-title', HTMLInputElement),
+    optionsInput: requireElementById('poll-options', HTMLTextAreaElement),
+    descriptionInput: requireElementById('poll-description', HTMLTextAreaElement),
+    deadlineInput: requireElementById('poll-deadline', HTMLInputElement),
+    titleError: requireElementById('poll-title-error', HTMLElement),
+    optionsError: requireElementById('poll-options-error', HTMLElement),
+  };
+}
+
 export class PollFormController {
   private readonly pollService: PollService;
-  private readonly dialog: HTMLDialogElement;
-  private readonly form: HTMLFormElement;
-  private readonly openButton: HTMLButtonElement | null;
-  private readonly closeButton: HTMLButtonElement;
-  private readonly cancelButton: HTMLButtonElement;
-  private readonly titleInput: HTMLInputElement;
-  private readonly optionsInput: HTMLTextAreaElement;
-  private readonly descriptionInput: HTMLTextAreaElement;
-  private readonly deadlineInput: HTMLInputElement;
-  private readonly titleError: HTMLElement;
-  private readonly optionsError: HTMLElement;
+  private dialog!: HTMLDialogElement;
+  private form!: HTMLFormElement;
+  private openButton!: HTMLButtonElement | null;
+  private closeButton!: HTMLButtonElement;
+  private cancelButton!: HTMLButtonElement;
+  private titleInput!: HTMLInputElement;
+  private optionsInput!: HTMLTextAreaElement;
+  private descriptionInput!: HTMLTextAreaElement;
+  private deadlineInput!: HTMLInputElement;
+  private titleError!: HTMLElement;
+  private optionsError!: HTMLElement;
 
+  /** Wires the modal form to the poll service and DOM nodes. */
   public constructor(options: PollFormControllerOptions) {
     this.pollService = options.pollService;
-    this.dialog = requireElementById('new-survey-dialog', HTMLDialogElement);
-    this.form = requireElementById('new-survey-form', HTMLFormElement);
-    const openEl = document.getElementById('new-survey-button');
-    this.openButton =
-      openEl instanceof HTMLButtonElement ? openEl : null;
-    this.closeButton = requireElementById('new-survey-close', HTMLButtonElement);
-    this.cancelButton = requireElementById('new-survey-cancel', HTMLButtonElement);
-    this.titleInput = requireElementById('poll-title', HTMLInputElement);
-    this.optionsInput = requireElementById('poll-options', HTMLTextAreaElement);
-    this.descriptionInput = requireElementById('poll-description', HTMLTextAreaElement);
-    this.deadlineInput = requireElementById('poll-deadline', HTMLInputElement);
-    this.titleError = requireElementById('poll-title-error', HTMLElement);
-    this.optionsError = requireElementById('poll-options-error', HTMLElement);
+    this.assignNewSurveyDom();
     this.attachEvents();
   }
 
-  /** Binds dialog and form events. */
+  /** Caches references to all new-survey modal elements. */
+  private assignNewSurveyDom(): void {
+    this.assignShell(readNewSurveyShell());
+    this.assignFields(readNewSurveyFields());
+  }
+
+  /** Assigns dialog shell controls to instance fields. */
+  private assignShell(shell: ReturnType<typeof readNewSurveyShell>): void {
+    this.dialog = shell.dialog;
+    this.form = shell.form;
+    this.openButton = shell.openButton;
+    this.closeButton = shell.closeButton;
+    this.cancelButton = shell.cancelButton;
+  }
+
+  /** Assigns inputs and error hosts to instance fields. */
+  private assignFields(fields: ReturnType<typeof readNewSurveyFields>): void {
+    this.titleInput = fields.titleInput;
+    this.optionsInput = fields.optionsInput;
+    this.descriptionInput = fields.descriptionInput;
+    this.deadlineInput = fields.deadlineInput;
+    this.titleError = fields.titleError;
+    this.optionsError = fields.optionsError;
+  }
+
+  /** Registers dialog, submit, and field input handlers. */
   private attachEvents(): void {
     this.openButton?.addEventListener('click', () => this.open());
     this.closeButton.addEventListener('click', () => this.close());
@@ -96,7 +153,7 @@ export class PollFormController {
     this.optionsInput.addEventListener('input', () => this.clearError('options'));
   }
 
-  /** Opens the modal with a reset form. */
+  /** Resets errors and opens the modal with focus on title. */
   private open(): void {
     this.form.reset();
     this.clearError('title');
@@ -106,12 +163,12 @@ export class PollFormController {
     this.titleInput.focus();
   }
 
-  /** Closes the modal without submitting. */
+  /** Closes the modal without persisting. */
   private close(): void {
     this.dialog.close();
   }
 
-  /** Validates input, creates the poll, and closes on success. */
+  /** Validates, creates a poll on success, and closes the modal. */
   private handleSubmit(): void {
     const input = this.collectInput();
     const errors = this.validate(input);
@@ -124,14 +181,10 @@ export class PollFormController {
     this.close();
   }
 
-  /** Reads form controls into a {@link NewPollInput}. */
+  /** Reads trimmed form values into a new-poll payload. */
   private collectInput(): NewPollInput {
-    const rawOptions = this.optionsInput.value
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0);
-    const deadlineValue = this.deadlineInput.value;
-    const deadline = deadlineValue.length > 0 ? new Date(deadlineValue) : null;
+    const rawOptions = this.readTrimmedOptionLines();
+    const deadline = this.readDeadlineFromInput();
     return {
       title: this.titleInput.value.trim(),
       description: this.descriptionInput.value.trim(),
@@ -141,7 +194,21 @@ export class PollFormController {
     };
   }
 
-  /** Field-level validation for the create-poll form. */
+  /** Parses non-empty option lines from the textarea. */
+  private readTrimmedOptionLines(): string[] {
+    return this.optionsInput.value
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+  }
+
+  /** Parses deadline input, or null when empty. */
+  private readDeadlineFromInput(): Date | null {
+    const deadlineValue = this.deadlineInput.value;
+    return deadlineValue.length > 0 ? new Date(deadlineValue) : null;
+  }
+
+  /** Runs title and options validation rules. */
   private validate(input: NewPollInput): ValidationErrors {
     const errors: ValidationErrors = {};
     const titleErr = validationTitleError(input.title);
@@ -155,14 +222,14 @@ export class PollFormController {
     return errors;
   }
 
-  /** Applies all errors and focuses the first invalid control. */
+  /** Surfaces field errors and focuses the first invalid control. */
   private applyErrors(errors: ValidationErrors): void {
     this.applyFieldError('title', errors.title);
     this.applyFieldError('options', errors.options);
     this.focusFirstInvalid(errors);
   }
 
-  /** Sets or clears one field’s inline error. */
+  /** Writes one inline error or clears that field. */
   private applyFieldError(field: RequiredField, message: string | undefined): void {
     if (message === undefined) {
       this.clearError(field);
@@ -174,7 +241,7 @@ export class PollFormController {
     inputElement.setAttribute('aria-invalid', 'true');
   }
 
-  /** Focuses title first, then options, when those keys are set. */
+  /** Focuses title, then options, based on which error exists. */
   private focusFirstInvalid(errors: ValidationErrors): void {
     if (errors.title !== undefined) {
       this.titleInput.focus();
@@ -185,7 +252,7 @@ export class PollFormController {
     }
   }
 
-  /** Clears error state for one field. */
+  /** Clears inline error state for one field. */
   private clearError(field: RequiredField): void {
     const errorElement = field === 'title' ? this.titleError : this.optionsError;
     const inputElement = field === 'title' ? this.titleInput : this.optionsInput;

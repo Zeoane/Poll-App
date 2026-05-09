@@ -20,7 +20,7 @@ export function formatDateTime(date: Date | null): string {
   return dateTimeFormatter.format(date);
 }
 
-/** Formats a relative time string; null yields a neutral placeholder. */
+/** Formats a relative day/hour/minute label for a deadline vs reference. */
 export function formatRelative(date: Date | null, reference: Date = new Date()): string {
   if (date === null) {
     return 'No deadline';
@@ -35,21 +35,25 @@ export function formatRelative(date: Date | null, reference: Date = new Date()):
   return relativeFormatter.format(Math.round(diffMs / MINUTE_IN_MS), 'minute');
 }
 
+/** Builds an "Ends in N Day(s)" pill fragment for positive day differences. */
 function endsInDaysLabel(diffMs: number): string {
   const days = Math.ceil(diffMs / DAY_IN_MS);
   return `Ends in ${days} ${days === 1 ? 'Day' : 'Days'}`;
 }
 
+/** Builds an "Ends in N Hour(s)" pill fragment. */
 function endsInHoursLabel(diffMs: number): string {
   const hours = Math.ceil(diffMs / HOUR_IN_MS);
   return `Ends in ${hours} ${hours === 1 ? 'Hour' : 'Hours'}`;
 }
 
+/** Builds an "Ends in N Minute(s)" pill fragment. */
 function endsInMinutesLabel(diffMs: number): string {
   const minutes = Math.max(1, Math.ceil(diffMs / MINUTE_IN_MS));
   return `Ends in ${minutes} ${minutes === 1 ? 'Minute' : 'Minutes'}`;
 }
 
+/** Maps a positive time-until-deadline to the coarsest human label. */
 function endsInFromPositiveDiff(diffMs: number): string {
   if (diffMs >= DAY_IN_MS) {
     return endsInDaysLabel(diffMs);

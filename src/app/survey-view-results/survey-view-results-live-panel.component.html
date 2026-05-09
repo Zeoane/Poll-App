@@ -1,0 +1,188 @@
+<aside
+  class="create-card__live"
+  [class.create-card__live--instant-bars]="instantResultsClass() && !liveResultsAreEmpty()"
+  [class.create-card__live--empty]="liveResultsAreEmpty()"
+  aria-label="Live survey results"
+>
+            <h2 class="create-card__live-title">
+              Survey results <span class="create-card__live-accent">LIVE</span>
+            </h2>
+
+  @if (liveResultsAreEmpty()) {
+  <div class="create-card__live-empty">
+    <p class="create-card__live-empty-hint">
+      Results will be shown here after<br />
+      participants complete the survey.
+    </p>
+    <p class="create-card__live-empty-status">
+      There are no answers yet.
+    </p>
+  </div>
+  } @else {
+  @if (viewMode() === 'poll' && currentPoll(); as poll) {
+  <div class="create-live__block">
+    <h3 class="create-live__q">
+      1. Which date would work best for you?
+    </h3>
+    <ul class="create-live__bars">
+      @for (opt of poll.options; track opt.id; let i = $index) {
+      <li class="create-bar">
+        <span class="create-bar__letter">{{ optionLetterBare(i) }}</span>
+        <div class="create-bar__track" aria-hidden="true">
+          <div
+            class="create-bar__fill"
+            [style.width.%]="optionVotePercent(opt)"
+          ></div>
+        </div>
+        <span class="create-bar__pct">{{ optionVotePercent(opt) }}%</span>
+      </li>
+      }
+    </ul>
+  </div>
+  } @else {
+  <div class="create-live__block">
+              <h3 class="create-live__q">
+                1. Which date would work best for you?
+              </h3>
+              <ul class="create-live__bars">
+                <li class="create-bar">
+                  <span class="create-bar__letter">A</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 27%"></div>
+                  </div>
+                  <span class="create-bar__pct">27%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">B</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 44%"></div>
+                  </div>
+                  <span class="create-bar__pct">44%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">C</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 3%"></div>
+                  </div>
+                  <span class="create-bar__pct">3%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">D</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 26%"></div>
+                  </div>
+                  <span class="create-bar__pct">26%</span>
+                </li>
+              </ul>
+            </div>
+            }
+
+  <div class="create-live__block">
+              <h3 class="create-live__q">
+                2. Choose the activities you prefer
+              </h3>
+              <ul class="create-live__bars">
+                <li class="create-bar">
+                  <span class="create-bar__letter">A</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 60%"></div>
+                  </div>
+                  <span class="create-bar__pct">60%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">B</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 0%"></div>
+                  </div>
+                  <span class="create-bar__pct">0%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">C</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 14%"></div>
+                  </div>
+                  <span class="create-bar__pct">14%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">D</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 26%"></div>
+                  </div>
+                  <span class="create-bar__pct">26%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">E</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 0%"></div>
+                  </div>
+                  <span class="create-bar__pct">0%</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="create-live__block">
+              <h3 class="create-live__q">
+                3. What's most important to you in a team event?
+              </h3>
+              <ul class="create-live__bars">
+                <li class="create-bar">
+                  <span class="create-bar__letter">A</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 44%"></div>
+                  </div>
+                  <span class="create-bar__pct">44%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">B</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 3%"></div>
+                  </div>
+                  <span class="create-bar__pct">3%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">C</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 26%"></div>
+                  </div>
+                  <span class="create-bar__pct">26%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">D</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 27%"></div>
+                  </div>
+                  <span class="create-bar__pct">27%</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="create-live__block">
+              <h3 class="create-live__q">
+                4. How long would you prefer the event to last?
+              </h3>
+              <ul class="create-live__bars">
+                <li class="create-bar">
+                  <span class="create-bar__letter">A</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 14%"></div>
+                  </div>
+                  <span class="create-bar__pct">14%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">B</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 86%"></div>
+                  </div>
+                  <span class="create-bar__pct">86%</span>
+                </li>
+                <li class="create-bar">
+                  <span class="create-bar__letter">C</span>
+                  <div class="create-bar__track" aria-hidden="true">
+                    <div class="create-bar__fill" style="width: 0%"></div>
+                  </div>
+                  <span class="create-bar__pct">0%</span>
+                </li>
+              </ul>
+            </div>
+            }
+</aside>

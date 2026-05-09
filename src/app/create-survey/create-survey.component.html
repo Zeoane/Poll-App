@@ -124,6 +124,10 @@
           </div>
         </div>
 
+        <div
+          class="create-survey-card__questions-grid"
+          [class.create-survey-card__questions-grid--single]="questions.length === 1"
+        >
         @for (q of questions; track q.id; let qi = $index) {
           <section
             class="create-q-block"
@@ -138,21 +142,9 @@
                 <button
                   type="button"
                   class="create-field__clear create-field__clear--q-head"
-                  aria-label="Fragetext leeren"
-                  (click)="clearQuestionPrompt(qi)"
+                  [attr.aria-label]="questions.length > 1 ? 'Frage löschen' : 'Frage zurücksetzen'"
+                  (click)="removeQuestion(qi)"
                 ></button>
-                @if (qi === questions.length - 1) {
-                  <button type="button" class="create-btn-add-next" (click)="addQuestion()">
-                    Add next question
-                    <img
-                      class="create-btn-add-next__icon"
-                      src="assets/img/add_circle-white-lightpurple.svg"
-                      alt=""
-                      width="24"
-                      height="24"
-                    />
-                  </button>
-                }
               </div>
             </div>
 
@@ -224,6 +216,19 @@
             </button>
           </section>
         }
+          <div class="create-survey-card__add-next-wrap">
+            <button type="button" class="create-btn-add-next" (click)="addQuestion()">
+              Add next question
+              <img
+                class="create-btn-add-next__icon"
+                src="assets/img/add_circle-white-lightpurple.svg"
+                alt=""
+                width="24"
+                height="24"
+              />
+            </button>
+          </div>
+        </div>
 
         @if (publishError(); as err) {
           <p class="create-survey-card__error" role="alert">{{ err }}</p>

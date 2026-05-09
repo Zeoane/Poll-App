@@ -9,13 +9,13 @@ export interface PollDetailControllerOptions {
   readonly pollService: PollService;
 }
 
-/** Controls the poll detail dialog with voting and live results. */
 export class PollDetailController {
   private readonly pollService: PollService;
   private readonly dialog: HTMLDialogElement;
   private readonly content: HTMLElement;
   private currentPollId: string | null = null;
 
+  /** Caches service and dialog DOM for later renders. */
   public constructor(options: PollDetailControllerOptions) {
     this.pollService = options.pollService;
     this.dialog = requireElementById('poll-detail-dialog', HTMLDialogElement);
@@ -25,7 +25,7 @@ export class PollDetailController {
     });
   }
 
-  /** Opens the detail dialog for the given poll, ignoring ended polls. */
+  /** Opens the modal for an active poll and renders its body. */
   public open(pollId: string): void {
     const poll = this.pollService.findPollById(pollId);
     if (poll === undefined || this.pollService.isPollEnded(poll)) {
@@ -36,7 +36,7 @@ export class PollDetailController {
     this.dialog.showModal();
   }
 
-  /** Re-renders the dialog content if a poll is currently shown. */
+  /** Rebuilds content when the poll still exists in the service. */
   public refresh(): void {
     if (this.currentPollId === null) {
       return;
@@ -48,7 +48,7 @@ export class PollDetailController {
     this.render(poll);
   }
 
-  /** Replaces the dialog content with freshly built sections. */
+  /** Replaces dialog children with header, columns, and footer. */
   private render(poll: Poll): void {
     const total = this.pollService.getTotalVotes(poll);
     const hasVoted = hasUserVotedOnPoll(poll.id);
@@ -60,7 +60,7 @@ export class PollDetailController {
     );
   }
 
-  /** Builds the header with title, deadline meta, and optional description. */
+  /** Builds title, meta, and optional description in the header. */
   private buildHeader(poll: Poll): HTMLElement {
     const header = document.createElement('header');
     header.className = 'poll-detail__header';
@@ -71,7 +71,7 @@ export class PollDetailController {
     return header;
   }
 
-  /** Builds the voting column on the left of the detail layout. */
+  /** Builds the vote or “already voted” column. */
   private buildVotingColumn(poll: Poll, hasVoted: boolean): HTMLElement {
     const section = document.createElement('section');
     section.className = 'poll-detail__voting';
@@ -81,7 +81,7 @@ export class PollDetailController {
     return section;
   }
 
-  /** Builds the list of clickable voting options. */
+  /** Builds a ul of clickable option buttons. */
   private buildOptionList(poll: Poll): HTMLUListElement {
     const list = document.createElement('ul');
     list.className = 'poll-detail__options';
@@ -91,7 +91,7 @@ export class PollDetailController {
     return list;
   }
 
-  /** Builds a single voting option list item with a click handler. */
+  /** Builds one li with a label button wired to handleVote. */
   private buildOptionItem(pollId: string, option: PollOption): HTMLLIElement {
     const item = document.createElement('li');
     item.className = 'poll-detail__option';
@@ -104,7 +104,7 @@ export class PollDetailController {
     return item;
   }
 
-  /** Builds the result column with total label and per-option bars. */
+  /** Builds heading, total, and bar list for results. */
   private buildResultColumn(poll: Poll, total: number): HTMLElement {
     const section = document.createElement('section');
     section.className = 'poll-detail__results';
@@ -117,7 +117,7 @@ export class PollDetailController {
     return section;
   }
 
-  /** Builds the footer with the close button. */
+  /** Builds footer with a single close control. */
   private buildFooter(): HTMLElement {
     const footer = document.createElement('footer');
     footer.className = 'poll-detail__footer';
@@ -130,7 +130,7 @@ export class PollDetailController {
     return footer;
   }
 
-  /** Submits a vote when the user has not voted on this poll yet. */
+  /** Applies a vote once per poll and refreshes the dialog. */
   private handleVote(pollId: string, optionId: string): void {
     if (hasUserVotedOnPoll(pollId)) {
       return;
@@ -144,7 +144,7 @@ export class PollDetailController {
   }
 }
 
-/** Builds the dialog title heading. */
+/** Creates the h2 title for the poll detail modal. */
 function buildHeaderTitle(text: string): HTMLHeadingElement {
   const title = document.createElement('h2');
   title.className = 'poll-detail__title';
@@ -153,7 +153,7 @@ function buildHeaderTitle(text: string): HTMLHeadingElement {
   return title;
 }
 
-/** Builds the meta paragraph describing the deadline state. */
+/** Creates deadline-relative meta line text. */
 function buildHeaderMeta(deadline: Date | null): HTMLParagraphElement {
   const meta = document.createElement('p');
   meta.className = 'poll-detail__meta';
@@ -165,7 +165,7 @@ function buildHeaderMeta(deadline: Date | null): HTMLParagraphElement {
   return meta;
 }
 
-/** Builds the optional description paragraph. */
+/** Creates the optional body copy paragraph. */
 function buildHeaderDescription(text: string): HTMLParagraphElement {
   const description = document.createElement('p');
   description.className = 'poll-detail__description';
@@ -173,7 +173,7 @@ function buildHeaderDescription(text: string): HTMLParagraphElement {
   return description;
 }
 
-/** Builds a section heading with the given ID and label. */
+/** Creates an h3 section title with id for aria-labelledby. */
 function buildSectionHeading(id: string, text: string): HTMLHeadingElement {
   const heading = document.createElement('h3');
   heading.className = 'poll-detail__section-title';
@@ -182,7 +182,7 @@ function buildSectionHeading(id: string, text: string): HTMLHeadingElement {
   return heading;
 }
 
-/** Builds the notice shown after the user has already voted. */
+/** Shows the short notice after voting. */
 function buildVotedNotice(): HTMLParagraphElement {
   const info = document.createElement('p');
   info.className = 'poll-detail__info';
@@ -190,7 +190,7 @@ function buildVotedNotice(): HTMLParagraphElement {
   return info;
 }
 
-/** Builds the total-votes label of the result column. */
+/** Renders total vote count with pluralised noun. */
 function buildTotalLabel(total: number): HTMLParagraphElement {
   const label = document.createElement('p');
   label.className = 'poll-detail__total';
@@ -199,7 +199,7 @@ function buildTotalLabel(total: number): HTMLParagraphElement {
   return label;
 }
 
-/** Builds the result list with one bar per option. */
+/** Builds one li per option with bars derived from totals. */
 function buildResultList(poll: Poll, total: number): HTMLUListElement {
   const list = document.createElement('ul');
   list.className = 'poll-results';
@@ -209,7 +209,7 @@ function buildResultList(poll: Poll, total: number): HTMLUListElement {
   return list;
 }
 
-/** Builds a single result row with header meta and progress bar. */
+/** Combines meta row and animated bar for one option. */
 function buildResultRow(label: string, votes: number, total: number): HTMLLIElement {
   const item = document.createElement('li');
   item.className = 'poll-results__item';
@@ -218,7 +218,7 @@ function buildResultRow(label: string, votes: number, total: number): HTMLLIElem
   return item;
 }
 
-/** Builds the meta header showing label and numeric value of the row. */
+/** Shows label and numeric vote share for one row. */
 function buildResultMeta(label: string, votes: number, percentage: number): HTMLElement {
   const meta = document.createElement('header');
   meta.className = 'poll-results__meta';
@@ -232,7 +232,7 @@ function buildResultMeta(label: string, votes: number, percentage: number): HTML
   return meta;
 }
 
-/** Builds the progress-bar element of a result row. */
+/** Creates an ARIA progressbar div with an inner fill width. */
 function buildResultBar(label: string, percentage: number): HTMLDivElement {
   const bar = document.createElement('div');
   bar.className = 'poll-results__bar';

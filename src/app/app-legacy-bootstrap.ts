@@ -14,7 +14,7 @@ interface WiredControllers {
 
 let sharedPollService: PollService | null = null;
 
-/** Gemeinsamer Zustand für Home, Modal und Details – bleibt beim Wechsel der Route erhalten. */
+/** Returns the shared poll service singleton used across routes. */
 export function getSharedPollService(): PollService {
   if (sharedPollService === null) {
     sharedPollService = new PollService(MOCK_POLLS);
@@ -22,6 +22,7 @@ export function getSharedPollService(): PollService {
   return sharedPollService;
 }
 
+/** Instantiates list, detail, form, sort, and scrollbar controllers for the home screen. */
 function wireControllers(
   pollService: PollService,
   onPollSelect?: (pollId: string) => void,
@@ -37,6 +38,7 @@ function wireControllers(
   return { list: listController, detail: detailController, scrollbar };
 }
 
+/** Refreshes lists, the detail dialog, and the custom scrollbar layout. */
 function runListSync(
   pollService: PollService,
   list: PollListController,
@@ -48,10 +50,7 @@ function runListSync(
   requestAnimationFrame(() => scrollbar.sync());
 }
 
-/**
- * Startet die Legacy-Controller auf der Home-Seite.
- * @returns Aufräumen: Listener beim Verlassen der Home-Route entfernen.
- */
+/** Wires legacy DOM controllers for the home route; returns a cleanup callback. */
 export function bootstrapPollAppHome(
   onPollSelect?: (pollId: string) => void,
 ): () => void {

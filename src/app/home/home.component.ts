@@ -21,6 +21,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
   private homeCleanup: (() => void) | null = null;
 
+  /** Starts legacy DOM controllers after the template renders. */
   public ngAfterViewInit(): void {
     this.homeCleanup = bootstrapPollAppHome((pollId) => {
       this.ngZone.run(() => {
@@ -29,6 +30,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  /** Tears down list subscriptions when leaving the home route. */
   public ngOnDestroy(): void {
     this.homeCleanup?.();
     this.homeCleanup = null;
