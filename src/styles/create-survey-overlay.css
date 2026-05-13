@@ -174,10 +174,9 @@
     white-space: normal;
   }
 
-  .create-field.create-field--date-category > .create-category-trigger {
-    grid-column: 1;
-    grid-row: 2;
-    justify-content: flex-start;
+  .create-field.create-field--date-category > .category-dropdown.create-category-trigger {
+    justify-self: start;
+    width: min(var(--category-dropdown-width), 100%);
   }
 
   .create-field.create-field--date-category .create-field__label--category-picker {

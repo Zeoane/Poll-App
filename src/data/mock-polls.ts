@@ -13,7 +13,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
     id: 'poll-1',
     title: "Let's Plan the Next Team Event Together",
     description: 'Wir planen unser nächstes Team-Event und sammeln Ideen.',
-    category: 'Team activities',
+    category: 'Team Activities',
     options: [
       { id: 'opt-1-a', label: '19.09.2025, Friday', votes: 5 },
       { id: 'opt-1-b', label: '10.10.2025, Saturday', votes: 8 },
@@ -27,7 +27,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
     id: 'poll-2',
     title: 'Fit & wellness survey!',
     description: 'Welche Wellness-Angebote sollen wir im Office einführen?',
-    category: 'Healthy Lifestyle',
+    category: 'Health & Wellness',
     options: [
       { id: 'opt-2-a', label: 'Yoga-Kurs', votes: 12 },
       { id: 'opt-2-b', label: 'Massage-Sessions', votes: 9 },
@@ -41,7 +41,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
     id: 'poll-3',
     title: 'Gaming habits and favorite games!',
     description: 'Welche Spiele möchtest du beim nächsten Gaming-Abend zocken?',
-    category: 'Gaming',
+    category: 'Gaming & Entertainment',
     options: [
       { id: 'opt-3-a', label: 'Mario Kart', votes: 11 },
       { id: 'opt-3-b', label: 'Among Us', votes: 6 },
@@ -54,7 +54,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
     id: 'poll-4',
     title: 'Healthier future: Fit & wellness survey!',
     description: 'Eine offene Umfrage ohne festes Enddatum.',
-    category: 'Healthy Lifestyle',
+    category: 'Health & Wellness',
     options: [
       { id: 'opt-4-a', label: 'Mehr Pausen', votes: 10 },
       { id: 'opt-4-b', label: 'Walking Meetings', votes: 6 },
@@ -67,7 +67,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
     id: 'poll-5',
     title: 'Which framework should we pick for the next project?',
     description: 'We are kicking off a new frontend—vote for your preferred stack.',
-    category: 'Team activities',
+    category: 'Technology & Innovation',
     options: [
       { id: 'opt-5-a', label: 'React', votes: 7 },
       { id: 'opt-5-b', label: 'Vue', votes: 4 },
@@ -81,7 +81,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
     id: 'poll-7',
     title: 'Which workshop topics should we cover next quarter?',
     description: 'Help prioritise internal training sessions.',
-    category: 'Education',
+    category: 'Education & Learning',
     options: [
       { id: 'opt-7-a', label: 'Accessibility', votes: 9 },
       { id: 'opt-7-b', label: 'Performance', votes: 6 },
@@ -94,7 +94,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
     id: 'poll-8',
     title: 'Indoor air quality: should we add CO₂ sensors to meeting rooms?',
     description: 'Quick pulse check from facilities and science enthusiasts.',
-    category: 'Science',
+    category: 'Technology & Innovation',
     options: [
       { id: 'opt-8-a', label: 'Yes, everywhere', votes: 14 },
       { id: 'opt-8-b', label: 'Only large rooms', votes: 8 },
@@ -107,7 +107,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
     id: 'poll-9',
     title: 'Where should this month’s remote social hangout live?',
     description: 'Pick a vibe—camera optional.',
-    category: 'Social',
+    category: 'Lifestyle & Preferences',
     options: [
       { id: 'opt-9-a', label: 'Discord game night', votes: 12 },
       { id: 'opt-9-b', label: 'Coffee roulette calls', votes: 7 },
@@ -120,7 +120,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
     id: 'poll-6',
     title: 'Pizza für das letzte Sprint-Review',
     description: 'Welche Pizza-Sorten haben wir für das letzte Review bestellt?',
-    category: 'Team activities',
+    category: 'Team Activities',
     options: [
       { id: 'opt-6-a', label: 'Margherita', votes: 4 },
       { id: 'opt-6-b', label: 'Salami', votes: 9 },

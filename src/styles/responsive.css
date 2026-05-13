@@ -28,6 +28,12 @@
     grid-template-columns: 1fr;
   }
 
+  .category-dropdown.category-dropdown--sort,
+  .create-field.create-field--date-category > .category-dropdown.create-category-trigger {
+    width: 100%;
+    max-width: 320px;
+  }
+
   .sort {
     width: 100%;
     max-width: 320px;

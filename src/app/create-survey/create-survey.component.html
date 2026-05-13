@@ -55,30 +55,53 @@
                 Set end date<span class="create-field__optional"> (optional)</span>
               </label>
 
-              <div class="create-category-trigger">
-                <span class="create-field__label create-field__label--category-picker" id="survey-category-label">
-                  {{ category !== '' ? category : 'Choose category' }}
-                </span>
-                <span class="create-category-trigger__arrow" aria-hidden="true">
-                  <img
-                    src="assets/img/arrow_drop_down.svg"
-                    alt=""
-                    width="15"
-                    height="8"
-                  />
-                </span>
-                <select
-                  id="survey-category"
-                  class="create-field__select--overlay"
-                  name="category"
+              <div class="category-dropdown create-category-trigger">
+                <div class="category-dropdown__stack">
+                <button
+                  type="button"
+                  class="create-category-trigger__button category-dropdown__trigger"
+                  id="survey-category-button"
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                  aria-controls="survey-category-menu"
                   aria-labelledby="survey-category-label"
-                  [(ngModel)]="category"
+                  aria-describedby="survey-category-selection-caption"
                 >
-                  <option value="" disabled hidden></option>
-                  @for (c of categoryOptions; track c) {
-                    <option [value]="c">{{ c }}</option>
-                  }
-                </select>
+                  <span
+                    class="create-field__label create-field__label--category-picker"
+                    id="survey-category-label"
+                  ></span>
+                  <span class="category-dropdown__chevron-wrap" aria-hidden="true">
+                    <img
+                      class="category-dropdown__chevron category-dropdown__chevron--down"
+                      src="assets/img/arrow_drop_down.svg"
+                      alt=""
+                      width="15"
+                      height="8"
+                    />
+                    <img
+                      class="category-dropdown__chevron category-dropdown__chevron--up"
+                      src="assets/img/arrow_drop_up-orange.svg"
+                      alt=""
+                      width="24"
+                      height="24"
+                    />
+                  </span>
+                </button>
+                <p
+                  class="category-dropdown__selection"
+                  id="survey-category-selection-caption"
+                  hidden
+                  aria-live="polite"
+                ></p>
+                </div>
+                <ul
+                  class="category-dropdown__menu"
+                  id="survey-category-menu"
+                  role="listbox"
+                  aria-label="Kategorie w\u00e4hlen"
+                  hidden
+                ></ul>
               </div>
 
               <div class="create-field__date-controls-row">

@@ -1,10 +1,10 @@
 export const POLL_CATEGORIES = [
-  'Team activities',
-  'Gaming',
-  'Healthy Lifestyle',
-  'Education',
-  'Science',
-  'Social',
+  'Team Activities',
+  'Health & Wellness',
+  'Gaming & Entertainment',
+  'Education & Learning',
+  'Lifestyle & Preferences',
+  'Technology & Innovation',
 ] as const;
 
 export type PollCategory = (typeof POLL_CATEGORIES)[number];

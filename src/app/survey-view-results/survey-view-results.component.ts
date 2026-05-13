@@ -95,7 +95,7 @@ export class SurveyViewResultsComponent {
 
   public surveyDescription = PREVIEW_DESCRIPTION;
 
-  public category = 'Team activities';
+  public category = 'Team Activities';
 
   public endsOn = '2025-09-01';
 
@@ -358,7 +358,7 @@ export class SurveyViewResultsComponent {
   private resetTemplateDefaults(): void {
     this.surveyName = TEMPLATE_SURVEY_NAME;
     this.surveyDescription = PREVIEW_DESCRIPTION;
-    this.category = 'Team activities';
+    this.category = 'Team Activities';
     this.endsOn = '2025-09-01';
     this.surveyStatus = 'draft';
     this.completeError = null;

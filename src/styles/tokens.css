@@ -45,6 +45,14 @@
 
   --content-max-width: 1218px;
   --surveys-max-width: 1042px;
+
+  /* Category dropdown: gemeinsame Box (Sort + Create) */
+  --category-dropdown-width: 206px;
+  --category-dropdown-trigger-padding-inline-start: 10px;
+  --category-dropdown-trigger-padding-inline-end: 6px;
+  /* Caption unter Create: gleicher link/rechts Einzug wie Chip im Trigger */
+  --category-dropdown-chip-padding-inline: 8px;
+  --category-dropdown-caption-offset-inline-start: 0px;
 }
 
 html {

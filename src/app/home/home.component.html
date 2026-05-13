@@ -109,26 +109,44 @@
             </button>
           </div>
 
-          <div class="sort-wrapper">
+          <div class="category-dropdown category-dropdown--sort">
+            <div class="category-dropdown__stack">
             <button
               type="button"
-              class="sort"
+              class="sort category-dropdown__trigger"
               id="sort-button"
               aria-haspopup="listbox"
               aria-expanded="false"
               aria-controls="sort-menu"
+              aria-describedby="sort-selection-caption"
             >
               <span class="sort__label" id="sort-label">Sort by categories</span>
-              <img
-                class="sort__chevron"
-                src="assets/img/arrow_drop_down.svg"
-                alt=""
-                width="15"
-                height="8"
-              >
+              <span class="category-dropdown__chevron-wrap" aria-hidden="true">
+                <img
+                  class="category-dropdown__chevron category-dropdown__chevron--down"
+                  src="assets/img/arrow_drop_down.svg"
+                  alt=""
+                  width="15"
+                  height="8"
+                >
+                <img
+                  class="category-dropdown__chevron category-dropdown__chevron--up"
+                  src="assets/img/arrow_drop_up-orange.svg"
+                  alt=""
+                  width="24"
+                  height="24"
+                >
+              </span>
             </button>
+            <p
+              class="category-dropdown__selection"
+              id="sort-selection-caption"
+              hidden
+              aria-live="polite"
+            ></p>
+            </div>
             <ul
-              class="sort__menu"
+              class="category-dropdown__menu"
               id="sort-menu"
               role="listbox"
               aria-label="Kategorie ausw\u00e4hlen"

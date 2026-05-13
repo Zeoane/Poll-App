@@ -5,3 +5,13 @@
   min-height: 100dvh;
   background: #ffffff;
 }
+
+.create-field.create-field--date-category > .category-dropdown.create-category-trigger {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  position: relative;
+  overflow: visible;
+  min-height: 32px;
+  height: auto;
+}
