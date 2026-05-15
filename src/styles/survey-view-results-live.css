@@ -1,3 +1,22 @@
+/* =============================================================================
+   Live-Ergebnis-Panel (aside.create-card__live)
+   Alle Frageblöcke (.create-live__block) nutzen dieselben vertikalen Abstände.
+   ============================================================================= */
+.create-card__live {
+  --live-gap-block-stack: 16px; /* zwischen aufeinanderfolgenden Frageblöcken */
+  --live-gap-q-top: 12px; /* über jeder Fragenüberschrift */
+  --live-gap-q-bottom: 10px; /* unter Fragenüberschrift → Balkenliste */
+  --live-gap-bar-rows: 8px; /* zwischen Balkenzeilen */
+  --live-gap-bar-columns: 8px; /* Buchstabe ↔ Track ↔ % */
+  --live-gap-q-inline: 0.35em; /* Nummer ↔ Fragetext (entspr. survey-view-results --survey-q-title-num-gap) */
+  /* Übernehmen aus .create-preview-layout (mit Fallback, falls Aside woanders genutzt wird) */
+  --live-column-width: var(--survey-results-live-column-width, 315px);
+  --live-bar-track-width: var(--survey-results-live-bar-track-width, 255px);
+  --live-bar-pct-width: var(--survey-results-live-bar-pct-width, 31px);
+}
+
+/* --- Panel-Kopf & Empty-State --- */
+
 .create-card__live-title {
   font-family: var(--font-display);
   font-size: 32px;
@@ -17,7 +36,7 @@
   flex-direction: column;
   align-items: stretch;
   gap: 24px;
-  width: 315px;
+  width: var(--live-column-width);
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -31,7 +50,7 @@
 .create-card__live--empty .create-card__live-title {
   margin-bottom: 0;
   box-sizing: border-box;
-  width: 315px;
+  width: var(--live-column-width);
   max-width: 100%;
   min-height: 39px;
 }
@@ -40,7 +59,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  width: 315px;
+  width: var(--live-column-width);
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -48,7 +67,7 @@
 .create-card__live-empty-hint {
   margin: 0;
   box-sizing: border-box;
-  width: 315px;
+  width: var(--live-column-width);
   max-width: 100%;
   min-height: 45px;
   font-family: var(--font-body);
@@ -62,7 +81,7 @@
 .create-card__live-empty-status {
   margin: 0;
   box-sizing: border-box;
-  width: 315px;
+  width: var(--live-column-width);
   max-width: 100%;
   min-height: 23px;
   text-align: center;
@@ -74,18 +93,35 @@
   color: #35273a;
 }
 
-.create-live__block + .create-live__block {
-  margin-top: 16px;
+/* --- Fragenblöcke, Überschriften, Balkenlisten --- */
+
+/*
+ * Abstand zwischen Frageblöcken (nicht `+`: Angular kann Knoten zwischen Divs einfügen).
+ */
+.create-card__live .create-live__block ~ .create-live__block {
+  margin-top: var(--live-gap-block-stack);
 }
 
 .create-live__q {
   font-family: var(--font-body);
   font-size: 18px;
   font-weight: 700;
-  line-height: 100%;
+  line-height: 1.25;
   letter-spacing: 0;
-  margin: 0 0 10px;
+  margin: var(--live-gap-q-top) 0 var(--live-gap-q-bottom);
   color: #35273a;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--live-gap-q-inline);
+}
+
+.create-live__q-num {
+  flex-shrink: 0;
+}
+
+.create-live__q-body {
+  flex: 1;
+  min-width: 0;
 }
 
 .create-live__bars {
@@ -95,14 +131,16 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--live-gap-bar-rows);
 }
+
+/* Balkenzeile */
 
 .create-bar {
   display: grid;
-  grid-template-columns: max-content 255px 31px;
+  grid-template-columns: max-content var(--live-bar-track-width) var(--live-bar-pct-width);
   align-items: center;
-  column-gap: 8px;
+  column-gap: var(--live-gap-bar-columns);
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -116,7 +154,7 @@
 }
 
 .create-bar__track {
-  width: 255px;
+  width: var(--live-bar-track-width);
   height: 14px;
   border-radius: 7px 20px 20px 7px;
   background: #ededed;
@@ -141,8 +179,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
-  width: 31px;
-  min-width: 31px;
+  width: var(--live-bar-pct-width);
+  min-width: var(--live-bar-pct-width);
   height: 15px;
   font-family: var(--font-body);
   font-size: 12px;
@@ -154,12 +192,19 @@
 }
 
 @media (max-width: 900px) {
+  /* Schmale Ansicht: Preview-Karte und Live-Panel untereinander */
   .create-preview-layout {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .create-card__questions {
     grid-template-columns: 1fr;
+    row-gap: 24px;
+  }
+
+  /* Nur zwischen Block (Fragen 1+2) und (Fragen 3+4): eine halbe Textzeile wie im Zwei-Spalten-Layout */
+  .create-card__questions > article.create-q:nth-child(3) {
+    margin-top: calc(var(--survey-text-line, calc(16px * 1.55)) / 2);
   }
 
   .create-card__title {

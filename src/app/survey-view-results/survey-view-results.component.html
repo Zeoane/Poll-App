@@ -50,9 +50,12 @@
 
             <div class="create-card__questions">
               @if (viewMode === 'poll' && currentPoll) {
-              <article class="create-q">
+              <article
+                class="create-q"
+                [class.create-q--vote-choice-lock]="pollVoteChoiceLockActive()"
+              >
                 <h2 class="create-q__title">
-                  1. Which date would work best for you?
+                  <span class="create-q__title-num">1.</span><span class="create-q__title-body">Which date would work best for you?</span>
                 </h2>
                 <p class="create-q__hint">{{ pollVoteHint() }}</p>
                 <ul class="create-q__opts">
@@ -61,16 +64,11 @@
                     <button
                       type="button"
                       class="create-check create-check--vote-trigger"
-                      [disabled]="pollInteractionLocked()"
+                      [class.create-check--vote-selected]="pollChosenOptionId() === opt.id"
+                      [disabled]="pollVoteButtonsDisabled()"
                       (click)="voteForOption(opt.id)"
                     >
-                      <img
-                        class="create-check__box create-check__box--unchecked"
-                        src="assets/img/check%20box.svg"
-                        alt=""
-                        width="20"
-                        height="20"
-                      />
+                      <span class="create-check__box" aria-hidden="true"></span>
                       <span class="create-check__text">
                         <span class="create-check__letter">{{ optionLetter(i) }}</span>
                         <span class="create-check__body">{{ opt.label }}</span>
@@ -80,133 +78,13 @@
                   }
                 </ul>
               </article>
-              } @else {
-              <article class="create-q">
-                <h2 class="create-q__title">
-                  1. Which date would work best for you?
-                </h2>
-                <p class="create-q__hint">
-                  More than one answers are possible.
-                </p>
-                <ul class="create-q__opts">
-                  <li>
-                    <label class="create-check">
-                      <input
-                        class="create-check__native"
-                        type="checkbox"
-                        name="p-q1-a"
-                      />
-                      <img
-                        class="create-check__box create-check__box--unchecked"
-                        src="assets/img/check%20box.svg"
-                        alt=""
-                        width="20"
-                        height="20"
-                      />
-                      <img
-                        class="create-check__box create-check__box--checked"
-                        src="assets/img/checkbox-orange.svg"
-                        alt=""
-                        width="20"
-                        height="20"
-                      />
-                      <span class="create-check__text">
-                        <span class="create-check__letter">A.</span>
-                        <span class="create-check__body">19.09.2025, Friday</span>
-                      </span>
-                    </label>
-                  </li>
-                  <li>
-                    <label class="create-check">
-                      <input
-                        class="create-check__native"
-                        type="checkbox"
-                        name="p-q1-b"
-                      />
-                      <img
-                        class="create-check__box create-check__box--unchecked"
-                        src="assets/img/check%20box.svg"
-                        alt=""
-                        width="20"
-                        height="20"
-                      />
-                      <img
-                        class="create-check__box create-check__box--checked"
-                        src="assets/img/checkbox-orange.svg"
-                        alt=""
-                        width="20"
-                        height="20"
-                      />
-                      <span class="create-check__text">
-                        <span class="create-check__letter">B.</span>
-                        <span class="create-check__body">10.10.2025, Saturday</span>
-                      </span>
-                    </label>
-                  </li>
-                  <li>
-                    <label class="create-check">
-                      <input
-                        class="create-check__native"
-                        type="checkbox"
-                        name="p-q1-c"
-                      />
-                      <img
-                        class="create-check__box create-check__box--unchecked"
-                        src="assets/img/check%20box.svg"
-                        alt=""
-                        width="20"
-                        height="20"
-                      />
-                      <img
-                        class="create-check__box create-check__box--checked"
-                        src="assets/img/checkbox-orange.svg"
-                        alt=""
-                        width="20"
-                        height="20"
-                      />
-                      <span class="create-check__text">
-                        <span class="create-check__letter">C.</span>
-                        <span class="create-check__body">11.10.2025, Saturday</span>
-                      </span>
-                    </label>
-                  </li>
-                  <li>
-                    <label class="create-check">
-                      <input
-                        class="create-check__native"
-                        type="checkbox"
-                        name="p-q1-d"
-                      />
-                      <img
-                        class="create-check__box create-check__box--unchecked"
-                        src="assets/img/check%20box.svg"
-                        alt=""
-                        width="20"
-                        height="20"
-                      />
-                      <img
-                        class="create-check__box create-check__box--checked"
-                        src="assets/img/checkbox-orange.svg"
-                        alt=""
-                        width="20"
-                        height="20"
-                      />
-                      <span class="create-check__text">
-                        <span class="create-check__letter">D.</span>
-                        <span class="create-check__body">31.10.2025, Friday</span>
-                      </span>
-                    </label>
-                  </li>
-                </ul>
-              </article>
               }
 
-              <app-survey-view-results-demo-questions />
+              <app-survey-view-results-demo-questions [leadWithTemplateQ1]="viewMode === 'template'" />
             </div>
 
-            @if (viewMode === 'template') {
             <div class="create-card__actions">
-              @if (completeError !== null) {
+              @if (viewMode === 'template' && completeError !== null) {
                 <p class="create-card__form-error" role="alert">
                   {{ completeError }}
                 </p>
@@ -219,7 +97,6 @@
                 Complete survey
               </button>
             </div>
-            }
           </div>
         </div>
 

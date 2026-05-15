@@ -2,6 +2,7 @@ import {
   Component,
   DestroyRef,
   inject,
+  signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -17,10 +18,16 @@ import {
   POLL_TITLE_MAX_WORDS,
 } from '../../types/poll';
 import { calculatePercentage } from '../../utils/format';
-import { hasUserVotedOnPoll, markUserVotedOnPoll } from '../../utils/poll-vote-storage';
+import {
+  getSessionVoteOptionId,
+  getUserVoteOptionId,
+  hasUserVotedOnPoll,
+  markUserVotedOnPoll,
+  syncStoredVoteOptionFromSession,
+} from '../../utils/poll-vote-storage';
 
 const PREVIEW_DESCRIPTION =
-  'We want to create team activities that everyone will enjoy – share your preferences and ideas in our survey to help us plan better experiences together.';
+  'We want to create team activities that everyone will enjoy - share your preferences and ideas in our survey to help us plan better experiences together.';
 
 const COMPLETE_POLL_OPTIONS: readonly string[] = [
   '19.09.2025, Friday',
@@ -103,6 +110,12 @@ export class SurveyViewResultsComponent {
 
   public completeError: string | null = null;
 
+  /**
+   * Highlighted poll option after voting; synced from storage in applyPollToView.
+   * Signal gives immediate UI after voteForOption (no stale template reads).
+   */
+  readonly pollChosenOptionId = signal<string | null>(null);
+
   /** Subscribes to the route poll id and clears listeners on destroy. */
   public constructor() {
     const route = inject(ActivatedRoute);
@@ -156,7 +169,32 @@ export class SurveyViewResultsComponent {
     if (updated === undefined) {
       return;
     }
-    markUserVotedOnPoll(poll.id);
+    markUserVotedOnPoll(poll.id, optionId);
+    this.currentPoll = updated;
+    this.pollChosenOptionId.set(optionId);
+  }
+
+  /** True only after deadline — keeps voting buttons reactive after cast vote so hover/focus still work on the chosen row. */
+  public pollVoteButtonsDisabled(): boolean {
+    if (this.viewMode !== 'poll' || this.currentPoll === null) {
+      return false;
+    }
+    return getSharedPollService().isPollEnded(this.currentPoll);
+  }
+
+  /** Open poll + user voted + chosen option known → disable non-selected rows. */
+  public pollVoteChoiceLockActive(): boolean {
+    const poll = this.currentPoll;
+    if (poll === null || this.viewMode !== 'poll') {
+      return false;
+    }
+    if (getSharedPollService().isPollEnded(poll)) {
+      return false;
+    }
+    if (!hasUserVotedOnPoll(poll.id)) {
+      return false;
+    }
+    return this.pollChosenOptionId() !== null;
   }
 
   /** Prefix for option index in the voting list (e.g. "A."). */
@@ -235,9 +273,10 @@ export class SurveyViewResultsComponent {
     return `${d}.${m}.${y}`;
   }
 
-  /** Validates the template preview then creates the poll and navigates home. */
+  /** Template: validates, creates poll, navigates home. Poll view: returns to home (same CTA as preview). */
   public completeSurvey(): void {
     if (this.viewMode === 'poll') {
+      void this.router.navigateByUrl('/');
       return;
     }
     const err = this.validateCompleteForm();
@@ -311,6 +350,7 @@ export class SurveyViewResultsComponent {
   private switchToTemplateMode(): void {
     this.viewMode = 'template';
     this.currentPoll = null;
+    this.pollChosenOptionId.set(null);
     this.resetTemplateDefaults();
   }
 
@@ -346,12 +386,43 @@ export class SurveyViewResultsComponent {
 
   /** Copies poll fields into the preview model. */
   private applyPollToView(poll: Poll): void {
+    syncStoredVoteOptionFromSession(poll.id);
     this.surveyName = poll.title;
     const desc = poll.description.trim();
     this.surveyDescription = desc.length > 0 ? desc : PREVIEW_DESCRIPTION;
     this.category = poll.category?.trim() ?? '—';
     this.endsOn = deadlineToEndsOnInput(poll.deadline);
     this.completeError = null;
+    this.pollChosenOptionId.set(this.resolvedUserVoteOptionId(poll));
+  }
+
+  /**
+   * Resolved chosen option for “your vote”: localStorage → sessionStorage → heuristic when poll total votes === 1
+   * (helps legacy entries without option id).
+   */
+  private resolvedUserVoteOptionId(poll: Poll): string | null {
+    const fromLs = getUserVoteOptionId(poll.id);
+    if (fromLs !== null) {
+      return fromLs;
+    }
+    const fromSs = getSessionVoteOptionId(poll.id);
+    if (fromSs !== null) {
+      return fromSs;
+    }
+    return this.inferSoloVoteOptionId(poll);
+  }
+
+  private inferSoloVoteOptionId(poll: Poll): string | null {
+    if (!hasUserVotedOnPoll(poll.id)) {
+      return null;
+    }
+    const svc = getSharedPollService();
+    const total = svc.getTotalVotes(poll);
+    if (total !== 1) {
+      return null;
+    }
+    const withOne = poll.options.filter((o) => o.votes === 1);
+    return withOne.length === 1 ? withOne[0]!.id : null;
   }
 
   /** Restores default demo copy for the template route. */

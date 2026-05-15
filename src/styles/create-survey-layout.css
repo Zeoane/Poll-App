@@ -120,9 +120,6 @@
 .create-survey-card__body {
   box-sizing: border-box;
   width: 100%;
-  max-width: 1052px;
-  min-height: 549px;
-  margin-left: auto;
   border-radius: 5px 80px 5px 5px;
   padding: 40px 32px;
   background-color: rgba(142, 112, 153, 0.16);
@@ -177,11 +174,18 @@
 }
 
 .create-field.create-field--date-category {
+  --category-dropdown-width: 268px;
+  --category-dropdown-trigger-padding-inline-start: 6px;
   display: grid;
-  grid-template-columns: auto minmax(206px, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   column-gap: var(--spacing-xl);
   row-gap: 10px;
   align-items: center;
+}
+
+.create-field.create-field--date-category > .category-dropdown.create-category-trigger {
+  width: fit-content;
+  max-width: var(--category-dropdown-width);
 }
 
 .create-field--grow {
@@ -249,6 +253,21 @@
   color: #ffffff;
   text-align: left;
   cursor: pointer;
+}
+
+/* Label am linken Innenrand, Chevron rechts; schmale Hover-Box via fit-content am Wrapper */
+.create-field.create-field--date-category .create-category-trigger__button {
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.create-field.create-field--date-category .category-dropdown__chevron-wrap {
+  margin-left: auto;
+}
+
+.create-field.create-field--date-category .create-field__label--category-picker {
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 /* Mit Kategorie-Auswahl steuert category-dropdown.css den Button-Hover — kein transparent hier */

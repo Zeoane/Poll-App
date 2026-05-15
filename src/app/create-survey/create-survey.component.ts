@@ -62,7 +62,17 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
     this.categoryDropdown = null;
   }
 
-  protected questions: QuestionBlock[] = [createEmptyQuestionBlock()];
+  protected questions: QuestionBlock[] = [createEmptyQuestionBlock(1)];
+
+  /** Maximum answers per question (shown in UI copy). */
+  protected readonly maxAnswersPerQuestion = 6;
+
+  /** A. und B. bleiben als Zeilen; ab C. (Index 2) kann die gesamte Zeile entfernt werden. */
+  protected readonly minAnswersPerQuestion = 2;
+  protected readonly answerRowFullRemoveFromIndex = 2;
+
+  /** Ab ursprünglich 3. Frage: letztes verbleibendes Exemplar löschen statt nur Inhalt leeren. */
+  protected readonly fullDeleteQuestionOrdinalMin = 3;
 
   protected publishError = signal<string | null>(null);
   protected toastVisible = signal(false);
@@ -86,12 +96,41 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
   }
 
   protected removeQuestion(index: number): void {
+    const q = this.questions[index];
+    if (!q) {
+      return;
+    }
+
+    const isFullDeleteWhenSole =
+      q.displayOrdinal >= this.fullDeleteQuestionOrdinalMin;
+
     if (this.questions.length > 1) {
       this.questions.splice(index, 1);
       this.stripQuestionPromptErrors();
       return;
     }
+
+    if (isFullDeleteWhenSole) {
+      this.questions.splice(index, 1);
+      this.stripQuestionPromptErrors();
+      return;
+    }
+
     this.resetSingleQuestion(index);
+  }
+
+  protected questionRemoveAriaLabel(index: number): string {
+    const q = this.questions[index];
+    if (!q) {
+      return 'Frage entfernen';
+    }
+    if (this.questions.length > 1) {
+      return 'Frage löschen';
+    }
+    if (q.displayOrdinal >= this.fullDeleteQuestionOrdinalMin) {
+      return 'Frage löschen';
+    }
+    return 'Frage zurücksetzen';
   }
 
   private resetSingleQuestion(index: number): void {
@@ -121,22 +160,43 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
   }
 
   protected clearAnswer(qIndex: number, aIndex: number): void {
-    const row = this.questions[qIndex]?.answers[aIndex];
+    const q = this.questions[qIndex];
+    if (!q) {
+      return;
+    }
+    const canRemoveRow =
+      aIndex >= this.answerRowFullRemoveFromIndex &&
+      q.answers.length > this.minAnswersPerQuestion;
+    if (canRemoveRow) {
+      q.answers.splice(aIndex, 1);
+      return;
+    }
+    const row = q.answers[aIndex];
     if (row) {
       row.text = '';
     }
   }
 
+  protected answerRowClearAriaLabel(aIndex: number): string {
+    return aIndex >= this.answerRowFullRemoveFromIndex
+      ? 'Antwort entfernen'
+      : 'Antwort leeren';
+  }
+
   protected addAnswer(qIndex: number): void {
     const q = this.questions[qIndex];
-    if (!q) {
+    if (!q || q.answers.length >= this.maxAnswersPerQuestion) {
       return;
     }
     q.answers.push({ id: nextSurveyRowId('a'), text: '' });
   }
 
   protected addQuestion(): void {
-    this.questions.push(createEmptyQuestionBlock());
+    const nextOrdinal =
+      this.questions.length === 0
+        ? 1
+        : Math.max(...this.questions.map((x) => x.displayOrdinal)) + 1;
+    this.questions.push(createEmptyQuestionBlock(nextOrdinal));
     const idx = this.questions.length - 1;
     queueMicrotask(() => this.scrollAndFocusQuestion(idx));
   }

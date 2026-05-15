@@ -84,9 +84,18 @@
   --create-card-padding: 40px;
   --create-meta-row-line: 21px;
   --create-live-offset: 194px;
+  /* Live-Titel näher an Nachbar-h1, wenn Balken sichtbar (.create-card__live--instant-bars). */
+  --create-live-offset-instant-adjust: 52px;
+  /* Zusätzlich nach unten, wenn Balken sichtbar (Ausrichtung zur linken Karte). */
+  --create-live-instant-bars-margin-top: 20px;
+  --survey-text-line: calc(16px * 1.55);
+  /* Rechte Spalte + gleiche Referenz für Live-Aside (Empty-State, Balkenraster). */
+  --survey-results-live-column-width: 315px;
+  --survey-results-live-bar-track-width: 255px;
+  --survey-results-live-bar-pct-width: 31px;
 
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 315px;
+  grid-template-columns: minmax(0, 1fr) var(--survey-results-live-column-width);
   align-items: start;
   gap: 32px;
   width: 100%;
@@ -100,6 +109,10 @@
   padding: var(--create-card-padding);
 }
 
+.create-preview-layout .create-card {
+  padding-bottom: 0;
+}
+
 .create-card__survey {
   min-width: 0;
   color: #35273a;
@@ -109,7 +122,7 @@
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  margin-top: var(--create-live-offset);
+  margin-top: 0;
   background: transparent;
   padding: 0;
 }
@@ -177,7 +190,7 @@
 }
 
 .create-card__desc {
-  margin: 0 0 24px;
+  margin: 0 0 calc(24px + 1lh);
   font-size: 16px;
   line-height: 1.55;
   color: #35273a;
@@ -185,10 +198,48 @@
 }
 
 .create-card__questions {
+  /* Einheitliche Tokens für Raster, Fragentitel, Hinweis und Antwortzeilen */
+  --survey-q-columns: 2;
+  --survey-q-col-gap: 24px;
+  --survey-q-row-gap: calc(24px + var(--survey-text-line) / 2);
+  --survey-q-margin-bottom: var(--survey-text-line);
+
+  --survey-q-title-num-gap: 0.35em;
+  --survey-q-title-margin-below: 8px;
+  --survey-q-title-size: 18px;
+  --survey-q-title-weight: 700;
+  --survey-q-title-line-height: 1.25;
+  --survey-q-title-line-height-with-hint: 1.15;
+  --survey-q-title-margin-no-hint: calc(
+    var(--survey-q-title-margin-below) + var(--survey-text-line)
+  );
+
+  --survey-q-hint-size: 12px;
+  --survey-q-hint-line-height: 1.5;
+  --survey-q-hint-margin-below: calc(12px + 1lh);
+
+  --survey-q-answer-gap: 10px;
+  --survey-q-answer-label-gap: 0.35em;
+  --survey-q-answer-label-row-gap: 0.15em;
+  --survey-q-answer-font-size: 18px;
+
+  --survey-q-checkbox-unchecked: url("../assets/img/check box.svg");
+  --survey-q-checkbox-hover: url("../assets/img/checkbox-hover.svg");
+  --survey-q-checkbox-checked: url("../assets/img/checkbox-orange-small.svg");
+  --survey-q-checkbox-size: 21px;
+
+  /* Zeilen-Hover-Hintergrund (#FFCFA1 @ 40 %): Checkbox + Abstand + Antworttext, ohne Layoutsprung (::before). */
+  --survey-q-answer-text-hover-bg: rgba(255, 207, 161, 0.4);
+  --survey-q-answer-text-hover-width: 281px;
+  --survey-q-answer-text-hover-min-height: 21px;
+  --survey-q-answer-text-hover-padding-x: 4px;
+
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(var(--survey-q-columns), minmax(0, 1fr));
+  column-gap: var(--survey-q-col-gap);
+  row-gap: var(--survey-q-row-gap);
   align-items: start;
+  margin-bottom: var(--survey-q-margin-bottom);
 }
 
 article.create-q {
@@ -196,20 +247,154 @@ article.create-q {
   min-width: 0;
 }
 
+/*
+ * Zwei Spalten: Wenn die rechte Frage optisch nach links ragt, liegt sie im
+ * Stapel oft über der linken — Klicks erreichen dann nicht Frage 1.
+ */
+.create-card__questions > article.create-q:nth-child(odd) {
+  position: relative;
+  z-index: 1;
+}
+
+.create-card__questions > article.create-q:nth-child(even) {
+  position: relative;
+  z-index: 0;
+}
+
+/* Erste Frage oft von der rechten Spalte überdeckt — höher stapeln für zuverlässige Klicks. */
+.create-card__questions > article.create-q:first-child {
+  position: relative;
+  z-index: 5;
+}
+
 .create-q__title {
-  margin: 0 0 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--survey-q-title-num-gap);
+  margin: 0 0 var(--survey-q-title-margin-below);
   font-family: var(--font-body);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
+  font-size: var(--survey-q-title-size);
+  font-weight: var(--survey-q-title-weight);
+  line-height: var(--survey-q-title-line-height);
   letter-spacing: 0;
   color: #35273a;
 }
 
+.create-q__title-num {
+  flex-shrink: 0;
+}
+
+.create-q__title-body {
+  flex: 1;
+  min-width: 0;
+}
+
+/*
+ * Mit Hinweis: zweispaltiges Artikel-Raster; ohne Hinweis: größerer Abstand Titel → Optionen.
+ * :has() — Kein direktes Kinder-`>` zu den Artikeln (Demo-Host nutzt display:contents).
+ */
+.create-card__questions article.create-q:has(.create-q__hint) {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: var(--survey-q-title-num-gap);
+  align-items: start;
+}
+
+.create-card__questions article.create-q:not(:has(.create-q__hint)) .create-q__title {
+  margin-bottom: var(--survey-q-title-margin-no-hint);
+  line-height: var(--survey-q-title-line-height);
+}
+
+.create-card__questions article.create-q:has(.create-q__hint) .create-q__title {
+  display: contents;
+}
+
+.create-card__questions article.create-q:has(.create-q__hint) .create-q__title-num {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.create-card__questions article.create-q:has(.create-q__hint) .create-q__title-body {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.create-card__questions article.create-q:has(.create-q__hint) .create-q__title-num,
+.create-card__questions article.create-q:has(.create-q__hint) .create-q__title-body {
+  line-height: var(--survey-q-title-line-height-with-hint);
+}
+
+.create-card__questions article.create-q:has(.create-q__hint) .create-q__hint {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.create-card__questions article.create-q:has(.create-q__hint) .create-q__opts {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
 .create-q__hint {
-  font-size: 12px;
-  margin: 0 0 12px;
+  font-size: var(--survey-q-hint-size);
+  line-height: var(--survey-q-hint-line-height);
+  margin: 0 0 var(--survey-q-hint-margin-below);
   color: #35273a;
+}
+
+/* Frage 2: Checkbox + Text gemeinsam in Spalte 2 — startet mit „Choose…“, nicht unter der Nummer. */
+.create-q__hint--multi-ctrl {
+  display: flex;
+  align-items: center;
+  gap: var(--survey-q-answer-gap);
+}
+
+.create-q__hint-multi-label {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Frage 2: Hinweis mit eigenem Schalter für Mehrfachauswahl (Icons wie Antwortzeilen, 21×21 px). */
+.create-q__hint-multi-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.create-q__hint-multi-btn:focus-visible {
+  outline: 2px solid var(--color-primary-orange);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.create-q__hint-multi-btn__icon {
+  display: block;
+  box-sizing: border-box;
+  width: var(--survey-q-checkbox-size, 21px);
+  height: var(--survey-q-checkbox-size, 21px);
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: var(--survey-q-checkbox-unchecked);
+}
+
+.create-q__hint-multi-btn--on .create-q__hint-multi-btn__icon {
+  background-image: var(--survey-q-checkbox-checked);
+}
+
+@media (hover: hover) {
+  .create-q__hint-multi-btn:not(.create-q__hint-multi-btn--on):hover
+    .create-q__hint-multi-btn__icon {
+    background-image: var(--survey-q-checkbox-hover);
+  }
 }
 
 .create-q__opts {
@@ -218,57 +403,125 @@ article.create-q {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--survey-q-answer-gap);
+  position: relative;
+  z-index: 2;
 }
 
 .create-check {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--survey-q-answer-gap);
   cursor: pointer;
   position: relative;
 }
 
 .create-check__native {
   position: absolute;
-  opacity: 0;
-  width: 22px;
-  height: 22px;
-  margin: 0;
-  cursor: pointer;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+  /* Treffer gehen auf Box/Text — Label aktiviert die Checkbox (zuverlässiger als opacity-Overlay). */
+  pointer-events: none;
+}
+
+/* Kein Browser-Ring / kein orangenes Box-Outline nach Klick (Fokus bleibt auf dem Control). */
+.create-check__native:focus,
+.create-check__native:focus-visible {
+  outline: none;
 }
 
 .create-check__box {
   flex-shrink: 0;
-  pointer-events: none;
+  cursor: pointer;
   margin-top: 1px;
-  display: block;
+  box-sizing: border-box;
+  width: var(--survey-q-checkbox-size, 21px);
+  height: var(--survey-q-checkbox-size, 21px);
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: var(--survey-q-checkbox-unchecked);
 }
 
-.create-check__box--checked {
-  display: none;
+.create-check__native:checked ~ .create-check__box {
+  background-image: var(--survey-q-checkbox-checked);
 }
 
-.create-check__native:checked ~ .create-check__box--unchecked {
-  display: none;
+button.create-check--vote-trigger:not(:disabled):not(.create-check--vote-selected)::before,
+button.create-check--preview:not(.create-check--preview-on)::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 1px;
+  z-index: 0;
+  box-sizing: border-box;
+  width: min(
+    calc(
+      var(--survey-q-answer-text-hover-padding-x) +
+        var(--survey-q-checkbox-size) +
+        var(--survey-q-answer-gap) +
+        var(--survey-q-answer-text-hover-width) +
+        var(--survey-q-answer-text-hover-padding-x)
+    ),
+    100%
+  );
+  height: var(--survey-q-answer-text-hover-min-height);
+  border-radius: 4px;
+  background-color: transparent;
+  pointer-events: none;
 }
 
-.create-check__native:checked ~ .create-check__box--checked {
-  display: block;
+button.create-check--vote-trigger:not(:disabled):not(.create-check--vote-selected) .create-check__box,
+button.create-check--vote-trigger:not(:disabled):not(.create-check--vote-selected) .create-check__text,
+button.create-check--preview:not(.create-check--preview-on) .create-check__box,
+button.create-check--preview:not(.create-check--preview-on) .create-check__text {
+  position: relative;
+  z-index: 1;
+}
+
+@media (hover: hover) {
+  /*
+   * Checkbox-Hover (checkbox-hover.svg): nur bei Hover direkt über der Checkbox,
+   * nicht durch Zeilen-Hintergrund ausgelöst (darüberliegende Ebene z-index: 1).
+   */
+  button.create-check--vote-trigger:not(:disabled):not(.create-check--vote-selected)
+    .create-check__box:hover {
+    background-image: var(--survey-q-checkbox-hover);
+  }
+
+  button.create-check--preview:not(.create-check--preview-on) .create-check__box:hover {
+    background-image: var(--survey-q-checkbox-hover);
+  }
+
+  /*
+   * Pfirsich-Streifen über Checkbox + Antworttext — ohne Reflow (::before).
+   */
+  button.create-check--vote-trigger:not(:disabled):not(.create-check--vote-selected):hover::before,
+  button.create-check--preview:not(.create-check--preview-on):hover::before {
+    background-color: var(--survey-q-answer-text-hover-bg);
+  }
 }
 
 .create-check__text {
   display: inline-flex;
   align-items: baseline;
   flex-wrap: wrap;
-  column-gap: 0.35em;
-  row-gap: 0.15em;
+  column-gap: var(--survey-q-answer-label-gap);
+  row-gap: var(--survey-q-answer-label-row-gap);
 }
 
 .create-check__letter {
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 18px;
+  font-size: var(--survey-q-answer-font-size);
   line-height: 1;
   letter-spacing: 0;
   color: #35273a;
@@ -278,24 +531,17 @@ article.create-q {
 .create-check__body {
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 18px;
+  font-size: var(--survey-q-answer-font-size);
   line-height: 1;
   letter-spacing: 0;
   color: #35273a;
   min-width: 0;
 }
 
-.create-check:focus-within .create-check__box--unchecked,
-.create-check:focus-within .create-check__box--checked {
-  outline: 2px solid var(--color-primary-orange);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
 button.create-check--vote-trigger {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--survey-q-answer-gap);
   cursor: pointer;
   position: relative;
   width: 100%;
@@ -313,10 +559,36 @@ button.create-check--vote-trigger:disabled {
   cursor: default;
 }
 
-button.create-check--vote-trigger:focus-visible .create-check__box--unchecked {
-  outline: 2px solid var(--color-primary-orange);
-  outline-offset: 2px;
-  border-radius: 4px;
+button.create-check--vote-trigger.create-check--vote-selected .create-check__box {
+  background-image: var(--survey-q-checkbox-checked);
+}
+
+/* Nur wenn eine Zeile als gewählt markiert ist — sonst blieben bei „Vote ohne Option-ID“ alle Zeilen unbenutzbar. */
+.create-q--vote-choice-lock:has(.create-check--vote-selected)
+  button.create-check--vote-trigger:not(.create-check--vote-selected) {
+  pointer-events: none;
+  cursor: default;
+}
+
+button.create-check--preview {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--survey-q-answer-gap);
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+button.create-check--preview.create-check--preview-on .create-check__box {
+  background-image: var(--survey-q-checkbox-checked);
 }
 
 .create-card__actions {
@@ -324,7 +596,9 @@ button.create-check--vote-trigger:focus-visible .create-check__box--unchecked {
   flex-direction: column;
   align-items: flex-end;
   gap: 12px;
-  margin-top: 28px;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 2px;
 }
 
 .create-card__form-error {
@@ -337,28 +611,82 @@ button.create-check--vote-trigger:focus-visible .create-check__box--unchecked {
 }
 
 .survey-view-results-page__complete-btn {
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 37px;
+  gap: 10px;
+  width: 159px;
+  height: 37px;
   padding: 8px 12px;
   border: none;
   border-radius: 10px;
-  background: var(--color-secondary-orange);
-  color: var(--color-primary-purple);
+  background: rgba(255, 183, 112, 0.3);
+  color: #35273a;
   font-family: "Nokora", var(--font-body);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
+  line-height: 1;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
 .survey-view-results-page__complete-btn:hover {
-  background: var(--color-primary-orange);
+  background: rgba(255, 183, 112, 0.48);
 }
 
 .survey-view-results-page__complete-btn:focus-visible {
   outline: 2px solid var(--color-primary-orange);
   outline-offset: 3px;
+}
+
+/* Zweispalten: linke Karte und Live-Panel enden unten auf gleicher Höhe (Breakpoint wie survey-view-results-live.css). */
+@media (min-width: 901px) {
+  .create-preview-layout {
+    align-items: stretch;
+  }
+
+  .create-preview-layout app-survey-view-results-live-panel {
+    display: block;
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+  }
+
+  .create-preview-layout .create-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .create-preview-layout .create-card__survey {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .create-preview-layout .create-card__actions {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .create-preview-layout .create-card__live {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding-top: var(--create-live-offset);
+    /* Wie linke .create-card: gleicher unterer Innenabstand zur optischen Grundlinie */
+    padding-bottom: var(--create-card-padding);
+  }
+
+  .create-preview-layout .create-card__live.create-card__live--instant-bars {
+    padding-top: calc(
+      var(--create-live-offset) - var(--create-live-offset-instant-adjust)
+    );
+    margin-top: var(--create-live-instant-bars-margin-top);
+  }
 }

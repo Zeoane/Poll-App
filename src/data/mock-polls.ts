@@ -12,7 +12,8 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
   {
     id: 'poll-1',
     title: "Let's Plan the Next Team Event Together",
-    description: 'Wir planen unser nächstes Team-Event und sammeln Ideen.',
+    description:
+      'We want to create team activities that everyone will enjoy - share your preferences and ideas in our survey to help us plan better experiences together.',
     category: 'Team Activities',
     options: [
       { id: 'opt-1-a', label: '19.09.2025, Friday', votes: 5 },
@@ -26,7 +27,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
   {
     id: 'poll-2',
     title: 'Fit & wellness survey!',
-    description: 'Welche Wellness-Angebote sollen wir im Office einführen?',
+    description: 'Which wellness offerings should we introduce in the office?',
     category: 'Health & Wellness',
     options: [
       { id: 'opt-2-a', label: 'Yoga-Kurs', votes: 12 },
@@ -40,7 +41,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
   {
     id: 'poll-3',
     title: 'Gaming habits and favorite games!',
-    description: 'Welche Spiele möchtest du beim nächsten Gaming-Abend zocken?',
+    description: 'Which games would you like to play at the next gaming night?',
     category: 'Gaming & Entertainment',
     options: [
       { id: 'opt-3-a', label: 'Mario Kart', votes: 11 },
@@ -53,7 +54,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
   {
     id: 'poll-4',
     title: 'Healthier future: Fit & wellness survey!',
-    description: 'Eine offene Umfrage ohne festes Enddatum.',
+    description: 'An open survey without a fixed end date.',
     category: 'Health & Wellness',
     options: [
       { id: 'opt-4-a', label: 'Mehr Pausen', votes: 10 },
@@ -119,7 +120,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
   {
     id: 'poll-6',
     title: 'Pizza für das letzte Sprint-Review',
-    description: 'Welche Pizza-Sorten haben wir für das letzte Review bestellt?',
+    description: 'Which pizza varieties did we order for the last review?',
     category: 'Team Activities',
     options: [
       { id: 'opt-6-a', label: 'Margherita', votes: 4 },

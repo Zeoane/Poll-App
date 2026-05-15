@@ -73,14 +73,28 @@
                   ></span>
                   <span class="category-dropdown__chevron-wrap" aria-hidden="true">
                     <img
-                      class="category-dropdown__chevron category-dropdown__chevron--down"
+                      class="category-dropdown__chevron category-dropdown__chevron--down-neutral"
                       src="assets/img/arrow_drop_down.svg"
                       alt=""
-                      width="15"
-                      height="8"
+                      width="24"
+                      height="24"
                     />
                     <img
-                      class="category-dropdown__chevron category-dropdown__chevron--up"
+                      class="category-dropdown__chevron category-dropdown__chevron--up-neutral"
+                      src="assets/img/arrow_drop_up.svg"
+                      alt=""
+                      width="24"
+                      height="24"
+                    />
+                    <img
+                      class="category-dropdown__chevron category-dropdown__chevron--down-orange"
+                      src="assets/img/arrow_drop_down-orange.svg"
+                      alt=""
+                      width="24"
+                      height="24"
+                    />
+                    <img
+                      class="category-dropdown__chevron category-dropdown__chevron--up-orange"
                       src="assets/img/arrow_drop_up-orange.svg"
                       alt=""
                       width="24"
@@ -165,7 +179,7 @@
                 <button
                   type="button"
                   class="create-field__clear create-field__clear--q-head"
-                  [attr.aria-label]="questions.length > 1 ? 'Frage löschen' : 'Frage zurücksetzen'"
+                  [attr.aria-label]="questionRemoveAriaLabel(qi)"
                   (click)="removeQuestion(qi)"
                 ></button>
               </div>
@@ -219,7 +233,7 @@
                     <button
                       type="button"
                       class="create-field__clear"
-                      aria-label="Antwort leeren"
+                      [attr.aria-label]="answerRowClearAriaLabel(ai)"
                       (click)="clearAnswer(qi, ai)"
                     ></button>
                   </div>
@@ -227,16 +241,28 @@
               }
             </ul>
 
-            <button type="button" class="create-link-add" (click)="addAnswer(qi)">
-              Add answer
-              <img
-                class="create-link-add__icon"
-                src="assets/img/add_circle-white-purple.svg"
-                alt=""
-                width="20"
-                height="20"
-              />
-            </button>
+            <div class="create-q-block__add-answer-row">
+              <button
+                type="button"
+                class="create-link-add"
+                (click)="addAnswer(qi)"
+                [disabled]="q.answers.length >= maxAnswersPerQuestion"
+              >
+                Add answer
+                <img
+                  class="create-link-add__icon"
+                  src="assets/img/add_circle-white-purple.svg"
+                  alt=""
+                  width="20"
+                  height="20"
+                />
+              </button>
+              @if (q.answers.length > 2) {
+                <p class="create-q-block__answer-limit-hint">
+                  You can add up to {{ maxAnswersPerQuestion }} answer fields.
+                </p>
+              }
+            </div>
           </section>
         }
           <div class="create-survey-card__add-next-wrap">

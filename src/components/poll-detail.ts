@@ -139,7 +139,7 @@ export class PollDetailController {
     if (updated === undefined) {
       return;
     }
-    markUserVotedOnPoll(pollId);
+    markUserVotedOnPoll(pollId, optionId);
     this.refresh();
   }
 }
