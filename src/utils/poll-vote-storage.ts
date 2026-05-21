@@ -131,3 +131,18 @@ export function markUserVotedOnPoll(pollId: string, optionId?: string): void {
     writeSessionVoteOptionId(pollId, optionId);
   }
 }
+
+/** Clears stored vote state for this poll (deselect / retract in preview). */
+export function clearUserVoteOnPoll(pollId: string): void {
+  const voted = readVotedPollIds();
+  voted.delete(pollId);
+  writeVotedPollIds(voted);
+  const choices = readVoteOptionIds();
+  delete choices[pollId];
+  writeVoteOptionIds(choices);
+  try {
+    sessionStorage.removeItem(sessionVoteOptionKey(pollId));
+  } catch {
+    //
+  }
+}

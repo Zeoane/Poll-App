@@ -18,13 +18,6 @@ import {
   POLL_TITLE_MAX_WORDS,
 } from '../../types/poll';
 import { calculatePercentage } from '../../utils/format';
-import {
-  getSessionVoteOptionId,
-  getUserVoteOptionId,
-  hasUserVotedOnPoll,
-  markUserVotedOnPoll,
-  syncStoredVoteOptionFromSession,
-} from '../../utils/poll-vote-storage';
 
 const PREVIEW_DESCRIPTION =
   'We want to create team activities that everyone will enjoy - share your preferences and ideas in our survey to help us plan better experiences together.';
@@ -111,8 +104,7 @@ export class SurveyViewResultsComponent {
   public completeError: string | null = null;
 
   /**
-   * Highlighted poll option after voting; synced from storage in applyPollToView.
-   * Signal gives immediate UI after voteForOption (no stale template reads).
+   * Highlighted poll option during this page visit only (not restored from storage).
    */
   readonly pollChosenOptionId = signal<string | null>(null);
 
@@ -138,63 +130,56 @@ export class SurveyViewResultsComponent {
     if (svc.isPollEnded(this.currentPoll)) {
       return 'This survey has closed; totals are shown on the right.';
     }
-    if (hasUserVotedOnPoll(this.currentPoll.id)) {
-      return 'Thanks — your vote has been counted.';
-    }
-    return 'Choose one option to vote. Results update immediately.';
+    return 'Choose one option to vote. Click again to deselect.';
   }
 
-  /** Disables voting after close or after the user has voted. */
-  public pollInteractionLocked(): boolean {
-    if (this.viewMode !== 'poll' || this.currentPoll === null) {
-      return true;
-    }
-    const svc = getSharedPollService();
-    if (svc.isPollEnded(this.currentPoll)) {
-      return true;
-    }
-    return hasUserVotedOnPoll(this.currentPoll.id);
-  }
-
-  /** Casts a vote when the poll is open and the user has not voted. */
+  /** Toggle vote like demo questions: select, switch, or deselect on repeat click. */
   public voteForOption(optionId: string): void {
     const poll = this.currentPoll;
-    if (poll === null || this.pollInteractionLocked()) {
+    if (poll === null || this.viewMode !== 'poll') {
       return;
     }
-    if (hasUserVotedOnPoll(poll.id)) {
+    const svc = getSharedPollService();
+    if (svc.isPollEnded(poll)) {
       return;
     }
-    const updated = getSharedPollService().vote(poll.id, optionId);
+
+    const currentChoiceId = this.pollChosenOptionId();
+
+    if (currentChoiceId === optionId) {
+      const updated = svc.retractVote(poll.id, optionId);
+      if (updated === undefined) {
+        return;
+      }
+      this.currentPoll = updated;
+      this.pollChosenOptionId.set(null);
+      return;
+    }
+
+    if (currentChoiceId === null) {
+      const updated = svc.vote(poll.id, optionId);
+      if (updated === undefined) {
+        return;
+      }
+      this.currentPoll = updated;
+      this.pollChosenOptionId.set(optionId);
+      return;
+    }
+
+    const updated = svc.changeVote(poll.id, currentChoiceId, optionId);
     if (updated === undefined) {
       return;
     }
-    markUserVotedOnPoll(poll.id, optionId);
     this.currentPoll = updated;
     this.pollChosenOptionId.set(optionId);
   }
 
-  /** True only after deadline — keeps voting buttons reactive after cast vote so hover/focus still work on the chosen row. */
+  /** True only after deadline — keeps rows reactive for hover/focus while the poll is open. */
   public pollVoteButtonsDisabled(): boolean {
     if (this.viewMode !== 'poll' || this.currentPoll === null) {
       return false;
     }
     return getSharedPollService().isPollEnded(this.currentPoll);
-  }
-
-  /** Open poll + user voted + chosen option known → disable non-selected rows. */
-  public pollVoteChoiceLockActive(): boolean {
-    const poll = this.currentPoll;
-    if (poll === null || this.viewMode !== 'poll') {
-      return false;
-    }
-    if (getSharedPollService().isPollEnded(poll)) {
-      return false;
-    }
-    if (!hasUserVotedOnPoll(poll.id)) {
-      return false;
-    }
-    return this.pollChosenOptionId() !== null;
   }
 
   /** Prefix for option index in the voting list (e.g. "A."). */
@@ -372,7 +357,8 @@ export class SurveyViewResultsComponent {
     }
     this.viewMode = 'poll';
     this.currentPoll = poll;
-    this.applyPollToView(poll);
+    this.pollChosenOptionId.set(null);
+    this.applyPollFields(poll);
   }
 
   /** Refreshes bound poll data after service notifications. */
@@ -380,49 +366,18 @@ export class SurveyViewResultsComponent {
     const poll = svc.findPollById(pollId);
     if (poll !== undefined) {
       this.currentPoll = poll;
-      this.applyPollToView(poll);
+      this.applyPollFields(poll);
     }
   }
 
-  /** Copies poll fields into the preview model. */
-  private applyPollToView(poll: Poll): void {
-    syncStoredVoteOptionFromSession(poll.id);
+  /** Copies poll fields into the preview model (keeps in-session vote highlight). */
+  private applyPollFields(poll: Poll): void {
     this.surveyName = poll.title;
     const desc = poll.description.trim();
     this.surveyDescription = desc.length > 0 ? desc : PREVIEW_DESCRIPTION;
     this.category = poll.category?.trim() ?? '—';
     this.endsOn = deadlineToEndsOnInput(poll.deadline);
     this.completeError = null;
-    this.pollChosenOptionId.set(this.resolvedUserVoteOptionId(poll));
-  }
-
-  /**
-   * Resolved chosen option for “your vote”: localStorage → sessionStorage → heuristic when poll total votes === 1
-   * (helps legacy entries without option id).
-   */
-  private resolvedUserVoteOptionId(poll: Poll): string | null {
-    const fromLs = getUserVoteOptionId(poll.id);
-    if (fromLs !== null) {
-      return fromLs;
-    }
-    const fromSs = getSessionVoteOptionId(poll.id);
-    if (fromSs !== null) {
-      return fromSs;
-    }
-    return this.inferSoloVoteOptionId(poll);
-  }
-
-  private inferSoloVoteOptionId(poll: Poll): string | null {
-    if (!hasUserVotedOnPoll(poll.id)) {
-      return null;
-    }
-    const svc = getSharedPollService();
-    const total = svc.getTotalVotes(poll);
-    if (total !== 1) {
-      return null;
-    }
-    const withOne = poll.options.filter((o) => o.votes === 1);
-    return withOne.length === 1 ? withOne[0]!.id : null;
   }
 
   /** Restores default demo copy for the template route. */

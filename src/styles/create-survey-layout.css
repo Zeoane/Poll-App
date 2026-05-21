@@ -305,13 +305,6 @@
   max-width: 100%;
 }
 
-.create-category-trigger__button.category-dropdown__trigger[aria-expanded='true']:not(
-    .create-category-trigger__button--filled
-  )
-  .create-field__label--category-picker {
-  background: rgba(217, 217, 217, 0.12);
-}
-
 /* Mit Auswahl: Hintergrund der gesamten Zeile → category-dropdown.css (wie Sort) */
 .create-category-trigger__button.create-category-trigger__button--filled
   .create-field__label--category-picker {

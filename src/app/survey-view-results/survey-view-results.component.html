@@ -50,10 +50,7 @@
 
             <div class="create-card__questions">
               @if (viewMode === 'poll' && currentPoll) {
-              <article
-                class="create-q"
-                [class.create-q--vote-choice-lock]="pollVoteChoiceLockActive()"
-              >
+              <article class="create-q">
                 <h2 class="create-q__title">
                   <span class="create-q__title-num">1.</span><span class="create-q__title-body">Which date would work best for you?</span>
                 </h2>
@@ -65,6 +62,7 @@
                       type="button"
                       class="create-check create-check--vote-trigger"
                       [class.create-check--vote-selected]="pollChosenOptionId() === opt.id"
+                      [attr.aria-pressed]="pollChosenOptionId() === opt.id"
                       [disabled]="pollVoteButtonsDisabled()"
                       (click)="voteForOption(opt.id)"
                     >

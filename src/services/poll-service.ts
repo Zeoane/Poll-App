@@ -117,7 +117,56 @@ export class PollService {
     if (poll === undefined || this.isPollEnded(poll)) {
       return undefined;
     }
-    const updatedPoll: Poll = { ...poll, options: this.incrementVote(poll, optionId) };
+    const updatedPoll: Poll = { ...poll, options: this.adjustVote(poll, optionId, 1) };
+    this.polls = this.polls.map((existing) =>
+      existing.id === pollId ? updatedPoll : existing,
+    );
+    this.notify();
+    return updatedPoll;
+  }
+
+  /** Removes one vote from an option when the poll is still open. */
+  public retractVote(pollId: string, optionId: string): Poll | undefined {
+    const poll = this.findPollById(pollId);
+    if (poll === undefined || this.isPollEnded(poll)) {
+      return undefined;
+    }
+    const option = poll.options.find((entry) => entry.id === optionId);
+    if (option === undefined || option.votes <= 0) {
+      return undefined;
+    }
+    const updatedPoll: Poll = { ...poll, options: this.adjustVote(poll, optionId, -1) };
+    this.polls = this.polls.map((existing) =>
+      existing.id === pollId ? updatedPoll : existing,
+    );
+    this.notify();
+    return updatedPoll;
+  }
+
+  /** Moves one vote from a previous option to a new one when the poll is still open. */
+  public changeVote(
+    pollId: string,
+    fromOptionId: string,
+    toOptionId: string,
+  ): Poll | undefined {
+    const poll = this.findPollById(pollId);
+    if (poll === undefined || this.isPollEnded(poll)) {
+      return undefined;
+    }
+    if (fromOptionId === toOptionId) {
+      return poll;
+    }
+    const fromOption = poll.options.find((entry) => entry.id === fromOptionId);
+    if (fromOption === undefined || fromOption.votes <= 0) {
+      return undefined;
+    }
+    const optionsAfterRetract = this.adjustVote(poll, fromOptionId, -1);
+    const updatedPoll: Poll = {
+      ...poll,
+      options: optionsAfterRetract.map((option) =>
+        option.id === toOptionId ? { ...option, votes: option.votes + 1 } : option,
+      ),
+    };
     this.polls = this.polls.map((existing) =>
       existing.id === pollId ? updatedPoll : existing,
     );
@@ -139,10 +188,16 @@ export class PollService {
     };
   }
 
-  /** Clones options, bumping votes for the matching option id. */
-  private incrementVote(poll: Poll, optionId: string): ReadonlyArray<PollOption> {
+  /** Clones options, adjusting votes for the matching option id (not below zero). */
+  private adjustVote(
+    poll: Poll,
+    optionId: string,
+    delta: number,
+  ): ReadonlyArray<PollOption> {
     return poll.options.map((option) =>
-      option.id === optionId ? { ...option, votes: option.votes + 1 } : option,
+      option.id === optionId
+        ? { ...option, votes: Math.max(0, option.votes + delta) }
+        : option,
     );
   }
 

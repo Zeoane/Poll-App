@@ -87,7 +87,8 @@
   /* Live-Titel näher an Nachbar-h1, wenn Balken sichtbar (.create-card__live--instant-bars). */
   --create-live-offset-instant-adjust: 52px;
   /* Zusätzlich nach unten, wenn Balken sichtbar (Ausrichtung zur linken Karte). */
-  --create-live-instant-bars-margin-top: 20px;
+  /* Unterer Innenabstand der lilafarbenen Karte (Ausrichtung zu Live-Balken Frage 4 C). */
+  --create-card-padding-bottom: 22px;
   --survey-text-line: calc(16px * 1.55);
   /* Rechte Spalte + gleiche Referenz für Live-Aside (Empty-State, Balkenraster). */
   --survey-results-live-column-width: 315px;
@@ -261,10 +262,18 @@ article.create-q {
   z-index: 0;
 }
 
-/* Erste Frage oft von der rechten Spalte überdeckt — höher stapeln für zuverlässige Klicks. */
-.create-card__questions > article.create-q:first-child {
+/* Erste Frage oft von der rechten Spalte überdeckt — höher stapeln für zuverlässige Klicks.
+ * :first-of-type: Angular-@if-Anker-Kommentare sind keine Elemente, brechen aber :first-child. */
+.create-card__questions > article.create-q:first-of-type {
   position: relative;
   z-index: 5;
+}
+
+/* Poll-Vote (Frage 1): muss über Demo-Frage 2 liegen (sonst keine Klicks/Hover auf Checkbox). */
+.create-card__questions > article.create-q:has(.create-check--vote-trigger) {
+  position: relative;
+  z-index: 10;
+  isolation: isolate;
 }
 
 .create-q__title {
@@ -563,13 +572,6 @@ button.create-check--vote-trigger.create-check--vote-selected .create-check__box
   background-image: var(--survey-q-checkbox-checked);
 }
 
-/* Nur wenn eine Zeile als gewählt markiert ist — sonst blieben bei „Vote ohne Option-ID“ alle Zeilen unbenutzbar. */
-.create-q--vote-choice-lock:has(.create-check--vote-selected)
-  button.create-check--vote-trigger:not(.create-check--vote-selected) {
-  pointer-events: none;
-  cursor: default;
-}
-
 button.create-check--preview {
   display: flex;
   align-items: flex-start;
@@ -656,12 +658,17 @@ button.create-check--preview.create-check--preview-on .create-check__box {
   .create-preview-layout .create-card {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: auto;
+    align-self: end;
+    box-sizing: border-box;
+    padding-bottom: var(--create-card-padding-bottom);
+    /* Unterkante bündig mit unterster Live-Balkenzeile (Frage 4 C), nicht mit Aside-Padding. */
+    margin-bottom: var(--create-card-padding);
     min-height: 0;
   }
 
   .create-preview-layout .create-card__survey {
-    flex: 1;
+    flex: 0 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -670,6 +677,21 @@ button.create-check--preview.create-check--preview-on .create-check__box {
   .create-preview-layout .create-card__actions {
     margin-top: 0;
     padding-top: 0;
+  }
+
+  /*
+   * Poll-Modus: Demo-Fragen (Q2–Q4) liegen im Zwei-Spalten-Raster über Frage-1-Optionen.
+   * pointer-events: none auf dem Artikel, auto nur auf echten Controls.
+   */
+  .create-card__questions:has(.create-check--vote-trigger)
+    > article.create-q:has(.create-check--preview) {
+    pointer-events: none;
+  }
+
+  .create-card__questions:has(.create-check--vote-trigger)
+    > article.create-q:has(.create-check--preview)
+    :is(.create-check--preview, .create-q__hint-multi-btn) {
+    pointer-events: auto;
   }
 
   .create-preview-layout .create-card__live {
@@ -683,10 +705,18 @@ button.create-check--preview.create-check--preview-on .create-check__box {
     padding-bottom: var(--create-card-padding);
   }
 
-  .create-preview-layout .create-card__live.create-card__live--instant-bars {
+  /* Mit sichtbaren Balken (Template + Poll): Titel-Offset und Nachbar-Ausrichtung. */
+  .create-preview-layout .create-card__live:not(.create-card__live--empty) {
     padding-top: calc(
       var(--create-live-offset) - var(--create-live-offset-instant-adjust)
     );
     margin-top: var(--create-live-instant-bars-margin-top);
+  }
+
+  /* Unterste .create-bar (z. B. Frage 4 C) bündig mit Unterkante .create-card. */
+  .create-preview-layout
+    .create-card__live:not(.create-card__live--empty)
+    .create-live__block:first-of-type {
+    margin-top: auto;
   }
 }
