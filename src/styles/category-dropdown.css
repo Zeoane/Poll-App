@@ -51,12 +51,6 @@
 .category-dropdown.category-dropdown--sort .sort.category-dropdown__trigger:hover:not(
     .category-dropdown__trigger--has-selection
   ) {
-  background-color: rgba(255, 255, 255, 0.06);
-}
-
-.category-dropdown.category-dropdown--sort:not(:has(.category-dropdown__trigger:hover)):has(
-    .sort[aria-expanded='true']
-  ):not(:has(.category-dropdown__trigger--has-selection)) {
   background-color: rgba(217, 217, 217, 0.12);
 }
 
@@ -67,24 +61,19 @@
   transition: none;
 }
 
-.category-dropdown.category-dropdown--sort:has(.category-dropdown__trigger--has-selection) .sort:hover,
+.category-dropdown.category-dropdown--sort:has(.category-dropdown__trigger--has-selection) .sort:hover {
+  background-color: rgba(217, 217, 217, 0.12);
+}
+
 .create-field.create-field--date-category
   > .category-dropdown.create-category-trigger:has(.category-dropdown__trigger--has-selection)
   .create-category-trigger__button:hover {
   background-color: rgba(255, 255, 255, 0.06);
 }
 
-.category-dropdown.category-dropdown--sort:has(.category-dropdown__trigger--has-selection) .sort.sort--active:not(
-    :hover
-  ),
-.category-dropdown.category-dropdown--sort:has(.category-dropdown__trigger--has-selection)
-  .sort[aria-expanded='true']:not(:hover) {
-  background-color: rgba(217, 217, 217, 0.12);
-}
-
 .create-field.create-field--date-category
   > .category-dropdown.create-category-trigger:has(.category-dropdown__trigger--has-selection)
-  .create-category-trigger__button:not(:hover):not([aria-expanded='true']) {
+  .create-category-trigger__button[aria-expanded='true']:not(:hover) {
   background-color: rgba(217, 217, 217, 0.12);
 }
 
@@ -166,6 +155,16 @@
 }
 
 .category-dropdown__trigger.category-dropdown__trigger--has-selection:not([aria-expanded="true"])
+  .category-dropdown__chevron--down-neutral {
+  display: block;
+}
+
+.category-dropdown__trigger.category-dropdown__trigger--has-selection:not([aria-expanded="true"]):hover
+  .category-dropdown__chevron--down-neutral {
+  display: none;
+}
+
+.category-dropdown__trigger.category-dropdown__trigger--has-selection:not([aria-expanded="true"]):hover
   .category-dropdown__chevron--down-orange {
   display: block;
 }

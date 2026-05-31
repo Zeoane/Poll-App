@@ -1,8 +1,26 @@
 @media (max-width: 900px) {
   :root {
-    --font-size-hero: 56px;
-    --font-size-section-title: 44px;
+    --font-size-hero: 62px;
+    --font-size-section-title: 54px;
+    --font-size-subsection: 24px;
     --font-size-body: 18px;
+  }
+
+  .surveys {
+    gap: var(--spacing-xl);
+  }
+
+  .poll-section__filters {
+    gap: var(--spacing-lg);
+  }
+
+  .poll-section--ending-soon .poll-card {
+    flex: 0 0 250px;
+  }
+
+  .poll-card--highlight .poll-card__inner {
+    width: 250px;
+    height: 233px;
   }
 
   .hero {
@@ -11,14 +29,32 @@
     min-height: 0;
   }
 
-  .hero__visual {
-    width: 100%;
-    max-width: 426px;
-    height: auto;
-    aspect-ratio: 426 / 420;
+  .hero__copy {
+    display: contents;
   }
 
-  .site-header,
+  .hero__headline {
+    order: 1;
+  }
+
+  .hero__visual {
+    order: 2;
+    flex: none;
+    width: 343px;
+    max-width: 100%;
+    height: 250px;
+  }
+
+  .hero__body {
+    order: 3;
+  }
+
+  .hero .button--cta {
+    order: 4;
+    align-self: center;
+  }
+
+  .site-header__inner,
   .app-main {
     padding-left: var(--spacing-lg);
     padding-right: var(--spacing-lg);
@@ -28,7 +64,11 @@
     grid-template-columns: 1fr;
   }
 
-  .category-dropdown.category-dropdown--sort,
+  .category-dropdown.category-dropdown--sort {
+    width: 206px;
+    max-width: 100%;
+  }
+
   .create-field.create-field--date-category > .category-dropdown.create-category-trigger {
     width: 100%;
     max-width: 320px;
@@ -36,7 +76,7 @@
 
   .sort {
     width: 100%;
-    max-width: 320px;
+    max-width: 206px;
   }
 
   #tab-panel-active.tabs__panel--active-scroll,

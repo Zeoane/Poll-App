@@ -162,6 +162,10 @@
   overflow: hidden;
 }
 
+.tabs__panel[hidden] {
+  display: none;
+}
+
 .tabs__panel-scroll-view {
   flex: 1;
   min-width: 0;
