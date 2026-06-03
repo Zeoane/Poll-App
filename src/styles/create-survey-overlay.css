@@ -157,45 +157,200 @@
 }
 
 @media (max-width: 900px) {
+  .create-survey-page {
+    background: #ffffff;
+    border-radius: 0;
+  }
+
+  .create-survey-page__top {
+    display: block;
+    background: #ffffff;
+  }
+
+  .create-survey-page__top-inner {
+    padding-inline: clamp(var(--spacing-md), 5vw, var(--spacing-lg));
+  }
+
+  .create-survey-page__main {
+    padding-inline: clamp(var(--spacing-md), 5vw, var(--spacing-lg));
+    background: var(--color-bg);
+    border-radius: 0 48px 0 0;
+  }
+
+  .create-survey-card {
+    position: relative;
+  }
+
+  .create-survey-card__head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding-right: 47px;
+  }
+
+  .create-survey-card__cancel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    grid-column: unset;
+    grid-row: unset;
+    align-self: auto;
+    width: 39px;
+    min-width: 39px;
+    height: 32px;
+    padding: 0;
+    gap: 0;
+    background: transparent;
+  }
+
+  .create-survey-card__cancel:hover {
+    background: transparent;
+    filter: brightness(1.04);
+  }
+
+  .create-survey-card__cancel-text,
+  .create-survey-card__cancel-icon--desktop {
+    display: none;
+  }
+
+  .create-survey-card__cancel-icon--mobile {
+    display: block;
+    width: 39px;
+    height: 32px;
+  }
+
   .create-survey-card__grid-top {
     grid-template-columns: 1fr;
+    row-gap: 0;
+    column-gap: 0;
+  }
+
+  .create-survey-card__grid-top > .create-survey-card__col:last-child {
+    margin-top: calc((var(--spacing-xl) - 10px) / 2 * 0.7);
+  }
+
+  .create-field:not(.create-field--date-category) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 10px;
+    row-gap: 10px;
+    align-items: center;
+  }
+
+  .create-field:not(.create-field--date-category) > .create-field__label {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .create-field:not(.create-field--date-category) > .create-field__row {
+    display: contents;
+  }
+
+  .create-field:not(.create-field--date-category) > .create-field__row > .create-field__input,
+  .create-field:not(.create-field--date-category)
+    > .create-field__row
+    > .create-field__input--textarea {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    max-width: none;
+    flex: none;
+  }
+
+  .create-field:not(.create-field--date-category) > .create-field__row > .create-field__clear {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .create-survey-card__col > .create-field--date-category {
+    margin-top: calc(-0.65 * var(--spacing-xl));
   }
 
   .create-field.create-field--date-category {
-    grid-template-columns: 1fr;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 10px;
+    row-gap: 10px;
+    --category-dropdown-trigger-padding-inline-start: 0;
+    --category-dropdown-chip-padding-inline: 0;
+  }
+
+  /* Figma: Survey name → Choose category → Set end date */
+  .create-field.create-field--date-category > .category-dropdown.create-category-trigger {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    justify-self: start;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .create-field.create-field--date-category
+    > .category-dropdown.create-category-trigger
+    > .category-dropdown__stack {
+    margin-inline: 0;
+    padding-inline: 0;
+    margin-top: 0;
+    margin-bottom: calc((10px + 10px * 0.12) * 1.5 - 10px);
+  }
+
+  .create-field.create-field--date-category
+    .create-category-trigger__button
+    > .create-field__label--category-picker {
+    padding-inline-start: 0;
   }
 
   .create-field.create-field--date-category > .create-field__label[for="survey-end"] {
     grid-column: 1;
-    grid-row: 1;
+    grid-row: 2;
   }
 
   .create-field.create-field--date-category > .create-field__label--date-end {
     white-space: normal;
   }
 
-  .create-field.create-field--date-category > .category-dropdown.create-category-trigger {
-    justify-self: start;
-    width: min(var(--category-dropdown-width), 100%);
-  }
-
   .create-field.create-field--date-category .create-field__label--category-picker {
     text-align: left;
   }
 
-  .create-field.create-field--date-category .create-field__date-controls-row {
-    grid-column: 1;
+  .create-field.create-field--date-category > .create-field__date-controls-row {
+    display: contents;
+  }
+
+  .create-field.create-field--date-category
+    > .create-field__date-controls-row
+    > .create-field__input--end-date {
+    grid-column: 1 / -1;
     grid-row: 3;
-    gap: 10px;
-    align-items: center;
     width: 100%;
-    max-width: 100%;
+    max-width: none;
+    flex: none;
+  }
+
+  .create-field.create-field--date-category
+    > .create-field__date-controls-row
+    > .create-field__clear {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: end;
+  }
+
+  .create-field--describe {
+    margin-left: 0;
+    padding-top: 3.5px;
+  }
+
+  .create-field--describe > .create-field__label {
+    padding-left: 0;
   }
 
   .create-survey-card__title {
-    font-size: clamp(36px, 9vw, 56px);
-    min-height: unset;
+    width: 100%;
     max-width: 100%;
+    min-height: unset;
+    font-size: 56px;
+    line-height: 100%;
+    white-space: normal;
   }
 
   .create-survey-card__body {
@@ -208,38 +363,188 @@
   .create-survey-card__questions-grid--single .create-survey-card__add-next-wrap {
     grid-column: 1;
     grid-row: auto;
-    justify-self: start;
+    justify-self: stretch;
     align-self: auto;
   }
 
   .create-survey-card__questions-grid {
     grid-template-columns: 1fr;
     column-gap: 0;
+    row-gap: var(--spacing-2xl);
+  }
+
+  .create-survey-card__add-next-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .create-survey-card__question-limit-hint {
+    text-align: center;
+  }
+
+  .create-btn-add-next {
+    margin-top: 42px;
+  }
+
+  .create-answers-head {
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Abstand über/unter „Answers“: Flex-gap allein reagiert nicht auf margin-bottom am Head */
+  .create-q-block > .create-field + .create-answers-head {
+    margin-top: var(--create-survey-answers-above-extra);
+  }
+
+  .create-answers-head + .create-answer-list {
+    margin-top: var(--create-survey-answers-below-adjust);
+  }
+
+  .create-survey-card__grid-top + .create-survey-card__questions-grid {
+    margin-top: calc(
+      -1 * var(--spacing-2xl) + 0.7 * (var(--spacing-2xl) - var(--spacing-md))
+    );
+  }
+
+  .create-q-block {
+    gap: var(--create-survey-q-gap);
+  }
+
+  .create-q-block .create-answer-list {
+    gap: var(--create-survey-q-gap);
+  }
+
+  .create-q-block__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+
+  .create-q-block__title {
+    width: auto;
+    max-width: 100%;
+    grid-column: 1;
+  }
+
+  .create-q-block__head-actions {
+    grid-column: 2;
+    margin-left: 0;
+  }
+
+  .create-q-block__head + .create-field {
+    margin-top: -20px;
+  }
+
+  .create-answer-list__item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    column-gap: 10px;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    min-height: unset;
+  }
+
+  .create-answer-list__letter {
+    grid-column: 1;
+    grid-row: 1;
+    width: auto;
+    align-self: center;
+  }
+
+  .create-answer-list__item .create-field__row--answer {
+    display: contents;
+  }
+
+  .create-answer-list__item .create-field__row--answer .create-field__input {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    height: 37px;
+  }
+
+  .create-answer-list__item .create-field__row--answer .create-field__clear {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+  }
+
+  .create-answer-list + .create-q-block__add-answer-row {
+    margin: 8px;
+  }
+
+  .create-q-block__add-answer-row .create-link-add {
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 0 0 2px;
+    gap: 8px;
+    font-size: 16px;
+    line-height: 1;
+    margin-top: 12px;
+  }
+
+  .create-field__row--q-prompt-only .create-field__input--q-prompt {
+    width: 100%;
+    max-width: none;
+    flex: none;
   }
 
   .create-survey-page__publish {
+    justify-content: center;
     padding-left: 0;
     padding-right: 0;
-    margin-top: calc(var(--spacing-2xl) + var(--spacing-sm) - 28px);
+    margin-top: var(--spacing-2xl);
   }
 
-  .create-field__input--end-date {
-    width: 100%;
-    max-width: 222px;
+  .create-btn-publish__label {
+    display: none;
   }
 
-  .create-field__input--q-prompt {
-    width: 100%;
+  .create-btn-publish__graphic {
+    display: block;
+    width: 123px;
+    height: 48px;
+  }
+
+  .create-btn-publish {
+    width: 123px;
+    min-width: 123px;
+    height: 48px;
+    padding: 0;
+    background: transparent;
+  }
+
+  .create-btn-publish:hover {
+    filter: brightness(1.04);
   }
 
   .create-field__row--top.create-field__row--describe {
     width: 100%;
     height: auto;
     min-height: 108px;
+    padding: 7px 13px;
   }
 
   .create-field__input--textarea.create-field__input--describe {
     width: 100%;
     min-height: 94px;
+  }
+
+  .create-publish-overlay__panel {
+    width: 357px;
+    max-width: min(357px, calc(100vw - 2 * var(--spacing-md)));
+    height: 169px;
+    min-height: 169px;
+    border-radius: 5px 50px 5px 5px;
   }
 }

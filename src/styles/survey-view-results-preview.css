@@ -110,6 +110,17 @@
   padding: var(--create-card-padding);
 }
 
+/* Schließen-Button nur in der mobilen Ansicht (siehe responsive.css). */
+.create-card__close-mobile {
+  display: none;
+  text-decoration: none;
+  z-index: 2;
+}
+
+.survey-view-results-page__complete-btn-graphic {
+  display: none;
+}
+
 .create-preview-layout .create-card {
   padding-bottom: 0;
 }

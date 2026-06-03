@@ -1,6 +1,24 @@
 <div class="create-survey-page">
   <a class="skip-link" href="#create-survey-main">Zum Hauptinhalt springen</a>
 
+  <header class="create-survey-page__top">
+    <div class="create-survey-page__top-inner">
+      <a
+        routerLink="/"
+        class="create-survey-page__brand"
+        aria-label="Poll App – zur Startseite"
+      >
+        <img
+          class="create-survey-page__logo"
+          src="assets/img/Logo-violett.svg"
+          alt=""
+          width="119"
+          height="49"
+        />
+      </a>
+    </div>
+  </header>
+
   <main id="create-survey-main" class="create-survey-page__main">
     <div class="create-survey-card">
       <div class="create-survey-card__head">
@@ -10,10 +28,19 @@
           type="button"
           class="create-survey-card__cancel"
           (click)="cancel()"
+          aria-label="Erstellen abbrechen"
         >
-          Cancel
           <img
-            class="create-survey-card__cancel-icon"
+            class="create-survey-card__cancel-icon create-survey-card__cancel-icon--mobile"
+            src="assets/img/CS-close-btn.svg"
+            alt=""
+            width="39"
+            height="32"
+            aria-hidden="true"
+          />
+          <span class="create-survey-card__cancel-text">Cancel</span>
+          <img
+            class="create-survey-card__cancel-icon create-survey-card__cancel-icon--desktop"
             src="assets/img/close.svg"
             alt=""
             width="24"
@@ -266,7 +293,12 @@
           </section>
         }
           <div class="create-survey-card__add-next-wrap">
-            <button type="button" class="create-btn-add-next" (click)="addQuestion()">
+            <button
+              type="button"
+              class="create-btn-add-next"
+              (click)="addQuestion()"
+              [disabled]="questions.length >= maxQuestionsPerSurvey"
+            >
               Add next question
               <img
                 class="create-btn-add-next__icon"
@@ -276,6 +308,11 @@
                 height="24"
               />
             </button>
+            @if (questions.length >= maxQuestionsPerSurvey) {
+              <p class="create-survey-card__question-limit-hint">
+                You can add up to {{ maxQuestionsPerSurvey }} questions.
+              </p>
+            }
           </div>
         </div>
 
@@ -287,7 +324,15 @@
 
     <div class="create-survey-page__publish">
       <button type="button" class="create-btn-publish" (click)="tryPublish()">
-        Publish
+        <img
+          class="create-btn-publish__graphic"
+          src="assets/img/CS-publisch-btn.svg"
+          alt=""
+          width="123"
+          height="48"
+          aria-hidden="true"
+        />
+        <span class="create-btn-publish__label">Publish</span>
       </button>
     </div>
   </main>

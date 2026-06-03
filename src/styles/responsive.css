@@ -96,4 +96,125 @@
       "results"
       "footer";
   }
+
+  /* Survey-Detailseite: "Create survey" oben entfällt, dafür Schließen-X auf
+     Höhe von "Published" und Complete-Button als SVG ganz unten. */
+  .survey-view-results-page__main {
+    padding-top: 24px;
+    padding-bottom: 40px;
+    padding-inline: clamp(var(--spacing-md), 5vw, var(--spacing-lg));
+  }
+
+  .survey-view-results-page__header-btn {
+    display: none;
+  }
+
+  .create-card {
+    position: relative;
+  }
+
+  .create-card__close-mobile {
+    display: block;
+    position: absolute;
+    /* vertikal mittig zur "Published"-Badge: card padding-top (28px) + Badge 26px/2 - Button 32px/2 */
+    top: 25px;
+    right: 20px;
+    width: 39px;
+    height: 32px;
+    line-height: 0;
+    border-radius: 10px;
+  }
+
+  .create-card__close-mobile img {
+    display: block;
+    width: 39px;
+    height: 32px;
+  }
+
+  .create-card__close-mobile:focus-visible {
+    outline: 2px solid var(--color-primary-orange);
+    outline-offset: 3px;
+  }
+
+  .survey-view-results-page__complete-btn-label {
+    display: none;
+  }
+
+  .survey-view-results-page__complete-btn-graphic {
+    display: block;
+    width: 147px;
+    height: 48px;
+  }
+
+  .survey-view-results-page__complete-btn,
+  .survey-view-results-page__complete-btn:hover {
+    width: 147px;
+    height: 48px;
+    padding: 0;
+    margin-bottom: 22px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* Touch-Scroll ohne sichtbare Scrollleisten */
+  html {
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  body {
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .app-main,
+  .create-survey-page,
+  .survey-view-results-page {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  .poll-section--ending-soon .poll-list,
+  .tabs__panel-scroll-view,
+  .category-dropdown__menu {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabs__panel-scroll-view {
+    overflow-y: auto;
+  }
+
+  .tabs__panel-scrollbar {
+    display: none !important;
+  }
+
+  .tabs__panel--active-scroll {
+    gap: 0;
+  }
+
+  .category-dropdown__menu {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .category-dropdown__menu::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }

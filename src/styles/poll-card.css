@@ -18,8 +18,11 @@
 }
 
 .poll-card:not(.poll-card--static):not(.poll-card--highlight) .poll-card__inner:hover,
+.poll-card:not(.poll-card--static):not(.poll-card--highlight) .poll-card__inner:active,
 .poll-card:not(.poll-card--highlight)
-  .poll-card__inner:has(.poll-card__open:focus-visible) {
+  .poll-card__inner:has(.poll-card__open:focus-visible),
+.poll-card:not(.poll-card--highlight)
+  .poll-card__inner:has(.poll-card__open:active) {
   background: rgba(217, 217, 217, 0.12);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
@@ -45,14 +48,18 @@
 }
 
 .poll-card--highlight:not(.poll-card--static) .poll-card__inner:hover,
-.poll-card--highlight .poll-card__inner:has(.poll-card__open:focus-visible) {
+.poll-card--highlight:not(.poll-card--static) .poll-card__inner:active,
+.poll-card--highlight .poll-card__inner:has(.poll-card__open:focus-visible),
+.poll-card--highlight .poll-card__inner:has(.poll-card__open:active) {
   background: #f4e9fb;
   box-shadow: none;
   border-radius: 0 80px 0 0;
 }
 
 .poll-card--highlight:not(.poll-card--static):hover,
-.poll-card--highlight:has(.poll-card__open:focus-visible) {
+.poll-card--highlight:not(.poll-card--static):active,
+.poll-card--highlight:has(.poll-card__open:focus-visible),
+.poll-card--highlight:has(.poll-card__open:active) {
   background: #f4e9fb;
   border-radius: 0 80px 0 0;
 }
@@ -121,8 +128,12 @@
 }
 
 .poll-card--highlight:not(.poll-card--static) .poll-card__inner:hover .poll-card__pill,
+.poll-card--highlight:not(.poll-card--static) .poll-card__inner:active .poll-card__pill,
 .poll-card--highlight
   .poll-card__inner:has(.poll-card__open:focus-visible)
+  .poll-card__pill,
+.poll-card--highlight
+  .poll-card__inner:has(.poll-card__open:active)
   .poll-card__pill {
   background: #ffb770;
 }

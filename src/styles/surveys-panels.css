@@ -133,6 +133,16 @@
   display: none;
 }
 
+.poll-section--ending-soon .poll-list {
+  cursor: grab;
+}
+
+.poll-section--ending-soon .poll-list.poll-list--dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+  user-select: none;
+}
+
 .poll-section--ending-soon .poll-card {
   flex: 0 0 321px;
   scroll-snap-align: start;

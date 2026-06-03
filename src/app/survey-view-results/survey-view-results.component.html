@@ -25,6 +25,18 @@
     <section class="survey-view-results-page__preview" aria-label="Survey preview">
       <div class="create-preview-layout">
         <div class="create-card">
+          <a
+            routerLink="/"
+            class="create-card__close-mobile"
+            aria-label="Umfrage schließen und zur Startseite zurückkehren"
+          >
+            <img
+              src="assets/img/mobile-close-survey-btn.svg"
+              alt=""
+              width="39"
+              height="32"
+            />
+          </a>
           <div class="create-card__survey">
             <div class="create-card__meta">
               <span
@@ -92,7 +104,17 @@
                 class="survey-view-results-page__complete-btn"
                 (click)="completeSurvey()"
               >
-                Complete survey
+                <img
+                  class="survey-view-results-page__complete-btn-graphic"
+                  src="assets/img/mobile-complete-survey-btn.svg"
+                  alt=""
+                  width="147"
+                  height="48"
+                  aria-hidden="true"
+                />
+                <span class="survey-view-results-page__complete-btn-label"
+                  >Complete survey</span
+                >
               </button>
             </div>
           </div>

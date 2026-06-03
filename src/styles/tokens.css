@@ -43,6 +43,12 @@
   --spacing-2xl: 48px;
   --spacing-3xl: 80px;
 
+  /* Create survey: getrennt vom globalen --spacing-md (z. B. 8px für A./B.) */
+  --create-survey-spacing-ref: 18px;
+  --create-survey-q-gap: var(--spacing-sm);
+  --create-survey-answers-above-extra: calc(var(--create-survey-spacing-ref) * 0.78 + 8px);
+  --create-survey-answers-below-adjust: calc(var(--create-survey-spacing-ref) * -0.24);
+
   --content-max-width: 1218px;
   --surveys-max-width: 1042px;
 

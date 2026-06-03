@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { CategoryListDropdown } from '../../components/category-list-dropdown';
 import { getSharedPollService } from '../app-legacy-bootstrap';
@@ -29,7 +29,7 @@ import {
 @Component({
   selector: 'app-create-survey',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './create-survey.component.html',
   styleUrl: './create-survey.component.css',
 })
@@ -63,15 +63,12 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
   }
 
   protected questions: QuestionBlock[] = [createEmptyQuestionBlock(1)];
-
-  /** Maximum answers per question (shown in UI copy). */
+  protected readonly maxQuestionsPerSurvey = 6;
   protected readonly maxAnswersPerQuestion = 6;
 
-  /** A. und B. bleiben als Zeilen; ab C. (Index 2) kann die gesamte Zeile entfernt werden. */
   protected readonly minAnswersPerQuestion = 2;
   protected readonly answerRowFullRemoveFromIndex = 2;
 
-  /** Ab ursprünglich 3. Frage: letztes verbleibendes Exemplar löschen statt nur Inhalt leeren. */
   protected readonly fullDeleteQuestionOrdinalMin = 3;
 
   protected publishError = signal<string | null>(null);
@@ -192,6 +189,9 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
   }
 
   protected addQuestion(): void {
+    if (this.questions.length >= this.maxQuestionsPerSurvey) {
+      return;
+    }
     const nextOrdinal =
       this.questions.length === 0
         ? 1

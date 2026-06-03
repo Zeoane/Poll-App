@@ -1,4 +1,5 @@
 import { ActivePanelScrollbarController } from '../components/active-panel-scrollbar';
+import { EndingSoonDragScrollController } from '../components/ending-soon-drag-scroll';
 import { PollDetailController } from '../components/poll-detail';
 import { PollFormController } from '../components/poll-form';
 import { PollListController } from '../components/poll-list';
@@ -10,6 +11,7 @@ interface WiredControllers {
   readonly list: PollListController;
   readonly detail: PollDetailController;
   readonly scrollbar: ActivePanelScrollbarController;
+  readonly endingSoonDragScroll: EndingSoonDragScrollController;
 }
 
 let sharedPollService: PollService | null = null;
@@ -35,7 +37,13 @@ function wireControllers(
   new PollFormController({ pollService });
   new SortDropdownController({ pollService });
   const scrollbar = new ActivePanelScrollbarController();
-  return { list: listController, detail: detailController, scrollbar };
+  const endingSoonDragScroll = new EndingSoonDragScrollController();
+  return {
+    list: listController,
+    detail: detailController,
+    scrollbar,
+    endingSoonDragScroll,
+  };
 }
 
 /** Refreshes lists, the detail dialog, and the custom scrollbar layout. */
@@ -55,12 +63,16 @@ export function bootstrapPollAppHome(
   onPollSelect?: (pollId: string) => void,
 ): () => void {
   const pollService = getSharedPollService();
-  const { list, detail, scrollbar } = wireControllers(pollService, onPollSelect);
+  const { list, detail, scrollbar, endingSoonDragScroll } = wireControllers(
+    pollService,
+    onPollSelect,
+  );
   const unsubscribe = pollService.subscribe(() => {
     runListSync(pollService, list, detail, scrollbar);
   });
   runListSync(pollService, list, detail, scrollbar);
   return () => {
     unsubscribe();
+    endingSoonDragScroll.destroy();
   };
 }

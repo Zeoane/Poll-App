@@ -17,6 +17,10 @@
 
 /* --- Panel-Kopf & Empty-State --- */
 
+.create-card__live-toggle {
+  display: none;
+}
+
 .create-card__live-title {
   font-family: var(--font-display);
   font-size: 32px;
@@ -44,6 +48,10 @@
 @media (min-width: 901px) {
   .create-card__live--empty {
     min-height: 678px;
+  }
+
+  .create-card__live-panel {
+    display: contents;
   }
 }
 
@@ -210,7 +218,7 @@
   .create-card__title {
     max-width: none;
     min-height: 0;
-    font-size: 40px;
+    font-size: 48px;
     line-height: 1.05;
   }
 
@@ -219,11 +227,82 @@
     max-width: none;
     margin-top: 0;
     padding: 24px 0 0;
-    border-top: 1px dashed rgba(53, 39, 58, 0.25);
   }
 
   .create-card {
     border-radius: 0 48px 0 0;
     padding: 28px 20px;
+  }
+
+  .create-card__meta-row {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    column-gap: 24px;
+    row-gap: 0;
+    font-size: 14px;
+  }
+
+  .create-card__meta-item {
+    flex: 0 0 auto;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .create-card__live-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    margin: 0 0 16px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1;
+    letter-spacing: 0;
+    color: #35273a;
+    cursor: pointer;
+  }
+
+  .create-card__live-toggle:focus-visible {
+    outline: 2px solid var(--color-primary-orange);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
+
+  .create-card__live-toggle-icon {
+    display: block;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .create-card__live-panel {
+    display: none;
+  }
+
+  .create-card__live--mobile-open .create-card__live-panel {
+    display: block;
+  }
+
+  .create-card__live:not(.create-card__live--mobile-open) {
+    padding-bottom: 0;
+  }
+}
+
+@media (max-width: 385px) {
+  .create-card__meta-row {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    row-gap: 4px;
+    column-gap: 0;
+  }
+
+  .create-card__meta-item {
+    white-space: normal;
   }
 }

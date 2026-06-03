@@ -2,11 +2,37 @@
   class="create-card__live"
   [class.create-card__live--instant-bars]="instantResultsClass() && !liveResultsAreEmpty()"
   [class.create-card__live--empty]="liveResultsAreEmpty()"
+  [class.create-card__live--mobile-open]="mobileResultsExpanded()"
   aria-label="Live survey results"
 >
-            <h2 class="create-card__live-title">
-              Survey results <span class="create-card__live-accent">LIVE</span>
-            </h2>
+  <button
+    type="button"
+    class="create-card__live-toggle"
+    (click)="toggleMobileResults()"
+    [attr.aria-expanded]="mobileResultsExpanded()"
+    aria-controls="survey-live-results-panel"
+  >
+    <span class="create-card__live-toggle-label">{{
+      mobileResultsExpanded() ? 'Close results' : 'See results'
+    }}</span>
+    <img
+      class="create-card__live-toggle-icon"
+      [src]="
+        mobileResultsExpanded()
+          ? 'assets/img/arrow_drop_down-up_survey.svg'
+          : 'assets/img/arrow_drop_down_survey.svg'
+      "
+      alt=""
+      width="24"
+      height="24"
+      aria-hidden="true"
+    />
+  </button>
+
+  <div id="survey-live-results-panel" class="create-card__live-panel">
+    <h2 class="create-card__live-title">
+      Survey results <span class="create-card__live-accent">LIVE</span>
+    </h2>
 
   @if (liveResultsAreEmpty()) {
   <div class="create-card__live-empty">
@@ -185,4 +211,5 @@
               </ul>
             </div>
             }
+  </div>
 </aside>

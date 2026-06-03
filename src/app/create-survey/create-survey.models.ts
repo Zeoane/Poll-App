@@ -13,7 +13,6 @@ export interface AnswerRow {
 
 export interface QuestionBlock {
   id: string;
-  /** Feste 1-basierte Nummer beim Anlegen (bleibt beim Löschen anderer Fragen erhalten). */
   displayOrdinal: number;
   prompt: string;
   allowMultiple: boolean;
