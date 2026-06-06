@@ -1,7 +1,8 @@
 import { Component, input, signal } from '@angular/core';
 
 import { getSharedPollService } from '../app-legacy-bootstrap';
-import type { Poll, PollOption } from '../../types/poll';
+import { resolveDisplayQuestions } from './survey-view-results-questions.helpers';
+import type { Poll, PollOption, SurveyQuestion } from '../../types/poll';
 import { calculatePercentage } from '../../utils/format';
 
 @Component({
@@ -27,14 +28,14 @@ export class SurveyViewResultsLivePanelComponent {
     return String.fromCharCode(65 + idx);
   }
 
-  /** Computes vote share percent for one option in the current poll. */
-  public optionVotePercent(option: PollOption): number {
-    const poll = this.currentPoll();
-    if (poll === null) {
-      return 0;
-    }
-    const svc = getSharedPollService();
-    const total = svc.getTotalVotes(poll);
+  /** Returns questions for the live panel in poll mode. */
+  public displayQuestions(poll: Poll): ReadonlyArray<SurveyQuestion> {
+    return resolveDisplayQuestions(poll);
+  }
+
+  /** Computes vote share percent for one option within one question. */
+  public questionOptionPercent(question: SurveyQuestion, option: PollOption): number {
+    const total = getSharedPollService().getQuestionVoteTotal(question);
     return calculatePercentage(option.votes, total);
   }
 }

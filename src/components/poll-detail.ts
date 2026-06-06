@@ -27,7 +27,12 @@ export class PollDetailController {
 
   /** Opens the modal for an active poll and renders its body. */
   public open(pollId: string): void {
-    const poll = this.pollService.findPollById(pollId);
+    void this.openPoll(pollId);
+  }
+
+  /** Loads survey detail before showing the modal. */
+  private async openPoll(pollId: string): Promise<void> {
+    const poll = await this.pollService.ensurePollDetail(pollId);
     if (poll === undefined || this.pollService.isPollEnded(poll)) {
       return;
     }
@@ -56,7 +61,7 @@ export class PollDetailController {
       this.buildHeader(poll),
       this.buildVotingColumn(poll, hasVoted),
       this.buildResultColumn(poll, total),
-      this.buildFooter(),
+      this.buildFooter(poll),
     );
   }
 
@@ -117,10 +122,13 @@ export class PollDetailController {
     return section;
   }
 
-  /** Builds footer with a single close control. */
-  private buildFooter(): HTMLElement {
+  /** Builds footer with optional full-survey link and close control. */
+  private buildFooter(poll: Poll): HTMLElement {
     const footer = document.createElement('footer');
     footer.className = 'poll-detail__footer';
+    if (this.shouldShowFullSurveyLink(poll)) {
+      footer.append(buildFullSurveyLink(poll.id));
+    }
     const closeButton = document.createElement('button');
     closeButton.type = 'button';
     closeButton.className = 'button button--secondary';
@@ -130,18 +138,46 @@ export class PollDetailController {
     return footer;
   }
 
+  /** True when the modal should link to the full multi-question view. */
+  private shouldShowFullSurveyLink(poll: Poll): boolean {
+    const questionCount = poll.questions?.length ?? 0;
+    return questionCount > 1;
+  }
+
   /** Applies a vote once per poll and refreshes the dialog. */
   private handleVote(pollId: string, optionId: string): void {
+    void this.castDetailVote(pollId, optionId);
+  }
+
+  /** Casts one vote on the first question through Supabase. */
+  private async castDetailVote(pollId: string, optionId: string): Promise<void> {
     if (hasUserVotedOnPoll(pollId)) {
       return;
     }
-    const updated = this.pollService.vote(pollId, optionId);
+    const poll = await this.pollService.ensurePollDetail(pollId);
+    if (poll === undefined) {
+      return;
+    }
+    const questionId = this.pollService.getFirstQuestion(poll)?.id;
+    if (questionId === undefined) {
+      return;
+    }
+    const updated = await this.pollService.voteOnQuestion(pollId, questionId, optionId);
     if (updated === undefined) {
       return;
     }
     markUserVotedOnPoll(pollId, optionId);
     this.refresh();
   }
+}
+
+/** Creates a router link to the full survey results page. */
+function buildFullSurveyLink(pollId: string): HTMLAnchorElement {
+  const link = document.createElement('a');
+  link.className = 'button button--primary';
+  link.href = `/survey-view-results/${pollId}`;
+  link.textContent = 'Open full survey';
+  return link;
 }
 
 /** Creates the h2 title for the poll detail modal. */

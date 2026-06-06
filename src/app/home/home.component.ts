@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { bootstrapPollAppHome } from '../app-legacy-bootstrap';
+import { bootstrapPollAppHome, getSharedPollService } from '../app-legacy-bootstrap';
 
 @Component({
   selector: 'app-home',
@@ -21,8 +21,14 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
   private homeCleanup: (() => void) | null = null;
 
-  /** Starts legacy DOM controllers after the template renders. */
+  /** Loads surveys from Supabase, then starts legacy DOM controllers. */
   public ngAfterViewInit(): void {
+    void this.bootstrapHome();
+  }
+
+  /** Initializes poll data and wires the legacy home screen. */
+  private async bootstrapHome(): Promise<void> {
+    await getSharedPollService().initialize();
     this.homeCleanup = bootstrapPollAppHome((pollId) => {
       this.ngZone.run(() => {
         void this.router.navigate(['/survey-view-results', pollId]);

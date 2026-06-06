@@ -46,25 +46,27 @@
   </div>
   } @else {
   @if (viewMode() === 'poll' && currentPoll(); as poll) {
+  @for (question of displayQuestions(poll); track question.id; let qi = $index) {
   <div class="create-live__block">
     <h3 class="create-live__q">
-      <span class="create-live__q-num">1.</span><span class="create-live__q-body">Which date would work best for you?</span>
+      <span class="create-live__q-num">{{ qi + 1 }}.</span><span class="create-live__q-body">{{ question.prompt }}</span>
     </h3>
     <ul class="create-live__bars">
-      @for (opt of poll.options; track opt.id; let i = $index) {
+      @for (opt of question.options; track opt.id; let i = $index) {
       <li class="create-bar">
         <span class="create-bar__letter">{{ optionLetterBare(i) }}</span>
         <div class="create-bar__track" aria-hidden="true">
           <div
             class="create-bar__fill"
-            [style.width.%]="optionVotePercent(opt)"
+            [style.width.%]="questionOptionPercent(question, opt)"
           ></div>
         </div>
-        <span class="create-bar__pct">{{ optionVotePercent(opt) }}%</span>
+        <span class="create-bar__pct">{{ questionOptionPercent(question, opt) }}%</span>
       </li>
       }
     </ul>
   </div>
+  }
   } @else {
   <div class="create-live__block">
               <h3 class="create-live__q">
@@ -101,7 +103,6 @@
                 </li>
               </ul>
             </div>
-            }
 
   <div class="create-live__block">
               <h3 class="create-live__q">
@@ -210,6 +211,7 @@
                 </li>
               </ul>
             </div>
-            }
+  }
+  }
   </div>
 </aside>

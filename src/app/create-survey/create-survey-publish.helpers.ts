@@ -1,4 +1,17 @@
+import type { CreateSurveyQuestionInput } from '../../types/poll';
+
 import type { QuestionBlock } from './create-survey.models';
+
+/** Maps all question blocks into Supabase create payloads. */
+export function mapQuestionsForPublish(
+  questions: ReadonlyArray<QuestionBlock>,
+): CreateSurveyQuestionInput[] {
+  return questions.map((question) => ({
+    prompt: question.prompt.trim(),
+    allowMultiple: question.allowMultiple,
+    answers: resolveFirstQuestionOptions(question),
+  }));
+}
 
 /** Resolves poll options from the first question block with sensible fallbacks. */
 export function resolveFirstQuestionOptions(first: QuestionBlock): string[] {

@@ -176,7 +176,12 @@ export class PollFormController {
       this.applyErrors(errors);
       return;
     }
-    this.pollService.createPoll(input);
+    void this.submitPoll(input);
+  }
+
+  /** Persists a new poll asynchronously and closes the modal on success. */
+  private async submitPoll(input: NewPollInput): Promise<void> {
+    await this.pollService.createPoll(input);
     this.openButton?.classList.add('button--cta--success');
     this.close();
   }

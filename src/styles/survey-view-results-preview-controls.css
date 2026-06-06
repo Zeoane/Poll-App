@@ -300,12 +300,7 @@ button.create-check--preview.create-check--preview-on .create-check__box {
       var(--create-live-offset) - var(--create-live-offset-instant-adjust)
     );
     margin-top: var(--create-live-instant-bars-margin-top);
-  }
-
-  
-  .create-preview-layout
-    .create-card__live:not(.create-card__live--empty)
-    .create-live__block:first-of-type {
-    margin-top: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 }

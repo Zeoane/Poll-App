@@ -15,10 +15,14 @@ import {
   parseEndsOnDate,
   validateCompleteSurveyForm,
 } from './survey-view-results-form.helpers';
-import { applyVoteForOption } from './survey-view-results-vote.helpers';
+import { resolveDisplayQuestions } from './survey-view-results-questions.helpers';
+import { toggleVoteForQuestion } from './survey-view-results-vote.helpers';
 import type { PollService } from '../../services/poll-service';
-import { type Poll, type PollOption } from '../../types/poll';
-import { calculatePercentage } from '../../utils/format';
+import { type Poll, type SurveyQuestion, type VoterChoicesByQuestion } from '../../types/poll';
+import {
+  clearUserVoteOnPoll,
+  markUserVotedOnPoll,
+} from '../../utils/poll-vote-storage';
 
 const PREVIEW_DESCRIPTION =
   'We want to create team activities that everyone will enjoy - share your preferences and ideas in our survey to help us plan better experiences together.';
@@ -56,10 +60,10 @@ export class SurveyViewResultsComponent {
   public surveyDescription = PREVIEW_DESCRIPTION;
   public category = 'Team Activities';
   public endsOn = '2025-09-01';
-  public surveyStatus: 'draft' | 'published' = 'draft';
+  public surveyStatus: 'published' = 'published';
   public completeError: string | null = null;
 
-  readonly pollChosenOptionId = signal<string | null>(null);
+  readonly pollChosenByQuestion = signal<VoterChoicesByQuestion>({});
 
   /** Subscribes to the route poll id and clears listeners on destroy. */
   public constructor() {
@@ -73,8 +77,23 @@ export class SurveyViewResultsComponent {
     });
   }
 
+  /** Returns questions to render for the current poll view. */
+  public displayQuestions(poll: Poll): ReadonlyArray<SurveyQuestion> {
+    return resolveDisplayQuestions(poll);
+  }
+
+  /** Returns the chosen option ids for one question. */
+  public chosenOptionsForQuestion(questionId: string): ReadonlyArray<string> {
+    return this.pollChosenByQuestion()[questionId] ?? [];
+  }
+
+  /** True when the visitor selected one option on a question. */
+  public isOptionChosen(questionId: string, optionId: string): boolean {
+    return this.chosenOptionsForQuestion(questionId).includes(optionId);
+  }
+
   /** Hint shown under the voting question based on poll state. */
-  public pollVoteHint(): string {
+  public pollVoteHint(question: SurveyQuestion): string {
     if (this.viewMode !== 'poll' || this.currentPoll === null) {
       return '';
     }
@@ -82,29 +101,18 @@ export class SurveyViewResultsComponent {
     if (service.isPollEnded(this.currentPoll)) {
       return 'This survey has closed; totals are shown on the right.';
     }
+    if (question.allowMultiple) {
+      return 'Choose one or more options to vote.';
+    }
     return 'Choose one option to vote. Click again to deselect.';
   }
 
-  /** Toggles vote selection, switch, or deselect for one poll option. */
-  public voteForOption(optionId: string): void {
-    const poll = this.currentPoll;
-    if (poll === null || this.viewMode !== 'poll') {
-      return;
-    }
-    const result = applyVoteForOption(
-      poll,
-      optionId,
-      this.pollChosenOptionId(),
-      getSharedPollService(),
-    );
-    if (result === undefined) {
-      return;
-    }
-    this.currentPoll = result.poll;
-    this.pollChosenOptionId.set(result.chosenOptionId);
+  /** Toggles vote selection, switch, or deselect for one question option. */
+  public voteForQuestion(questionId: string, optionId: string): void {
+    void this.castVoteForQuestion(questionId, optionId);
   }
 
-  /** True only after deadline while the poll is still open. */
+  /** True when voting must be blocked for closed polls. */
   public pollVoteButtonsDisabled(): boolean {
     if (this.viewMode !== 'poll' || this.currentPoll === null) {
       return false;
@@ -115,21 +123,6 @@ export class SurveyViewResultsComponent {
   /** Prefix for option index in the voting list (e.g. "A."). */
   public optionLetter(index: number): string {
     return `${String.fromCharCode(65 + index)}.`;
-  }
-
-  /** Bare letter label for live result bars. */
-  public optionLetterBare(index: number): string {
-    return String.fromCharCode(65 + index);
-  }
-
-  /** Percent width for one option in the live chart. */
-  public optionVotePercent(option: PollOption): number {
-    const poll = this.currentPoll;
-    if (!poll) {
-      return 0;
-    }
-    const total = getSharedPollService().getTotalVotes(poll);
-    return calculatePercentage(option.votes, total);
   }
 
   /** Sidebar uses instant bar widths when showing a real poll. */
@@ -158,15 +151,12 @@ export class SurveyViewResultsComponent {
     if (this.viewMode === 'poll' && this.currentPoll !== null) {
       return this.pollViewClosed ? 'Closed' : 'Published';
     }
-    return this.surveyStatus === 'published' ? 'Published' : 'Draft';
+    return 'Published';
   }
 
-  /** Draft-style chip when template is draft or poll ended. */
+  /** Draft-style chip when the poll has ended. */
   public statusIsDraftStyle(): boolean {
-    return (
-      (this.viewMode === 'template' && this.surveyStatus === 'draft') ||
-      this.pollViewClosed
-    );
+    return this.pollViewClosed;
   }
 
   /** Published-style chip when not in draft styling. */
@@ -196,22 +186,7 @@ export class SurveyViewResultsComponent {
       return;
     }
     this.completeError = null;
-    this.submitCompletedTemplatePoll();
-    void this.router.navigateByUrl('/');
-  }
-
-  /** Persists the preview survey as a new poll in the shared service. */
-  private submitCompletedTemplatePoll(): void {
-    const title = this.surveyName.trim();
-    const deadline = parseEndsOnDate(this.endsOn)!;
-    const category = this.category.trim();
-    getSharedPollService().createPoll({
-      title,
-      description: this.surveyDescription.trim() || PREVIEW_DESCRIPTION,
-      category: category.length > 0 ? category : null,
-      options: [...COMPLETE_POLL_OPTIONS],
-      deadline,
-    });
+    void this.submitCompletedTemplatePoll();
   }
 
   /** Switches between template mode and a concrete poll route subscription. */
@@ -221,7 +196,7 @@ export class SurveyViewResultsComponent {
       this.switchToTemplateMode();
       return;
     }
-    this.bindPollRoute(pollId);
+    void this.bindPollRoute(pollId);
   }
 
   /** Clears any poll-listen unsubscribe handle. */
@@ -234,39 +209,51 @@ export class SurveyViewResultsComponent {
   private switchToTemplateMode(): void {
     this.viewMode = 'template';
     this.currentPoll = null;
-    this.pollChosenOptionId.set(null);
+    this.pollChosenByQuestion.set({});
     this.resetTemplateDefaults();
   }
 
   /** Loads a poll by route id and subscribes to live updates. */
-  private bindPollRoute(pollId: string): void {
+  private async bindPollRoute(pollId: string): Promise<void> {
     const service = getSharedPollService();
-    this.attachCurrentPoll(pollId, service);
-    this.pollListenerUnsubHolder.unsubscribe = service.subscribe(() => {
-      this.syncPollFromService(pollId, service);
-    });
-  }
-
-  /** Sets current poll from the service or redirects home if missing. */
-  private attachCurrentPoll(pollId: string, service: PollService): void {
-    const poll = service.findPollById(pollId);
-    if (!poll) {
+    await service.initialize();
+    const poll = await service.ensurePollDetail(pollId);
+    if (poll === undefined) {
       void this.router.navigateByUrl('/');
       return;
     }
     this.viewMode = 'poll';
     this.currentPoll = poll;
-    this.pollChosenOptionId.set(null);
     this.applyPollFields(poll);
+    await this.restoreVoterChoices(pollId, service);
+    this.pollListenerUnsubHolder.unsubscribe = service.subscribeToSurvey(
+      pollId,
+      () => {
+        void this.syncPollFromService(pollId, service);
+      },
+    );
   }
 
   /** Refreshes bound poll data after service notifications. */
-  private syncPollFromService(pollId: string, service: PollService): void {
-    const poll = service.findPollById(pollId);
+  private async syncPollFromService(
+    pollId: string,
+    service: PollService,
+  ): Promise<void> {
+    const poll = await service.ensurePollDetail(pollId);
     if (poll !== undefined) {
       this.currentPoll = poll;
       this.applyPollFields(poll);
+      await this.restoreVoterChoices(pollId, service);
     }
+  }
+
+  /** Loads stored voter choices for the bound survey. */
+  private async restoreVoterChoices(
+    pollId: string,
+    service: PollService,
+  ): Promise<void> {
+    const choices = await service.loadVoterChoices(pollId);
+    this.pollChosenByQuestion.set({ ...choices });
   }
 
   /** Copies poll fields into the preview model. */
@@ -280,13 +267,73 @@ export class SurveyViewResultsComponent {
     this.completeError = null;
   }
 
+  /** Persists the preview survey as a new poll in Supabase. */
+  private async submitCompletedTemplatePoll(): Promise<void> {
+    const title = this.surveyName.trim();
+    const deadline = parseEndsOnDate(this.endsOn)!;
+    const category = this.category.trim();
+    await getSharedPollService().createPoll({
+      title,
+      description: this.surveyDescription.trim() || PREVIEW_DESCRIPTION,
+      category: category.length > 0 ? category : null,
+      options: [...COMPLETE_POLL_OPTIONS],
+      deadline,
+    });
+    void this.router.navigateByUrl('/');
+  }
+
+  /** Applies async vote logic for one question option. */
+  private async castVoteForQuestion(
+    questionId: string,
+    optionId: string,
+  ): Promise<void> {
+    const poll = this.currentPoll;
+    if (poll === null || this.viewMode !== 'poll') {
+      return;
+    }
+    const question = this.displayQuestions(poll).find((entry) => entry.id === questionId);
+    if (question === undefined) {
+      return;
+    }
+    const result = await toggleVoteForQuestion(
+      poll,
+      question,
+      optionId,
+      this.chosenOptionsForQuestion(questionId),
+      getSharedPollService(),
+    );
+    if (result === undefined) {
+      return;
+    }
+    this.currentPoll = result.poll;
+    this.pollChosenByQuestion.update((choices) => ({
+      ...choices,
+      [questionId]: [...result.choices],
+    }));
+    if (poll.isExample === true) {
+      this.syncExampleVoteStorage(poll.id, result.choices);
+    }
+  }
+
+  /** Persists example survey choices for reload in local storage. */
+  private syncExampleVoteStorage(
+    pollId: string,
+    choices: ReadonlyArray<string>,
+  ): void {
+    if (choices.length === 0) {
+      clearUserVoteOnPoll(pollId);
+      return;
+    }
+    markUserVotedOnPoll(pollId, choices[0]);
+  }
+
   /** Restores default demo copy for the template route. */
   private resetTemplateDefaults(): void {
     this.surveyName = TEMPLATE_SURVEY_NAME;
     this.surveyDescription = PREVIEW_DESCRIPTION;
     this.category = 'Team Activities';
     this.endsOn = '2025-09-01';
-    this.surveyStatus = 'draft';
+    this.surveyStatus = 'published';
     this.completeError = null;
   }
 }

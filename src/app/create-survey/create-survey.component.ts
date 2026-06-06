@@ -27,10 +27,7 @@ import {
   nextSurveyRowId,
   type QuestionBlock,
 } from './create-survey.models';
-import {
-  buildPublishedDescription,
-  resolveFirstQuestionOptions,
-} from './create-survey-publish.helpers';
+import { mapQuestionsForPublish } from './create-survey-publish.helpers';
 import {
   computeCreateSurveyFieldErrors,
   stripQuestionPromptErrorKeys,
@@ -55,7 +52,7 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
   protected category = '';
 
   protected questions: QuestionBlock[] = [createEmptyQuestionBlock(1)];
-  protected readonly maxQuestionsPerSurvey = 6;
+  protected readonly maxQuestionsPerSurvey = 4;
   protected readonly maxAnswersPerQuestion = 6;
   protected readonly minAnswersPerQuestion = 2;
   protected readonly answerRowFullRemoveFromIndex = 2;
@@ -234,13 +231,22 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
 
   /** Persists the survey when the first question block exists. */
   protected publish(): void {
+    void this.runPublish();
+  }
+
+  /** Async publish entry that surfaces persistence errors. */
+  private async runPublish(): Promise<void> {
     this.publishError.set(null);
     const first = this.questions[0];
     if (!first) {
       this.publishError.set('No question available.');
       return;
     }
-    this.completePublish(first);
+    try {
+      await this.completePublish(first);
+    } catch {
+      this.publishError.set('Could not publish survey. Please try again.');
+    }
   }
 
   /** Drops stale question-prompt errors after structural edits. */
@@ -284,32 +290,34 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
     element?.focus();
   }
 
-  /** Creates the poll and shows the post-publish overlay. */
-  private completePublish(first: QuestionBlock): void {
+  /** Creates the published survey in Supabase and shows the overlay. */
+  private async completePublish(first: QuestionBlock): Promise<void> {
     const title = this.surveyName.trim();
-    const options = resolveFirstQuestionOptions(first);
-    const description = buildPublishedDescription(
-      this.describingText,
-      this.questions,
-    );
-    this.persistNewPoll(title, options, description);
+    const description = this.resolvePublishedDescription(first);
+    await this.persistNewSurvey(title, description);
     this.beginPostPublishUi();
   }
 
-  /** Writes the new poll into the shared in-memory service. */
-  private persistNewPoll(
-    title: string,
-    options: string[],
-    description: string,
-  ): void {
+  /** Builds the stored survey description from optional describing text. */
+  private resolvePublishedDescription(first: QuestionBlock): string {
+    const describing = this.describingText.trim();
+    if (describing.length > 0) {
+      return describing;
+    }
+    const prompt = first.prompt.trim();
+    return prompt.length > 0 ? prompt : 'Survey without description.';
+  }
+
+  /** Writes the full survey graph into Supabase as published. */
+  private async persistNewSurvey(title: string, description: string): Promise<void> {
     const deadline = parseSurveyEndDate(this.endDate.trim());
     const category = this.category.trim();
-    getSharedPollService().createPoll({
+    await getSharedPollService().createSurvey({
       title,
       description,
       category: category.length > 0 ? category : null,
-      options,
       deadline,
+      questions: mapQuestionsForPublish(this.questions),
     });
   }
 

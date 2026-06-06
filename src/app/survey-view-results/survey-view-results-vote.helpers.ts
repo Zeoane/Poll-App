@@ -1,66 +1,107 @@
 import type { PollService } from '../../services/poll-service';
-import type { Poll } from '../../types/poll';
+import type { Poll, SurveyQuestion } from '../../types/poll';
 
-export interface VoteForOptionResult {
+export type QuestionChoices = ReadonlyArray<string>;
+
+export interface VoteToggleResult {
   readonly poll: Poll;
-  readonly chosenOptionId: string | null;
+  readonly choices: QuestionChoices;
 }
 
-/** Applies select, switch, or deselect vote logic for one poll option. */
-export function applyVoteForOption(
+/** Toggles one option for single- or multi-select questions. */
+export async function toggleVoteForQuestion(
   poll: Poll,
+  question: SurveyQuestion,
   optionId: string,
-  currentChoiceId: string | null,
+  currentChoices: QuestionChoices,
   service: PollService,
-): VoteForOptionResult | undefined {
+): Promise<VoteToggleResult | undefined> {
   if (service.isPollEnded(poll)) {
     return undefined;
   }
-  if (currentChoiceId === optionId) {
-    return retractVoteChoice(poll, optionId, service);
+  if (question.allowMultiple) {
+    return toggleMultiChoice(poll, question.id, optionId, currentChoices, service);
   }
-  if (currentChoiceId === null) {
-    return castVoteChoice(poll, optionId, service);
-  }
-  return changeVoteChoice(poll, currentChoiceId, optionId, service);
+  return toggleSingleChoice(poll, question.id, optionId, currentChoices, service);
 }
 
-/** Retracts the current vote selection. */
-function retractVoteChoice(
+/** Handles select, switch, or deselect for one single-choice question. */
+async function toggleSingleChoice(
   poll: Poll,
+  questionId: string,
+  optionId: string,
+  currentChoices: QuestionChoices,
+  service: PollService,
+): Promise<VoteToggleResult | undefined> {
+  if (currentChoices.includes(optionId)) {
+    return retractChoice(poll, questionId, optionId, service);
+  }
+  if (currentChoices.length === 1) {
+    return changeChoice(poll, questionId, currentChoices[0]!, optionId, service);
+  }
+  return castChoice(poll, questionId, optionId, service);
+}
+
+/** Adds or removes one option on a multi-select question. */
+async function toggleMultiChoice(
+  poll: Poll,
+  questionId: string,
+  optionId: string,
+  currentChoices: QuestionChoices,
+  service: PollService,
+): Promise<VoteToggleResult | undefined> {
+  if (currentChoices.includes(optionId)) {
+    return retractChoice(poll, questionId, optionId, service);
+  }
+  return castChoice(poll, questionId, optionId, service);
+}
+
+/** Casts a vote and appends the option id to local choices. */
+async function castChoice(
+  poll: Poll,
+  questionId: string,
   optionId: string,
   service: PollService,
-): VoteForOptionResult | undefined {
-  const updated = service.retractVote(poll.id, optionId);
+): Promise<VoteToggleResult | undefined> {
+  const updated = await service.voteOnQuestion(poll.id, questionId, optionId);
   if (updated === undefined) {
     return undefined;
   }
-  return { poll: updated, chosenOptionId: null };
+  const prior = await service.loadVoterChoices(poll.id);
+  return { poll: updated, choices: prior[questionId] ?? [optionId] };
 }
 
-/** Casts a first vote on the poll. */
-function castVoteChoice(
+/** Retracts a vote and rebuilds local choices from the service. */
+async function retractChoice(
   poll: Poll,
+  questionId: string,
   optionId: string,
   service: PollService,
-): VoteForOptionResult | undefined {
-  const updated = service.vote(poll.id, optionId);
+): Promise<VoteToggleResult | undefined> {
+  const updated = await service.retractVoteOnQuestion(poll.id, questionId, optionId);
   if (updated === undefined) {
     return undefined;
   }
-  return { poll: updated, chosenOptionId: optionId };
+  const prior = await service.loadVoterChoices(poll.id);
+  return { poll: updated, choices: prior[questionId] ?? [] };
 }
 
-/** Moves an existing vote to a different option. */
-function changeVoteChoice(
+/** Switches a single-choice vote to another option. */
+async function changeChoice(
   poll: Poll,
+  questionId: string,
   fromOptionId: string,
   toOptionId: string,
   service: PollService,
-): VoteForOptionResult | undefined {
-  const updated = service.changeVote(poll.id, fromOptionId, toOptionId);
+): Promise<VoteToggleResult | undefined> {
+  const updated = await service.changeVoteOnQuestion(
+    poll.id,
+    questionId,
+    fromOptionId,
+    toOptionId,
+  );
   if (updated === undefined) {
     return undefined;
   }
-  return { poll: updated, chosenOptionId: toOptionId };
+  return { poll: updated, choices: [toOptionId] };
 }

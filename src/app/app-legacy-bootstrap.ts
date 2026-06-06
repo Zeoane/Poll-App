@@ -4,8 +4,9 @@ import { PollDetailController } from '../components/poll-detail';
 import { PollFormController } from '../components/poll-form';
 import { PollListController } from '../components/poll-list';
 import { SortDropdownController } from '../components/sort-dropdown';
-import { MOCK_POLLS } from '../data/mock-polls';
 import { PollService } from '../services/poll-service';
+import { SupabaseSurveyRepository } from '../services/supabase-survey.repository';
+import type { SupabaseService } from '../services/supabase.service';
 
 interface WiredControllers {
   readonly list: PollListController;
@@ -15,11 +16,25 @@ interface WiredControllers {
 }
 
 let sharedPollService: PollService | null = null;
+let sharedSupabaseService: SupabaseService | null = null;
+
+/** Registers the shared Supabase service for legacy and Angular routes. */
+export function setSharedSupabaseService(service: SupabaseService): void {
+  sharedSupabaseService = service;
+}
+
+/** Returns the shared Supabase service when the app initializer ran. */
+export function getSharedSupabaseService(): SupabaseService | null {
+  return sharedSupabaseService;
+}
 
 /** Returns the shared poll service singleton used across routes. */
 export function getSharedPollService(): PollService {
   if (sharedPollService === null) {
-    sharedPollService = new PollService(MOCK_POLLS);
+    const repo = new SupabaseSurveyRepository(
+      () => sharedSupabaseService?.getClient() ?? null,
+    );
+    sharedPollService = new PollService(repo);
   }
   return sharedPollService;
 }
