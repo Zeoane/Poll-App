@@ -82,7 +82,7 @@ function createOpenButton(
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'poll-card__open';
-  button.setAttribute('aria-label', `Umfrage öffnen: ${poll.title}`);
+  button.setAttribute('aria-label', `Open survey: ${poll.title}`);
   button.addEventListener('click', () => {
     onSelect(poll.id);
   });

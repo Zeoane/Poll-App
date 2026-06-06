@@ -97,8 +97,7 @@
       "footer";
   }
 
-  /* Survey-Detailseite: "Create survey" oben entfällt, dafür Schließen-X auf
-     Höhe von "Published" und Complete-Button als SVG ganz unten. */
+  
   .survey-view-results-page__main {
     padding-top: 24px;
     padding-bottom: 40px;
@@ -116,7 +115,7 @@
   .create-card__close-mobile {
     display: block;
     position: absolute;
-    /* vertikal mittig zur "Published"-Badge: card padding-top (28px) + Badge 26px/2 - Button 32px/2 */
+    
     top: 25px;
     right: 20px;
     width: 39px;
@@ -156,7 +155,7 @@
     box-shadow: none;
   }
 
-  /* Touch-Scroll ohne sichtbare Scrollleisten */
+  
   html {
     overflow-x: hidden;
     scrollbar-width: none;

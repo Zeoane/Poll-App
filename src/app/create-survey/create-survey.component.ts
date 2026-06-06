@@ -12,10 +12,16 @@ import { Router, RouterLink } from '@angular/router';
 
 import { CategoryListDropdown } from '../../components/category-list-dropdown';
 import { getSharedPollService } from '../app-legacy-bootstrap';
-import { POLL_TITLE_MAX_CHARS, POLL_TITLE_MAX_WORDS } from '../../types/poll';
 
 import { attachCreateSurveyCategoryDropdown } from './create-survey-category-bridge';
 import { parseSurveyEndDate } from './create-survey-end-date';
+import {
+  answerRowClearAriaLabel,
+  appendEmptyQuestion,
+  questionRemoveAriaLabel,
+  resetQuestionBlock,
+  resolveQuestionRemovalAction,
+} from './create-survey-question.helpers';
 import {
   createEmptyQuestionBlock,
   nextSurveyRowId,
@@ -25,6 +31,10 @@ import {
   buildPublishedDescription,
   resolveFirstQuestionOptions,
 } from './create-survey-publish.helpers';
+import {
+  computeCreateSurveyFieldErrors,
+  stripQuestionPromptErrorKeys,
+} from './create-survey-validation.helpers';
 
 @Component({
   selector: 'app-create-survey',
@@ -44,180 +54,130 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
   protected endDate = '';
   protected category = '';
 
+  protected questions: QuestionBlock[] = [createEmptyQuestionBlock(1)];
+  protected readonly maxQuestionsPerSurvey = 6;
+  protected readonly maxAnswersPerQuestion = 6;
+  protected readonly minAnswersPerQuestion = 2;
+  protected readonly answerRowFullRemoveFromIndex = 2;
+  protected readonly fullDeleteQuestionOrdinalMin = 3;
+
+  protected publishError = signal<string | null>(null);
+  protected publishOverlayOpen = signal(false);
+  protected readonly fieldFillErrorMessage = 'Please fill out form';
+  protected fieldErrors = signal<Record<string, boolean>>({});
+
+  /** Wires the shared category dropdown after the template renders. */
   public ngAfterViewInit(): void {
-    this.categoryDropdown = attachCreateSurveyCategoryDropdown(
-      this.document,
-      {
-        getSelection: () =>
-          this.category.trim() === '' ? null : this.category.trim(),
-        setSelection: (c) => {
-          this.category = c ?? '';
-        },
+    this.categoryDropdown = attachCreateSurveyCategoryDropdown(this.document, {
+      getSelection: () =>
+        this.category.trim() === '' ? null : this.category.trim(),
+      setSelection: (value) => {
+        this.category = value ?? '';
       },
-    );
+    });
   }
 
+  /** Tears down the category dropdown listeners. */
   public ngOnDestroy(): void {
     this.categoryDropdown?.destroy();
     this.categoryDropdown = null;
   }
 
-  protected questions: QuestionBlock[] = [createEmptyQuestionBlock(1)];
-  protected readonly maxQuestionsPerSurvey = 6;
-  protected readonly maxAnswersPerQuestion = 6;
-
-  protected readonly minAnswersPerQuestion = 2;
-  protected readonly answerRowFullRemoveFromIndex = 2;
-
-  protected readonly fullDeleteQuestionOrdinalMin = 3;
-
-  protected publishError = signal<string | null>(null);
-  protected toastVisible = signal(false);
-  protected publishOverlayOpen = signal(false);
-
-  protected readonly fieldFillErrorMessage = 'Please fill out form';
-
-  protected fieldErrors = signal<Record<string, boolean>>({});
-
+  /** Clears the survey name field and its validation flag. */
   protected clearSurveyName(): void {
     this.surveyName = '';
     this.clearFieldErrorKey('surveyName');
   }
 
+  /** Clears the optional describing text field. */
   protected clearDescribingText(): void {
     this.describingText = '';
   }
 
+  /** Clears the optional end date field. */
   protected clearEndDate(): void {
     this.endDate = '';
   }
 
+  /** Deletes, resets, or ignores a question based on list state. */
   protected removeQuestion(index: number): void {
-    const q = this.questions[index];
-    if (!q) {
+    const action = resolveQuestionRemovalAction(
+      this.questions,
+      index,
+      this.fullDeleteQuestionOrdinalMin,
+    );
+    if (action === 'noop') {
       return;
     }
-
-    const isFullDeleteWhenSole =
-      q.displayOrdinal >= this.fullDeleteQuestionOrdinalMin;
-
-    if (this.questions.length > 1) {
+    if (action === 'splice') {
       this.questions.splice(index, 1);
       this.stripQuestionPromptErrors();
       return;
     }
-
-    if (isFullDeleteWhenSole) {
-      this.questions.splice(index, 1);
-      this.stripQuestionPromptErrors();
-      return;
+    const question = this.questions[index];
+    if (question) {
+      resetQuestionBlock(question);
+      this.clearFieldErrorKey(`q-prompt-${index}`);
     }
-
-    this.resetSingleQuestion(index);
   }
 
+  /** Returns the accessible label for a question remove button. */
   protected questionRemoveAriaLabel(index: number): string {
-    const q = this.questions[index];
-    if (!q) {
-      return 'Frage entfernen';
-    }
-    if (this.questions.length > 1) {
-      return 'Frage löschen';
-    }
-    if (q.displayOrdinal >= this.fullDeleteQuestionOrdinalMin) {
-      return 'Frage löschen';
-    }
-    return 'Frage zurücksetzen';
+    return questionRemoveAriaLabel(
+      this.questions,
+      index,
+      this.fullDeleteQuestionOrdinalMin,
+    );
   }
 
-  private resetSingleQuestion(index: number): void {
-    const q = this.questions[index];
-    if (!q) {
-      return;
-    }
-    q.prompt = '';
-    q.allowMultiple = false;
-    q.answers = [
-      { id: nextSurveyRowId('a'), text: '' },
-      { id: nextSurveyRowId('a'), text: '' },
-    ];
-    this.clearFieldErrorKey(`q-prompt-${index}`);
-  }
-
-  private stripQuestionPromptErrors(): void {
-    this.fieldErrors.update((m) => {
-      const next = { ...m };
-      for (const key of Object.keys(next)) {
-        if (key.startsWith('q-prompt-')) {
-          delete next[key];
-        }
-      }
-      return next;
-    });
-  }
-
+  /** Clears or removes one answer row depending on list length. */
   protected clearAnswer(qIndex: number, aIndex: number): void {
-    const q = this.questions[qIndex];
-    if (!q) {
+    const question = this.questions[qIndex];
+    if (!question) {
       return;
     }
     const canRemoveRow =
       aIndex >= this.answerRowFullRemoveFromIndex &&
-      q.answers.length > this.minAnswersPerQuestion;
+      question.answers.length > this.minAnswersPerQuestion;
     if (canRemoveRow) {
-      q.answers.splice(aIndex, 1);
+      question.answers.splice(aIndex, 1);
       return;
     }
-    const row = q.answers[aIndex];
+    const row = question.answers[aIndex];
     if (row) {
       row.text = '';
     }
   }
 
+  /** Returns the accessible label for an answer clear button. */
   protected answerRowClearAriaLabel(aIndex: number): string {
-    return aIndex >= this.answerRowFullRemoveFromIndex
-      ? 'Antwort entfernen'
-      : 'Antwort leeren';
+    return answerRowClearAriaLabel(aIndex, this.answerRowFullRemoveFromIndex);
   }
 
+  /** Appends one empty answer row when under the per-question limit. */
   protected addAnswer(qIndex: number): void {
-    const q = this.questions[qIndex];
-    if (!q || q.answers.length >= this.maxAnswersPerQuestion) {
+    const question = this.questions[qIndex];
+    if (!question || question.answers.length >= this.maxAnswersPerQuestion) {
       return;
     }
-    q.answers.push({ id: nextSurveyRowId('a'), text: '' });
+    question.answers.push({ id: nextSurveyRowId('a'), text: '' });
   }
 
+  /** Appends a new question block and focuses its prompt field. */
   protected addQuestion(): void {
     if (this.questions.length >= this.maxQuestionsPerSurvey) {
       return;
     }
-    const nextOrdinal =
-      this.questions.length === 0
-        ? 1
-        : Math.max(...this.questions.map((x) => x.displayOrdinal)) + 1;
-    this.questions.push(createEmptyQuestionBlock(nextOrdinal));
-    const idx = this.questions.length - 1;
-    queueMicrotask(() => this.scrollAndFocusQuestion(idx));
+    const index = appendEmptyQuestion(this.questions);
+    queueMicrotask(() => this.scrollAndFocusQuestion(index));
   }
 
-  private scrollAndFocusQuestion(idx: number): void {
-    const doc = this.document;
-    doc.getElementById(`create-q-block-${idx}`)?.scrollIntoView({
-      block: 'nearest',
-      behavior: 'auto',
-    });
-    doc.getElementById(`create-q-prompt-${idx}`)?.focus();
-  }
-
+  /** Navigates back to the home route. */
   protected cancel(): void {
     void this.router.navigateByUrl('/');
   }
 
-  protected dismissToast(): void {
-    this.toastVisible.set(false);
-  }
-
+  /** Closes the publish overlay when Escape is pressed. */
   @HostListener('document:keydown.escape')
   protected onEscapeClosePublishOverlay(): void {
     if (this.publishOverlayOpen()) {
@@ -225,110 +185,138 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  /** Hides the post-publish confirmation overlay. */
   protected closePublishOverlay(): void {
     this.publishOverlayOpen.set(false);
   }
 
+  /** Closes the overlay when the backdrop is clicked. */
   protected onPublishOverlayBackdrop(event: MouseEvent): void {
     if (event.target === event.currentTarget) {
       this.closePublishOverlay();
     }
   }
 
+  /** Returns whether a field key is currently marked invalid. */
   protected hasFieldError(key: string): boolean {
     return this.fieldErrors()[key] === true;
   }
 
+  /** Clears one field error flag without cloning when unchanged. */
   protected clearFieldErrorKey(key: string): void {
-    this.fieldErrors.update((m) => {
-      if (m[key] !== true) {
-        return m;
+    this.fieldErrors.update((map) => {
+      if (map[key] !== true) {
+        return map;
       }
-      const next = { ...m };
+      const next = { ...map };
       delete next[key];
       return next;
     });
   }
 
+  /** Validates the form and starts publishing when valid. */
   protected tryPublish(): void {
     this.publishError.set(null);
-    const errors = this.computeFieldErrors();
+    const errors = computeCreateSurveyFieldErrors(this.surveyName, this.questions);
     this.fieldErrors.set(errors);
     if (Object.keys(errors).length > 0) {
+      this.publishError.set(this.fieldFillErrorMessage);
+      this.focusFirstPublishError(errors);
       return;
     }
     this.publish();
   }
 
-  private computeFieldErrors(): Record<string, boolean> {
-    const e: Record<string, boolean> = {};
-    this.addSurveyNameErrors(e);
-    this.addQuestionPromptErrors(e);
-    return e;
-  }
-
-  private addSurveyNameErrors(e: Record<string, boolean>): void {
-    const title = this.surveyName.trim();
-    if (title.length < 3 || title.length > POLL_TITLE_MAX_CHARS) {
-      e['surveyName'] = true;
-      return;
-    }
-    const wordCount = title.split(/\s+/).filter(Boolean).length;
-    if (wordCount > POLL_TITLE_MAX_WORDS) {
-      e['surveyName'] = true;
-    }
-  }
-
-  private addQuestionPromptErrors(e: Record<string, boolean>): void {
-    this.questions.forEach((q, qi) => {
-      if (q.prompt.trim().length === 0) {
-        e[`q-prompt-${qi}`] = true;
-      }
-    });
-  }
-
+  /** Returns the letter prefix for one answer option index. */
   protected optionLetter(index: number): string {
     return `${String.fromCharCode(65 + index)}.`;
   }
 
+  /** Persists the survey when the first question block exists. */
   protected publish(): void {
     this.publishError.set(null);
     const first = this.questions[0];
     if (!first) {
-      this.publishError.set('Keine Frage vorhanden.');
+      this.publishError.set('No question available.');
       return;
     }
     this.completePublish(first);
   }
 
+  /** Drops stale question-prompt errors after structural edits. */
+  private stripQuestionPromptErrors(): void {
+    this.fieldErrors.update((map) => stripQuestionPromptErrorKeys(map));
+  }
+
+  /** Scrolls to and focuses one question prompt input. */
+  private scrollAndFocusQuestion(index: number): void {
+    const doc = this.document;
+    doc.getElementById(`create-q-block-${index}`)?.scrollIntoView({
+      block: 'nearest',
+      behavior: 'auto',
+    });
+    doc.getElementById(`create-q-prompt-${index}`)?.focus();
+  }
+
+  /** Focuses and scrolls to the first invalid publish field. */
+  private focusFirstPublishError(errors: Record<string, boolean>): void {
+    queueMicrotask(() => this.scrollToFirstPublishError(errors));
+  }
+
+  /** Scrolls the viewport to the first field flagged in errors. */
+  private scrollToFirstPublishError(errors: Record<string, boolean>): void {
+    if (errors['surveyName'] === true) {
+      this.focusAndScroll('survey-name');
+      return;
+    }
+    const questionIndex = this.questions.findIndex(
+      (_, index) => errors[`q-prompt-${index}`] === true,
+    );
+    if (questionIndex >= 0) {
+      this.focusAndScroll(`create-q-prompt-${questionIndex}`);
+    }
+  }
+
+  /** Focuses one element id and centers it in the viewport. */
+  private focusAndScroll(elementId: string): void {
+    const element = this.document.getElementById(elementId);
+    element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    element?.focus();
+  }
+
+  /** Creates the poll and shows the post-publish overlay. */
   private completePublish(first: QuestionBlock): void {
     const title = this.surveyName.trim();
-    const opts = resolveFirstQuestionOptions(first);
+    const options = resolveFirstQuestionOptions(first);
     const description = buildPublishedDescription(
       this.describingText,
       this.questions,
     );
-    this.persistNewPoll(title, opts, description);
+    this.persistNewPoll(title, options, description);
     this.beginPostPublishUi();
   }
 
-  private persistNewPoll(title: string, opts: string[], description: string): void {
+  /** Writes the new poll into the shared in-memory service. */
+  private persistNewPoll(
+    title: string,
+    options: string[],
+    description: string,
+  ): void {
     const deadline = parseSurveyEndDate(this.endDate.trim());
-    const cat = this.category.trim();
+    const category = this.category.trim();
     getSharedPollService().createPoll({
       title,
       description,
-      category: cat.length > 0 ? cat : null,
-      options: opts,
+      category: category.length > 0 ? category : null,
+      options,
       deadline,
     });
   }
 
+  /** Shows the publish overlay then navigates home after a short delay. */
   private beginPostPublishUi(): void {
     this.publishOverlayOpen.set(true);
-    this.toastVisible.set(true);
     window.setTimeout(() => {
-      this.toastVisible.set(false);
       this.publishOverlayOpen.set(false);
       void this.router.navigateByUrl('/');
     }, 2800);

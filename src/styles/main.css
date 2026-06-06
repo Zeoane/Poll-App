@@ -8,7 +8,9 @@
 @import "./create-survey-layout.css";
 @import "./create-survey-form-fields.css";
 @import "./create-survey-builder.css";
-@import "./create-survey-overlay.css";
-@import "./survey-view-results-preview.css";
+@import "./create-survey-overlay-base.css";
+@import "./create-survey-overlay-responsive.css";
+@import "./survey-view-results-preview-layout.css";
+@import "./survey-view-results-preview-controls.css";
 @import "./survey-view-results-live.css";
 @import "./responsive.css";

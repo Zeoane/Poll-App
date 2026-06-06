@@ -33,6 +33,7 @@ type CategoryDom = {
   selectionCaption: HTMLElement;
 };
 
+/** Reads create-survey category dropdown nodes from the document. */
 function queryCategoryElements(doc: Document): CategoryDom | null {
   const trigger = doc.getElementById(
     'survey-category-button',

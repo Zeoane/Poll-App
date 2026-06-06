@@ -19,6 +19,7 @@ export interface QuestionBlock {
   answers: AnswerRow[];
 }
 
+/** Creates a blank question block with two empty answer rows. */
 export function createEmptyQuestionBlock(displayOrdinal: number): QuestionBlock {
   return {
     id: nextSurveyRowId('q'),

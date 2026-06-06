@@ -305,7 +305,6 @@
   cursor: pointer;
 }
 
-/* Label am linken Innenrand, Chevron rechts; schmale Hover-Box via fit-content am Wrapper */
 .create-field.create-field--date-category .create-category-trigger__button {
   justify-content: flex-start;
   gap: 8px;
@@ -320,7 +319,6 @@
   min-width: 0;
 }
 
-/* Mit Kategorie-Auswahl steuert category-dropdown.css den Button-Hover — kein transparent hier */
 .create-category-trigger__button:not(.category-dropdown__trigger--has-selection):hover {
   background: transparent;
 }
@@ -355,7 +353,6 @@
   max-width: 100%;
 }
 
-/* Mit Auswahl: Hintergrund der gesamten Zeile → category-dropdown.css (wie Sort) */
 .create-category-trigger__button.create-category-trigger__button--filled
   .create-field__label--category-picker {
   background: transparent;

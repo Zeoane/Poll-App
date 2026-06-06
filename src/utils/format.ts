@@ -3,12 +3,12 @@ const HOUR_IN_MS = 60 * MINUTE_IN_MS;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
 const PERCENT_FACTOR = 100;
 
-const dateTimeFormatter = new Intl.DateTimeFormat('de-DE', {
+const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'medium',
   timeStyle: 'short',
 });
 
-const relativeFormatter = new Intl.RelativeTimeFormat('de-DE', {
+const relativeFormatter = new Intl.RelativeTimeFormat('en-US', {
   numeric: 'auto',
 });
 

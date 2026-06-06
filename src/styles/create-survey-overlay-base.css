@@ -1,0 +1,138 @@
+.create-survey-card__error {
+  margin: 0;
+  color: #ffb4b6;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.create-survey-page__publish {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1052px;
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0 0;
+  margin-top: calc(64px + var(--spacing-sm) - 40px);
+}
+
+.create-survey-page__publish-error {
+  align-self: stretch;
+  text-align: center;
+}
+
+.create-btn-publish {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 99px;
+  min-width: 99px;
+  height: 48px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #ffcfa1;
+  color: #221227;
+  font-family: "Nokora", var(--font-body);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.create-btn-publish:hover {
+  filter: brightness(1.04);
+}
+
+.create-btn-publish:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+@keyframes create-publish-overlay-panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.create-publish-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-md);
+  margin: 0;
+  border: none;
+  background: rgba(34, 18, 39, 0.4);
+}
+
+.create-publish-overlay__panel {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 357px;
+  max-width: min(357px, calc(100vw - 2 * var(--spacing-md)));
+  height: 86px;
+  min-height: 86px;
+  padding: 8px 40px 8px 16px;
+  border-radius: 5px 50px 5px 5px;
+  background: #fee9d4;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  animation: create-publish-overlay-panel-in 300ms ease-out forwards;
+}
+
+.create-publish-overlay__text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 100%;
+  letter-spacing: 0.02em;
+  color: #35273a;
+  text-align: center;
+}
+
+.create-publish-overlay__close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: rgba(142, 112, 153, 0.12);
+  color: var(--color-primary-purple, #35273a);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.create-publish-overlay__close:hover {
+  background: rgba(142, 112, 153, 0.2);
+}
+
+.create-publish-overlay__close:focus-visible {
+  outline: 2px solid var(--create-accent-title);
+  outline-offset: 2px;
+}
+

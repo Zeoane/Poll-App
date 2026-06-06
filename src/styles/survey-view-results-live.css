@@ -1,21 +1,16 @@
-/* =============================================================================
-   Live-Ergebnis-Panel (aside.create-card__live)
-   Alle Frageblöcke (.create-live__block) nutzen dieselben vertikalen Abstände.
-   ============================================================================= */
+
 .create-card__live {
-  --live-gap-block-stack: 16px; /* zwischen aufeinanderfolgenden Frageblöcken */
-  --live-gap-q-top: 12px; /* über jeder Fragenüberschrift */
-  --live-gap-q-bottom: 10px; /* unter Fragenüberschrift → Balkenliste */
-  --live-gap-bar-rows: 8px; /* zwischen Balkenzeilen */
-  --live-gap-bar-columns: 8px; /* Buchstabe ↔ Track ↔ % */
-  --live-gap-q-inline: 0.35em; /* Nummer ↔ Fragetext (entspr. survey-view-results --survey-q-title-num-gap) */
-  /* Übernehmen aus .create-preview-layout (mit Fallback, falls Aside woanders genutzt wird) */
+  --live-gap-block-stack: 16px; 
+  --live-gap-q-top: 12px; 
+  --live-gap-q-bottom: 10px; 
+  --live-gap-bar-rows: 8px; 
+  --live-gap-bar-columns: 8px; 
+  --live-gap-q-inline: 0.35em; 
+  
   --live-column-width: var(--survey-results-live-column-width, 315px);
   --live-bar-track-width: var(--survey-results-live-bar-track-width, 255px);
   --live-bar-pct-width: var(--survey-results-live-bar-pct-width, 31px);
 }
-
-/* --- Panel-Kopf & Empty-State --- */
 
 .create-card__live-toggle {
   display: none;
@@ -101,11 +96,6 @@
   color: #35273a;
 }
 
-/* --- Fragenblöcke, Überschriften, Balkenlisten --- */
-
-/*
- * Abstand zwischen Frageblöcken (nicht `+`: Angular kann Knoten zwischen Divs einfügen).
- */
 .create-card__live .create-live__block ~ .create-live__block {
   margin-top: var(--live-gap-block-stack);
 }
@@ -141,8 +131,6 @@
   flex-direction: column;
   gap: var(--live-gap-bar-rows);
 }
-
-/* Balkenzeile */
 
 .create-bar {
   display: grid;
@@ -200,7 +188,7 @@
 }
 
 @media (max-width: 900px) {
-  /* Schmale Ansicht: Preview-Karte und Live-Panel untereinander */
+  
   .create-preview-layout {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -210,7 +198,7 @@
     row-gap: 24px;
   }
 
-  /* Nur zwischen Block (Fragen 1+2) und (Fragen 3+4): eine halbe Textzeile wie im Zwei-Spalten-Layout */
+  
   .create-card__questions > article.create-q:nth-child(3) {
     margin-top: calc(var(--survey-text-line, calc(16px * 1.55)) / 2);
   }

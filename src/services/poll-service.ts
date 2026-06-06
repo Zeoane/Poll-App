@@ -16,6 +16,7 @@ export class PollService {
   /** Seeds the service with an initial poll snapshot. */
   public constructor(initialPolls: ReadonlyArray<Poll>) {
     this.polls = [...initialPolls];
+    this.sortPollsByDeadline();
   }
 
   /** Subscribes to poll list changes and returns an unsubscribe function. */
@@ -46,32 +47,29 @@ export class PollService {
     return this.activeCategory;
   }
 
-  /** Lists non-ended polls matching the category filter, sorted by deadline. */
+  /** Lists non-ended polls matching the category filter (sorted by deadline). */
   public getActivePolls(): ReadonlyArray<Poll> {
     const now = Date.now();
-    return [...this.polls]
+    return this.polls
       .filter((poll) => !this.isPollEnded(poll, now))
-      .filter((poll) => this.matchesActiveCategory(poll))
-      .sort((a, b) => this.compareByDeadline(a, b));
+      .filter((poll) => this.matchesActiveCategory(poll));
   }
 
-  /** Lists ended polls matching the category filter, newest deadline first. */
+  /** Lists ended polls matching the category filter (sorted by deadline). */
   public getPastPolls(): ReadonlyArray<Poll> {
     const now = Date.now();
-    return [...this.polls]
+    return this.polls
       .filter((poll) => this.isPollEnded(poll, now))
-      .filter((poll) => this.matchesActiveCategory(poll))
-      .sort((a, b) => this.compareByDeadlineDescending(a, b));
+      .filter((poll) => this.matchesActiveCategory(poll));
   }
 
-  /** Lists soon-ending active polls ignoring the category filter. */
+  /** Lists soon-ending active polls ignoring the category filter (sorted by deadline). */
   public getEndingSoonPolls(): ReadonlyArray<Poll> {
     const now = Date.now();
     const threshold = now + ENDING_SOON_THRESHOLD_MS;
-    return [...this.polls]
+    return this.polls
       .filter((poll) => !this.isPollEnded(poll, now))
-      .filter((poll) => this.isWithinWindow(poll, now, threshold))
-      .sort((a, b) => this.compareByDeadline(a, b));
+      .filter((poll) => this.isWithinWindow(poll, now, threshold));
   }
 
   /** True when the poll category matches the active filter (or filter is off). */
@@ -106,7 +104,8 @@ export class PollService {
       createdAt: new Date(),
       deadline: input.deadline,
     };
-    this.polls = [newPoll, ...this.polls];
+    this.polls.push(newPoll);
+    this.sortPollsByDeadline();
     this.notify();
     return newPoll;
   }
@@ -118,10 +117,7 @@ export class PollService {
       return undefined;
     }
     const updatedPoll: Poll = { ...poll, options: this.adjustVote(poll, optionId, 1) };
-    this.polls = this.polls.map((existing) =>
-      existing.id === pollId ? updatedPoll : existing,
-    );
-    this.notify();
+    this.replacePoll(updatedPoll);
     return updatedPoll;
   }
 
@@ -136,10 +132,7 @@ export class PollService {
       return undefined;
     }
     const updatedPoll: Poll = { ...poll, options: this.adjustVote(poll, optionId, -1) };
-    this.polls = this.polls.map((existing) =>
-      existing.id === pollId ? updatedPoll : existing,
-    );
-    this.notify();
+    this.replacePoll(updatedPoll);
     return updatedPoll;
   }
 
@@ -153,6 +146,24 @@ export class PollService {
     if (poll === undefined || this.isPollEnded(poll)) {
       return undefined;
     }
+    const updatedPoll = this.buildPollWithTransferredVote(
+      poll,
+      fromOptionId,
+      toOptionId,
+    );
+    if (updatedPoll === undefined) {
+      return undefined;
+    }
+    this.replacePoll(updatedPoll);
+    return updatedPoll;
+  }
+
+  /** Builds a poll copy with one vote moved between two options. */
+  private buildPollWithTransferredVote(
+    poll: Poll,
+    fromOptionId: string,
+    toOptionId: string,
+  ): Poll | undefined {
     if (fromOptionId === toOptionId) {
       return poll;
     }
@@ -160,18 +171,13 @@ export class PollService {
     if (fromOption === undefined || fromOption.votes <= 0) {
       return undefined;
     }
-    const optionsAfterRetract = this.adjustVote(poll, fromOptionId, -1);
-    const updatedPoll: Poll = {
+    const retracted = this.adjustVote(poll, fromOptionId, -1);
+    return {
       ...poll,
-      options: optionsAfterRetract.map((option) =>
+      options: retracted.map((option) =>
         option.id === toOptionId ? { ...option, votes: option.votes + 1 } : option,
       ),
     };
-    this.polls = this.polls.map((existing) =>
-      existing.id === pollId ? updatedPoll : existing,
-    );
-    this.notify();
-    return updatedPoll;
   }
 
   /** Sums votes across all options of a poll. */
@@ -210,10 +216,24 @@ export class PollService {
     return deadlineMs > nowMs && deadlineMs <= thresholdMs;
   }
 
+  /** Replaces one poll and keeps the list sorted by deadline. */
+  private replacePoll(updatedPoll: Poll): void {
+    this.polls = this.polls.map((existing) =>
+      existing.id === updatedPoll.id ? updatedPoll : existing,
+    );
+    this.sortPollsByDeadline();
+    this.notify();
+  }
+
+  /** Sorts all polls: nearest end date first; no deadline last; ties by createdAt. */
+  private sortPollsByDeadline(): void {
+    this.polls.sort((a, b) => this.compareByDeadline(a, b));
+  }
+
   /** Sorts by ascending deadline; missing deadlines go last. */
   private compareByDeadline(a: Poll, b: Poll): number {
     if (a.deadline === null && b.deadline === null) {
-      return 0;
+      return a.createdAt.getTime() - b.createdAt.getTime();
     }
     if (a.deadline === null) {
       return 1;
@@ -221,14 +241,11 @@ export class PollService {
     if (b.deadline === null) {
       return -1;
     }
-    return a.deadline.getTime() - b.deadline.getTime();
-  }
-
-  /** Sorts by descending deadline timestamp. */
-  private compareByDeadlineDescending(a: Poll, b: Poll): number {
-    const aTime = a.deadline?.getTime() ?? 0;
-    const bTime = b.deadline?.getTime() ?? 0;
-    return bTime - aTime;
+    const byDeadline = a.deadline.getTime() - b.deadline.getTime();
+    if (byDeadline !== 0) {
+      return byDeadline;
+    }
+    return a.createdAt.getTime() - b.createdAt.getTime();
   }
 
   /** Notifies all subscribers with the latest polls array. */

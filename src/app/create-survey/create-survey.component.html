@@ -1,16 +1,16 @@
 <div class="create-survey-page">
-  <a class="skip-link" href="#create-survey-main">Zum Hauptinhalt springen</a>
+  <a class="skip-link" href="#create-survey-main">Skip to main content</a>
 
   <header class="create-survey-page__top">
     <div class="create-survey-page__top-inner">
       <a
         routerLink="/"
         class="create-survey-page__brand"
-        aria-label="Poll App – zur Startseite"
+        aria-label="Poll App – Home"
       >
         <img
           class="create-survey-page__logo"
-          src="assets/img/Logo-violett.svg"
+          src="assets/img/brand/logo-violet.svg"
           alt=""
           width="119"
           height="49"
@@ -28,11 +28,11 @@
           type="button"
           class="create-survey-card__cancel"
           (click)="cancel()"
-          aria-label="Erstellen abbrechen"
+          aria-label="Cancel creating survey"
         >
           <img
             class="create-survey-card__cancel-icon create-survey-card__cancel-icon--mobile"
-            src="assets/img/CS-close-btn.svg"
+            src="assets/img/create-survey/close-mobile.svg"
             alt=""
             width="39"
             height="32"
@@ -41,7 +41,7 @@
           <span class="create-survey-card__cancel-text">Cancel</span>
           <img
             class="create-survey-card__cancel-icon create-survey-card__cancel-icon--desktop"
-            src="assets/img/close.svg"
+            src="assets/img/icons/actions/close.svg"
             alt=""
             width="24"
             height="24"
@@ -71,7 +71,7 @@
                 <button
                   type="button"
                   class="create-field__clear"
-                  aria-label="Survey name leeren"
+                  aria-label="Clear survey name"
                   (click)="clearSurveyName()"
                 ></button>
               </div>
@@ -101,28 +101,28 @@
                   <span class="category-dropdown__chevron-wrap" aria-hidden="true">
                     <img
                       class="category-dropdown__chevron category-dropdown__chevron--down-neutral"
-                      src="assets/img/arrow_drop_down.svg"
+                      src="assets/img/icons/chevrons/down.svg"
                       alt=""
                       width="24"
                       height="24"
                     />
                     <img
                       class="category-dropdown__chevron category-dropdown__chevron--up-neutral"
-                      src="assets/img/arrow_drop_up.svg"
+                      src="assets/img/icons/chevrons/up.svg"
                       alt=""
                       width="24"
                       height="24"
                     />
                     <img
                       class="category-dropdown__chevron category-dropdown__chevron--down-orange"
-                      src="assets/img/arrow_drop_down-orange.svg"
+                      src="assets/img/icons/chevrons/down-active.svg"
                       alt=""
                       width="24"
                       height="24"
                     />
                     <img
                       class="category-dropdown__chevron category-dropdown__chevron--up-orange"
-                      src="assets/img/arrow_drop_up-orange.svg"
+                      src="assets/img/icons/chevrons/up-active.svg"
                       alt=""
                       width="24"
                       height="24"
@@ -140,7 +140,7 @@
                   class="category-dropdown__menu"
                   id="survey-category-menu"
                   role="listbox"
-                  aria-label="Kategorie w\u00e4hlen"
+                  aria-label="Choose category"
                   hidden
                 ></ul>
               </div>
@@ -157,7 +157,7 @@
                 <button
                   type="button"
                   class="create-field__clear"
-                  aria-label="Enddatum leeren"
+                  aria-label="Clear end date"
                   (click)="clearEndDate()"
                 ></button>
               </div>
@@ -180,7 +180,7 @@
                 <button
                   type="button"
                   class="create-field__clear create-field__clear--textarea"
-                  aria-label="Beschreibung leeren"
+                  aria-label="Clear description"
                   (click)="clearDescribingText()"
                 ></button>
               </div>
@@ -278,7 +278,7 @@
                 Add answer
                 <img
                   class="create-link-add__icon"
-                  src="assets/img/add_circle-white-purple.svg"
+                  src="assets/img/icons/actions/add-on-purple.svg"
                   alt=""
                   width="20"
                   height="20"
@@ -302,7 +302,7 @@
               Add next question
               <img
                 class="create-btn-add-next__icon"
-                src="assets/img/add_circle-white-lightpurple.svg"
+                src="assets/img/icons/actions/add-on-light-purple.svg"
                 alt=""
                 width="24"
                 height="24"
@@ -316,17 +316,19 @@
           </div>
         </div>
 
-        @if (publishError(); as err) {
-          <p class="create-survey-card__error" role="alert">{{ err }}</p>
-        }
       </div>
     </div>
 
     <div class="create-survey-page__publish">
+      @if (publishError(); as err) {
+        <p class="create-survey-card__error create-survey-page__publish-error" role="alert">
+          {{ err }}
+        </p>
+      }
       <button type="button" class="create-btn-publish" (click)="tryPublish()">
         <img
           class="create-btn-publish__graphic"
-          src="assets/img/CS-publisch-btn.svg"
+          src="assets/img/create-survey/publish-mobile.svg"
           alt=""
           width="123"
           height="48"
@@ -349,7 +351,7 @@
         <button
           type="button"
           class="create-publish-overlay__close"
-          aria-label="Overlay schließen"
+          aria-label="Close overlay"
           (click)="closePublishOverlay()"
         >
           ×
@@ -361,12 +363,4 @@
     </div>
   }
 
-  @if (toastVisible()) {
-    <div class="create-toast" role="status">
-      <span>Your survey is now published</span>
-      <button type="button" class="create-toast__close" aria-label="Schließen" (click)="dismissToast()">
-        ×
-      </button>
-    </div>
-  }
 </div>

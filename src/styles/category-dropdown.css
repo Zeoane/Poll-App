@@ -111,7 +111,6 @@
   height: 28px;
 }
 
-/* Chevron: zu/offen × neutral/orange — orange bei Hover (zu + offen) */
 .category-dropdown__chevron-wrap > .category-dropdown__chevron {
   display: none;
 }

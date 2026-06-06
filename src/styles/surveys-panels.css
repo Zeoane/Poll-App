@@ -214,7 +214,7 @@
   width: 8px;
   height: 64px;
   transform: translateY(0);
-  background: transparent url("../assets/img/Scroll.svg") center / 8px 64px
+  background: transparent url("../assets/img/ui/scroll-thumb.svg") center / 8px 64px
     no-repeat;
   cursor: grab;
   touch-action: none;

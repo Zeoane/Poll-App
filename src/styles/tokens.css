@@ -43,7 +43,7 @@
   --spacing-2xl: 48px;
   --spacing-3xl: 80px;
 
-  /* Create survey: getrennt vom globalen --spacing-md (z. B. 8px für A./B.) */
+  
   --create-survey-spacing-ref: 18px;
   --create-survey-q-gap: var(--spacing-sm);
   --create-survey-answers-above-extra: calc(var(--create-survey-spacing-ref) * 0.78 + 8px);
@@ -52,11 +52,11 @@
   --content-max-width: 1218px;
   --surveys-max-width: 1042px;
 
-  /* Category dropdown: gemeinsame Box (Sort + Create) */
+  
   --category-dropdown-width: 206px;
   --category-dropdown-trigger-padding-inline-start: 10px;
   --category-dropdown-trigger-padding-inline-end: 6px;
-  /* Caption unter Create: gleicher link/rechts Einzug wie Chip im Trigger */
+  
   --category-dropdown-chip-padding-inline: 8px;
   --category-dropdown-caption-offset-inline-start: 0px;
 }

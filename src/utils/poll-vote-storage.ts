@@ -2,6 +2,7 @@ const VOTED_POLLS_STORAGE_KEY = 'poll-app:voted-polls';
 const VOTED_POLL_OPTION_IDS_KEY = 'poll-app:voted-option-ids';
 const SESSION_VOTE_OPTION_PREFIX = 'poll-app:session-vote-option:';
 
+/** Builds the sessionStorage key for one poll's chosen option id. */
 function sessionVoteOptionKey(pollId: string): string {
   return SESSION_VOTE_OPTION_PREFIX + pollId;
 }
@@ -39,7 +40,7 @@ function writeVoteOptionIds(map: Record<string, string>): void {
   try {
     window.localStorage.setItem(VOTED_POLL_OPTION_IDS_KEY, JSON.stringify(map));
   } catch {
-    //
+    return;
   }
 }
 
@@ -53,11 +54,12 @@ export function getSessionVoteOptionId(pollId: string): string | null {
   }
 }
 
+/** Stores the chosen option id for one poll in sessionStorage. */
 function writeSessionVoteOptionId(pollId: string, optionId: string): void {
   try {
     sessionStorage.setItem(sessionVoteOptionKey(pollId), optionId);
   } catch {
-    //
+    return;
   }
 }
 
@@ -143,6 +145,6 @@ export function clearUserVoteOnPoll(pollId: string): void {
   try {
     sessionStorage.removeItem(sessionVoteOptionKey(pollId));
   } catch {
-    //
+    return;
   }
 }

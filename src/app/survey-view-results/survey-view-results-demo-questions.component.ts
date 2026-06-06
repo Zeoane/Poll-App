@@ -1,5 +1,25 @@
 import { Component, Input } from '@angular/core';
 
+type Q2Key = 'a' | 'b' | 'c' | 'd' | 'e';
+const Q2_KEYS: readonly Q2Key[] = ['a', 'b', 'c', 'd', 'e'];
+
+/** Keeps only the first selected Q2 option when multi-select is disabled. */
+function collapseQ2Selections(
+  selections: Record<Q2Key, boolean>,
+): void {
+  let kept = false;
+  for (const key of Q2_KEYS) {
+    if (!selections[key]) {
+      continue;
+    }
+    if (kept) {
+      selections[key] = false;
+    } else {
+      kept = true;
+    }
+  }
+}
+
 @Component({
   selector: 'app-survey-view-results-demo-questions',
   standalone: true,
@@ -13,62 +33,52 @@ import { Component, Input } from '@angular/core';
   ],
 })
 export class SurveyViewResultsDemoQuestionsComponent {
-  /** In template preview, render Question 1 here so all items share the same host (same grid/hit-testing as Q2–Q4). */
   @Input() leadWithTemplateQ1 = false;
 
-  /** Template preview — Question 1 (button toggles avoid fragile checkbox hit-testing). */
   previewQ1Checked = { a: false, b: false, c: false, d: false };
 
-  /** Questions 2–4 — same pattern */
   demoPreview = {
     q2: { a: false, b: false, c: false, d: false, e: false },
     q3: { a: false, b: false, c: false, d: false },
     q4: { a: false, b: false, c: false },
   };
 
+  q2MultipleEnabled = false;
+
+  /** Toggles one template preview option in question 1. */
   toggleQ1(key: 'a' | 'b' | 'c' | 'd'): void {
     this.previewQ1Checked[key] = !this.previewQ1Checked[key];
   }
 
-  /** Question 2: allow multiple option selections only after the hint control is activated. */
-  q2MultipleEnabled = false;
-
+  /** Toggles multi-select mode for demo question 2. */
   toggleQ2MultipleHint(): void {
     this.q2MultipleEnabled = !this.q2MultipleEnabled;
     if (!this.q2MultipleEnabled) {
-      const keys = ['a', 'b', 'c', 'd', 'e'] as const;
-      let kept = false;
-      for (const k of keys) {
-        if (!this.demoPreview.q2[k]) {
-          continue;
-        }
-        if (kept) {
-          this.demoPreview.q2[k] = false;
-        } else {
-          kept = true;
-        }
-      }
+      collapseQ2Selections(this.demoPreview.q2);
     }
   }
 
-  toggleQ2(key: 'a' | 'b' | 'c' | 'd' | 'e'): void {
+  /** Toggles one option in demo question 2. */
+  toggleQ2(key: Q2Key): void {
     if (this.q2MultipleEnabled) {
       this.demoPreview.q2[key] = !this.demoPreview.q2[key];
       return;
     }
     const wasOn = this.demoPreview.q2[key];
-    for (const k of ['a', 'b', 'c', 'd', 'e'] as const) {
-      this.demoPreview.q2[k] = false;
+    for (const entry of Q2_KEYS) {
+      this.demoPreview.q2[entry] = false;
     }
     if (!wasOn) {
       this.demoPreview.q2[key] = true;
     }
   }
 
+  /** Toggles one option in demo question 3. */
   toggleQ3(key: 'a' | 'b' | 'c' | 'd'): void {
     this.demoPreview.q3[key] = !this.demoPreview.q3[key];
   }
 
+  /** Toggles one option in demo question 4. */
   toggleQ4(key: 'a' | 'b' | 'c'): void {
     this.demoPreview.q4[key] = !this.demoPreview.q4[key];
   }

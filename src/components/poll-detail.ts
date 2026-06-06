@@ -76,7 +76,7 @@ export class PollDetailController {
     const section = document.createElement('section');
     section.className = 'poll-detail__voting';
     section.setAttribute('aria-labelledby', 'poll-detail-voting-heading');
-    section.append(buildSectionHeading('poll-detail-voting-heading', 'Deine Stimme'));
+    section.append(buildSectionHeading('poll-detail-voting-heading', 'Your vote'));
     section.append(hasVoted ? buildVotedNotice() : this.buildOptionList(poll));
     return section;
   }
@@ -110,7 +110,7 @@ export class PollDetailController {
     section.className = 'poll-detail__results';
     section.setAttribute('aria-labelledby', 'poll-detail-results-heading');
     section.append(
-      buildSectionHeading('poll-detail-results-heading', 'Aktuelle Auswertung'),
+      buildSectionHeading('poll-detail-results-heading', 'Current results'),
       buildTotalLabel(total),
       buildResultList(poll, total),
     );
@@ -124,7 +124,7 @@ export class PollDetailController {
     const closeButton = document.createElement('button');
     closeButton.type = 'button';
     closeButton.className = 'button button--secondary';
-    closeButton.textContent = 'Schließen';
+    closeButton.textContent = 'Close';
     closeButton.addEventListener('click', () => this.dialog.close());
     footer.append(closeButton);
     return footer;
@@ -158,10 +158,10 @@ function buildHeaderMeta(deadline: Date | null): HTMLParagraphElement {
   const meta = document.createElement('p');
   meta.className = 'poll-detail__meta';
   if (deadline === null) {
-    meta.textContent = 'Diese Umfrage hat keine Deadline.';
+    meta.textContent = 'This survey has no deadline.';
     return meta;
   }
-  meta.textContent = `Endet ${formatRelative(deadline)} (${formatDateTime(deadline)})`;
+  meta.textContent = `Ends ${formatRelative(deadline)} (${formatDateTime(deadline)})`;
   return meta;
 }
 
@@ -186,7 +186,7 @@ function buildSectionHeading(id: string, text: string): HTMLHeadingElement {
 function buildVotedNotice(): HTMLParagraphElement {
   const info = document.createElement('p');
   info.className = 'poll-detail__info';
-  info.textContent = 'Danke! Du hast bereits abgestimmt.';
+  info.textContent = 'Thanks! You have already voted.';
   return info;
 }
 
@@ -194,8 +194,8 @@ function buildVotedNotice(): HTMLParagraphElement {
 function buildTotalLabel(total: number): HTMLParagraphElement {
   const label = document.createElement('p');
   label.className = 'poll-detail__total';
-  const noun = total === 1 ? 'Stimme' : 'Stimmen';
-  label.textContent = `${total} ${noun} insgesamt`;
+  const noun = total === 1 ? 'vote' : 'votes';
+  label.textContent = `${total} ${noun} total`;
   return label;
 }
 

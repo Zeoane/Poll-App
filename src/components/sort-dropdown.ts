@@ -14,6 +14,7 @@ export interface SortDropdownControllerOptions {
 export class SortDropdownController {
   private readonly dropdown: CategoryListDropdown;
 
+  /** Wires the home sort dropdown to the shared poll service filter. */
   public constructor(options: SortDropdownControllerOptions) {
     this.dropdown = new CategoryListDropdown({
       trigger: requireElementById('sort-button', HTMLButtonElement),
