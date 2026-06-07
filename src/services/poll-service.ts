@@ -9,16 +9,22 @@ import { buildExampleVoterChoices } from '../utils/voter-choices.helpers';
 
 import { buildExamplePolls, isExamplePoll } from '../data/example-polls';
 
+import { upsertPollInList, pollHasQuestionDetail } from './poll-service-cache.helpers';
 import {
   castExampleVote,
   changeExampleVote,
   retractExampleVote,
 } from './poll-service-example-vote';
+import {
+  comparePollsByDeadline,
+  getQuestionVoteTotal as sumQuestionVotes,
+  getTotalVotes as sumPollVotes,
+  isPollEnded as pollHasEnded,
+  listActivePolls,
+  listEndingSoonPolls,
+  listPastPolls,
+} from './poll-service-poll.helpers';
 import { SupabaseSurveyRepository } from './supabase-survey.repository';
-
-const HOUR_IN_MS = 60 * 60 * 1000;
-const DAY_IN_MS = 24 * HOUR_IN_MS;
-const ENDING_SOON_THRESHOLD_MS = 3 * DAY_IN_MS;
 
 type PollListener = (polls: ReadonlyArray<Poll>) => void;
 type SurveyListener = () => void;
@@ -97,27 +103,17 @@ export class PollService {
 
   /** Lists non-ended polls matching the category filter (sorted by deadline). */
   public getActivePolls(): ReadonlyArray<Poll> {
-    const now = Date.now();
-    return this.polls
-      .filter((poll) => !this.isPollEnded(poll, now))
-      .filter((poll) => this.matchesActiveCategory(poll));
+    return listActivePolls(this.polls, this.activeCategory);
   }
 
   /** Lists ended polls matching the category filter (sorted by deadline). */
   public getPastPolls(): ReadonlyArray<Poll> {
-    const now = Date.now();
-    return this.polls
-      .filter((poll) => this.isPollEnded(poll, now))
-      .filter((poll) => this.matchesActiveCategory(poll));
+    return listPastPolls(this.polls, this.activeCategory);
   }
 
   /** Lists soon-ending active polls ignoring the category filter. */
   public getEndingSoonPolls(): ReadonlyArray<Poll> {
-    const now = Date.now();
-    const threshold = now + ENDING_SOON_THRESHOLD_MS;
-    return this.polls
-      .filter((poll) => !this.isPollEnded(poll, now))
-      .filter((poll) => this.isWithinWindow(poll, now, threshold));
+    return listEndingSoonPolls(this.polls);
   }
 
   /** Looks up a poll by id from the in-memory cache. */
@@ -146,7 +142,7 @@ export class PollService {
     if (isExamplePoll(cached)) {
       return cached;
     }
-    if (cached !== undefined && this.hasQuestionDetail(cached)) {
+    if (cached !== undefined && pollHasQuestionDetail(cached)) {
       return cached;
     }
     if (!this.repo.isAvailable()) {
@@ -163,10 +159,7 @@ export class PollService {
 
   /** True when the poll deadline has passed relative to reference time. */
   public isPollEnded(poll: Poll, referenceTimeMs: number = Date.now()): boolean {
-    if (poll.deadline === null) {
-      return false;
-    }
-    return poll.deadline.getTime() <= referenceTimeMs;
+    return pollHasEnded(poll, referenceTimeMs);
   }
 
   /** Creates a legacy single-question poll in Supabase. */
@@ -257,18 +250,12 @@ export class PollService {
 
   /** Sums votes across all questions or legacy flat options. */
   public getTotalVotes(poll: Poll): number {
-    if (poll.questions !== undefined && poll.questions.length > 0) {
-      return poll.questions.reduce(
-        (sum, question) => sum + this.getQuestionVoteTotal(question),
-        0,
-      );
-    }
-    return poll.options.reduce((sum, option) => sum + option.votes, 0);
+    return sumPollVotes(poll);
   }
 
   /** Sums votes for one question's options. */
   public getQuestionVoteTotal(question: SurveyQuestion): number {
-    return question.options.reduce((sum, option) => sum + option.votes, 0);
+    return sumQuestionVotes(question);
   }
 
   /** Returns the first question or undefined when detail is missing. */
@@ -313,62 +300,14 @@ export class PollService {
     return detail;
   }
 
-  /** True when the poll category matches the active filter. */
-  private matchesActiveCategory(poll: Poll): boolean {
-    if (this.activeCategory === null) {
-      return true;
-    }
-    return poll.category === this.activeCategory;
-  }
-
-  /** True when a poll already has nested question detail. */
-  private hasQuestionDetail(poll: Poll): boolean {
-    return poll.questions !== undefined && poll.questions.length > 0;
-  }
-
   /** Inserts or replaces one poll in the cache. */
   private upsertPoll(poll: Poll): void {
-    const index = this.polls.findIndex((entry) => entry.id === poll.id);
-    if (index < 0) {
-      this.polls.push(poll);
-      return;
-    }
-    if (isExamplePoll(this.polls[index]) && !isExamplePoll(poll)) {
-      return;
-    }
-    this.polls[index] = poll;
-  }
-
-  /** True when deadline lies strictly between now and threshold. */
-  private isWithinWindow(poll: Poll, nowMs: number, thresholdMs: number): boolean {
-    if (poll.deadline === null) {
-      return false;
-    }
-    const deadlineMs = poll.deadline.getTime();
-    return deadlineMs > nowMs && deadlineMs <= thresholdMs;
+    upsertPollInList(this.polls, poll);
   }
 
   /** Sorts all polls: nearest end date first; no deadline last. */
   private sortPollsByDeadline(): void {
-    this.polls.sort((a, b) => this.compareByDeadline(a, b));
-  }
-
-  /** Sorts by ascending deadline; missing deadlines go last. */
-  private compareByDeadline(a: Poll, b: Poll): number {
-    if (a.deadline === null && b.deadline === null) {
-      return a.createdAt.getTime() - b.createdAt.getTime();
-    }
-    if (a.deadline === null) {
-      return 1;
-    }
-    if (b.deadline === null) {
-      return -1;
-    }
-    const byDeadline = a.deadline.getTime() - b.deadline.getTime();
-    if (byDeadline !== 0) {
-      return byDeadline;
-    }
-    return a.createdAt.getTime() - b.createdAt.getTime();
+    this.polls.sort(comparePollsByDeadline);
   }
 
   /** Starts realtime listening when the first survey listener attaches. */

@@ -82,6 +82,16 @@ export class SurveyViewResultsComponent {
     return resolveDisplayQuestions(poll);
   }
 
+  /** First votable question for example polls on the survey page. */
+  public primaryQuestion(poll: Poll): SurveyQuestion | undefined {
+    return this.displayQuestions(poll)[0];
+  }
+
+  /** Example polls from the home list also show demo questions 2–4. */
+  public showDemoFollowUpQuestions(): boolean {
+    return this.viewMode === 'template' || this.currentPoll?.isExample === true;
+  }
+
   /** Returns the chosen option ids for one question. */
   public chosenOptionsForQuestion(questionId: string): ReadonlyArray<string> {
     return this.pollChosenByQuestion()[questionId] ?? [];

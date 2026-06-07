@@ -8,6 +8,14 @@ import {
   mapSurveyDetailToPoll,
   mapSurveyRowToListPoll,
 } from './supabase-survey.mapper';
+import {
+  buildOptionInsertRows,
+  buildQuestionInsertRow,
+  buildSurveyInsertRow,
+  groupResponsesByQuestion,
+  subscribeSurveyResponseChannel,
+  throwOnSupabaseError,
+} from './supabase-survey.repository.helpers';
 
 type DbClient = SupabaseClient<Database>;
 type ClientGetter = () => DbClient | null;
@@ -34,9 +42,7 @@ export class SupabaseSurveyRepository {
       .select('question_id, option_id')
       .eq('survey_id', surveyId)
       .eq('voter_token', getVoterToken());
-    if (error !== null) {
-      throw new Error(error.message);
-    }
+    throwOnSupabaseError(error);
     return groupResponsesByQuestion(data ?? []);
   }
 
@@ -78,9 +84,7 @@ export class SupabaseSurveyRepository {
       p_option_id: optionId,
       p_voter_token: getVoterToken(),
     });
-    if (error !== null) {
-      throw new Error(error.message);
-    }
+    throwOnSupabaseError(error);
   }
 
   /** Removes one vote through the retract_survey_vote RPC. */
@@ -91,9 +95,7 @@ export class SupabaseSurveyRepository {
       p_option_id: optionId,
       p_voter_token: getVoterToken(),
     });
-    if (error !== null) {
-      throw new Error(error.message);
-    }
+    throwOnSupabaseError(error);
   }
 
   /** Subscribes to response changes for one survey. */
@@ -105,19 +107,7 @@ export class SupabaseSurveyRepository {
     if (client === null) {
       return () => undefined;
     }
-    const channel = client
-      .channel(`survey-responses:${surveyId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'survey_responses',
-          filter: `survey_id=eq.${surveyId}`,
-        },
-        () => onChange(),
-      )
-      .subscribe();
+    const channel = subscribeSurveyResponseChannel(client, surveyId, onChange);
     return () => {
       void client.removeChannel(channel);
     };
@@ -145,9 +135,7 @@ export class SupabaseSurveyRepository {
       .select('*')
       .eq('status', status)
       .order('created_at', { ascending: false });
-    if (error !== null) {
-      throw new Error(error.message);
-    }
+    throwOnSupabaseError(error);
     return (data ?? []).map(mapSurveyRowToListPoll);
   }
 
@@ -161,9 +149,7 @@ export class SupabaseSurveyRepository {
       .select('*')
       .eq('id', surveyId)
       .maybeSingle();
-    if (error !== null) {
-      throw new Error(error.message);
-    }
+    throwOnSupabaseError(error);
     return data;
   }
 
@@ -177,9 +163,7 @@ export class SupabaseSurveyRepository {
       .select('*')
       .eq('survey_id', surveyId)
       .order('sort_order', { ascending: true });
-    if (error !== null) {
-      throw new Error(error.message);
-    }
+    throwOnSupabaseError(error);
     return data ?? [];
   }
 
@@ -197,9 +181,7 @@ export class SupabaseSurveyRepository {
       .select('*')
       .in('question_id', questionIds)
       .order('sort_order', { ascending: true });
-    if (error !== null) {
-      throw new Error(error.message);
-    }
+    throwOnSupabaseError(error);
     return data ?? [];
   }
 
@@ -212,9 +194,7 @@ export class SupabaseSurveyRepository {
       .from('question_result_stats')
       .select('*')
       .eq('survey_id', surveyId);
-    if (error !== null) {
-      throw new Error(error.message);
-    }
+    throwOnSupabaseError(error);
     return data ?? [];
   }
 
@@ -225,17 +205,12 @@ export class SupabaseSurveyRepository {
   ): Promise<string> {
     const { data, error } = await client
       .from('surveys')
-      .insert({
-        title: input.title.trim(),
-        description: input.description.trim(),
-        category: input.category,
-        deadline: input.deadline === null ? null : input.deadline.toISOString(),
-        status: 'published',
-      })
+      .insert(buildSurveyInsertRow(input))
       .select('id')
       .single();
-    if (error !== null) {
-      throw new Error(error.message);
+    throwOnSupabaseError(error);
+    if (data === null) {
+      throw new Error('Survey insert returned no row.');
     }
     return data.id;
   }
@@ -260,16 +235,12 @@ export class SupabaseSurveyRepository {
   ): Promise<void> {
     const { data, error } = await client
       .from('questions')
-      .insert({
-        survey_id: surveyId,
-        sort_order: sortOrder,
-        prompt: question.prompt.trim(),
-        allow_multiple: question.allowMultiple,
-      })
+      .insert(buildQuestionInsertRow(surveyId, question, sortOrder))
       .select('id')
       .single();
-    if (error !== null) {
-      throw new Error(error.message);
+    throwOnSupabaseError(error);
+    if (data === null) {
+      throw new Error('Question insert returned no row.');
     }
     await this.insertOptionRows(client, data.id, question.answers);
   }
@@ -280,34 +251,11 @@ export class SupabaseSurveyRepository {
     questionId: string,
     answers: ReadonlyArray<string>,
   ): Promise<void> {
-    const rows = answers.map((label, index) => ({
-      question_id: questionId,
-      sort_order: index + 1,
-      label: label.trim(),
-    }));
+    const rows = buildOptionInsertRows(questionId, answers);
     if (rows.length === 0) {
       return;
     }
     const { error } = await client.from('question_options').insert(rows);
-    if (error !== null) {
-      throw new Error(error.message);
-    }
+    throwOnSupabaseError(error);
   }
-}
-
-/** Groups flat response rows into question → option id lists. */
-function groupResponsesByQuestion(
-  rows: ReadonlyArray<{ question_id: string; option_id: string }>,
-): VoterChoicesByQuestion {
-  const grouped = new Map<string, string[]>();
-  for (const row of rows) {
-    const existing = grouped.get(row.question_id) ?? [];
-    existing.push(row.option_id);
-    grouped.set(row.question_id, existing);
-  }
-  const result: Record<string, ReadonlyArray<string>> = {};
-  for (const [questionId, optionIds] of grouped.entries()) {
-    result[questionId] = optionIds;
-  }
-  return result;
 }

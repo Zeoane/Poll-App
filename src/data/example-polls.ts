@@ -12,10 +12,10 @@ export function isExamplePoll(poll: Poll | undefined): boolean {
   return poll?.isExample === true;
 }
 
-/** Clones a mock poll into a published example with one question block. */
+/** Clones a mock poll into a published example with one votable question. */
 function toExamplePoll(poll: Poll): Poll {
   const options = cloneOptions(poll.options);
-  const question = buildExampleQuestion(poll.id, options);
+  const question = buildExampleQuestion(poll.id, options, exampleQuestionPrompt(poll));
   return {
     ...poll,
     options,
@@ -25,15 +25,24 @@ function toExamplePoll(poll: Poll): Poll {
   };
 }
 
-/** Builds the single question used by legacy example surveys. */
+/** Returns the Q1 prompt shown on example survey cards. */
+function exampleQuestionPrompt(poll: Poll): string {
+  if (poll.id === 'poll-1') {
+    return 'Which date would work best for you?';
+  }
+  return 'Choose one option';
+}
+
+/** Builds the single votable question used by home-screen example surveys. */
 function buildExampleQuestion(
   pollId: string,
   options: ReadonlyArray<PollOption>,
+  prompt: string,
 ): SurveyQuestion {
   return {
     id: `${pollId}-q1`,
     sortOrder: 1,
-    prompt: 'Choose one option',
+    prompt,
     allowMultiple: false,
     options,
   };

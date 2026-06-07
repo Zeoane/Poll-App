@@ -1,9 +1,9 @@
-let idSeq = 0;
+let rowIdSequence = 0;
 
 /** Builds a short unique id string for question/answer rows. */
 export function nextSurveyRowId(prefix: string): string {
-  idSeq += 1;
-  return `${prefix}-${Date.now()}-${idSeq}`;
+  rowIdSequence += 1;
+  return `${prefix}-${Date.now()}-${rowIdSequence}`;
 }
 
 export interface AnswerRow {

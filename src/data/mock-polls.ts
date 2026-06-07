@@ -54,7 +54,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
   {
     id: 'poll-4',
     title: 'Healthier future: Fit & wellness survey!',
-    description: 'An open survey without a fixed end date.',
+    description: 'Share your ideas for a healthier workplace culture.',
     category: 'Health & Wellness',
     options: [
       { id: 'opt-4-a', label: 'More breaks', votes: 10 },
@@ -62,7 +62,7 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
       { id: 'opt-4-c', label: 'Mental Health Days', votes: 18 },
     ],
     createdAt: relativeDate(-7 * DAY_IN_MS),
-    deadline: null,
+    deadline: relativeDate(2 * DAY_IN_MS),
   },
   {
     id: 'poll-5',

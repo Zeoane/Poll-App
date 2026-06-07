@@ -20,6 +20,19 @@ export function mapSurveyRowToListPoll(row: SurveyRow): Poll {
   };
 }
 
+/** Maps and sorts question rows with options and aggregated vote counts. */
+function mapSurveyQuestions(
+  questions: readonly QuestionRow[],
+  options: readonly QuestionOptionRow[],
+  stats: readonly QuestionResultStatRow[],
+): SurveyQuestion[] {
+  const voteByOption = buildVoteCountMap(stats);
+  return questions
+    .slice()
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((question) => mapQuestionRow(question, options, voteByOption));
+}
+
 /** Builds a full poll with nested questions and vote counts. */
 export function mapSurveyDetailToPoll(
   survey: SurveyRow,
@@ -27,11 +40,7 @@ export function mapSurveyDetailToPoll(
   options: readonly QuestionOptionRow[],
   stats: readonly QuestionResultStatRow[],
 ): Poll {
-  const voteByOption = buildVoteCountMap(stats);
-  const mappedQuestions = questions
-    .slice()
-    .sort((a, b) => a.sort_order - b.sort_order)
-    .map((question) => mapQuestionRow(question, options, voteByOption));
+  const mappedQuestions = mapSurveyQuestions(questions, options, stats);
   const firstOptions = mappedQuestions[0]?.options ?? [];
   return {
     id: survey.id,

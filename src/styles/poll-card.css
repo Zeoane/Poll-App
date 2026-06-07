@@ -82,6 +82,13 @@
   outline-offset: 2px;
 }
 
+.poll-card__category,
+.poll-card__title,
+.poll-card__pill {
+  position: relative;
+  z-index: 1;
+}
+
 .poll-card__category {
   margin: 0;
   font-family: var(--font-body);

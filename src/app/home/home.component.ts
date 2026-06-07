@@ -14,7 +14,6 @@ import { bootstrapPollAppHome, getSharedPollService } from '../app-legacy-bootst
   standalone: true,
   imports: [RouterLink],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css',
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
   private readonly router = inject(Router);

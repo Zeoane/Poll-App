@@ -62,38 +62,69 @@
 
             <div class="create-card__questions">
               @if (viewMode === 'poll' && currentPoll; as poll) {
-              @for (question of displayQuestions(poll); track question.id; let qi = $index) {
-              <article class="create-q">
-                <h2 class="create-q__title">
-                  <span class="create-q__title-num">{{ qi + 1 }}.</span><span class="create-q__title-body">{{ question.prompt }}</span>
-                </h2>
-                <p class="create-q__hint">{{ pollVoteHint(question) }}</p>
-                <ul class="create-q__opts">
-                  @for (opt of question.options; track opt.id; let i = $index) {
-                  <li>
-                    <button
-                      type="button"
-                      class="create-check create-check--vote-trigger"
-                      [class.create-check--vote-selected]="isOptionChosen(question.id, opt.id)"
-                      [attr.aria-pressed]="isOptionChosen(question.id, opt.id)"
-                      [disabled]="pollVoteButtonsDisabled()"
-                      (click)="voteForQuestion(question.id, opt.id)"
-                    >
-                      <span class="create-check__box" aria-hidden="true"></span>
-                      <span class="create-check__text">
-                        <span class="create-check__letter">{{ optionLetter(i) }}</span>
-                        <span class="create-check__body">{{ opt.label }}</span>
-                      </span>
-                    </button>
-                  </li>
+                @if (poll.isExample) {
+                  @if (primaryQuestion(poll); as question) {
+                  <article class="create-q">
+                    <h2 class="create-q__title">
+                      <span class="create-q__title-num">1.</span><span class="create-q__title-body">{{ question.prompt }}</span>
+                    </h2>
+                    <p class="create-q__hint">{{ pollVoteHint(question) }}</p>
+                    <ul class="create-q__opts">
+                      @for (opt of question.options; track opt.id; let i = $index) {
+                      <li>
+                        <button
+                          type="button"
+                          class="create-check create-check--vote-trigger"
+                          [class.create-check--vote-selected]="isOptionChosen(question.id, opt.id)"
+                          [attr.aria-pressed]="isOptionChosen(question.id, opt.id)"
+                          [disabled]="pollVoteButtonsDisabled()"
+                          (click)="voteForQuestion(question.id, opt.id)"
+                        >
+                          <span class="create-check__box" aria-hidden="true"></span>
+                          <span class="create-check__text">
+                            <span class="create-check__letter">{{ optionLetter(i) }}</span>
+                            <span class="create-check__body">{{ opt.label }}</span>
+                          </span>
+                        </button>
+                      </li>
+                      }
+                    </ul>
+                  </article>
                   }
-                </ul>
-              </article>
-              }
+                } @else {
+                  @for (question of displayQuestions(poll); track question.id; let qi = $index) {
+                  <article class="create-q">
+                    <h2 class="create-q__title">
+                      <span class="create-q__title-num">{{ qi + 1 }}.</span><span class="create-q__title-body">{{ question.prompt }}</span>
+                    </h2>
+                    <p class="create-q__hint">{{ pollVoteHint(question) }}</p>
+                    <ul class="create-q__opts">
+                      @for (opt of question.options; track opt.id; let i = $index) {
+                      <li>
+                        <button
+                          type="button"
+                          class="create-check create-check--vote-trigger"
+                          [class.create-check--vote-selected]="isOptionChosen(question.id, opt.id)"
+                          [attr.aria-pressed]="isOptionChosen(question.id, opt.id)"
+                          [disabled]="pollVoteButtonsDisabled()"
+                          (click)="voteForQuestion(question.id, opt.id)"
+                        >
+                          <span class="create-check__box" aria-hidden="true"></span>
+                          <span class="create-check__text">
+                            <span class="create-check__letter">{{ optionLetter(i) }}</span>
+                            <span class="create-check__body">{{ opt.label }}</span>
+                          </span>
+                        </button>
+                      </li>
+                      }
+                    </ul>
+                  </article>
+                  }
+                }
               }
 
-              @if (viewMode === 'template') {
-              <app-survey-view-results-demo-questions [leadWithTemplateQ1]="true" />
+              @if (showDemoFollowUpQuestions()) {
+              <app-survey-view-results-demo-questions [leadWithTemplateQ1]="viewMode === 'template'" />
               }
             </div>
 

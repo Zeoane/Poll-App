@@ -33,6 +33,19 @@ export class SurveyViewResultsLivePanelComponent {
     return resolveDisplayQuestions(poll);
   }
 
+  /** First votable question for example polls. */
+  public primaryQuestion(poll: Poll): SurveyQuestion | undefined {
+    return this.displayQuestions(poll)[0];
+  }
+
+  /** Template and home example polls show static demo blocks for questions 2–4. */
+  public showDemoFollowUpBlocks(): boolean {
+    if (this.viewMode() === 'template') {
+      return true;
+    }
+    return this.viewMode() === 'poll' && this.currentPoll()?.isExample === true;
+  }
+
   /** Computes vote share percent for one option within one question. */
   public questionOptionPercent(question: SurveyQuestion, option: PollOption): number {
     const total = getSharedPollService().getQuestionVoteTotal(question);
