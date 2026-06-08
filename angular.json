@@ -73,6 +73,10 @@
             },
             "development": {
               "buildTarget": "poll-app:build:development"
+            },
+            "fz-path": {
+              "buildTarget": "poll-app:build:development,fz-server",
+              "servePath": "angular-projects/pollapp"
             }
           },
           "defaultConfiguration": "development"

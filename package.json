@@ -6,9 +6,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve -o",
-    "start:fz-path": "ng serve -o --base-href=/angular-projects/pollapp/ --serve-path=angular-projects/pollapp",
+    "start:fz-path": "ng serve -o --configuration=fz-path",
     "build": "ng build",
     "build:fz": "ng build --configuration=production,fz-server",
+    "deploy:fz": "ng build --configuration=production,fz-server",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
