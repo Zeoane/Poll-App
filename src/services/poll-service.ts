@@ -10,11 +10,8 @@ import { buildExampleVoterChoices } from '../utils/voter-choices.helpers';
 import { buildExamplePolls, isExamplePoll } from '../data/example-polls';
 
 import { upsertPollInList, pollHasQuestionDetail } from './poll-service-cache.helpers';
-import {
-  castExampleVote,
-  changeExampleVote,
-  retractExampleVote,
-} from './poll-service-example-vote';
+import { runChangeVoteOnQuestion } from './poll-service-change-vote.helpers';
+import { castExampleVote, retractExampleVote } from './poll-service-example-vote';
 import {
   comparePollsByDeadline,
   getQuestionVoteTotal as sumQuestionVotes,
@@ -237,15 +234,11 @@ export class PollService {
     if (poll === undefined || this.isPollEnded(poll)) {
       return undefined;
     }
-    if (isExamplePoll(poll)) {
-      const updated = changeExampleVote(poll, questionId, fromOptionId, toOptionId);
-      return updated === undefined ? undefined : this.commitExamplePoll(updated);
-    }
-    const retracted = await this.retractVoteOnQuestion(pollId, questionId, fromOptionId);
-    if (retracted === undefined) {
-      return undefined;
-    }
-    return this.voteOnQuestion(pollId, questionId, toOptionId);
+    return runChangeVoteOnQuestion(poll, pollId, questionId, fromOptionId, toOptionId, {
+      retractVoteOnQuestion: (id, qId, opt) => this.retractVoteOnQuestion(id, qId, opt),
+      voteOnQuestion: (id, qId, opt) => this.voteOnQuestion(id, qId, opt),
+      commitExamplePoll: (updated) => this.commitExamplePoll(updated),
+    });
   }
 
   /** Sums votes across all questions or legacy flat options. */
