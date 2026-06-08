@@ -1,5 +1,33 @@
 # Poll-App
 
+## Inhaltsverzeichnis / Table of contents
+
+**<a href="#de" style="color:#0366d6;text-decoration:underline;">Deutsch</a>**
+
+- [Demokarten (Demo-Umfragen)](#de-demokarten)
+- [Voraussetzungen](#de-voraussetzungen)
+- [Setup](#de-setup)
+- [Entwicklung](#de-entwicklung)
+- [Build](#de-build)
+- [Tests](#de-tests)
+- [Projektstruktur](#de-projektstruktur)
+- [User-Story-Abdeckung](#de-user-stories)
+- [Coding-Konventionen](#de-coding-konventionen)
+
+**<a href="#en" style="color:#0366d6;text-decoration:underline;">English</a>**
+
+- [Demo survey cards](#en-demo-survey-cards)
+- [Prerequisites](#en-prerequisites)
+- [Setup](#en-setup)
+- [Development](#en-development)
+- [Build](#en-build)
+- [Tests](#en-tests)
+- [Project structure](#en-project-structure)
+- [User story coverage](#en-user-stories)
+- [Coding conventions](#en-coding-conventions)
+
+<a id="de"></a>
+
 Eine Web-Applikation zum Erstellen, Verwalten und Teilnehmen an Umfragen.
 Aufgesetzt mit **Angular 19** (Application Builder) und **TypeScript**.
 Die UI-Logik läuft zunächst als bestehende Controller-Klassen, angebunden über
@@ -7,6 +35,8 @@ Die UI-Logik läuft zunächst als bestehende Controller-Klassen, angebunden übe
 
 Styles liegen modular unter `src/styles/` mit Einstieg `main.css` (in
 `angular.json` als globales Stylesheet eingetragen).
+
+<a id="de-demokarten"></a>
 
 ## Demokarten (Demo-Umfragen)
 
@@ -27,16 +57,22 @@ Umfragen in der Übersicht. Auf der Survey-Seite zeigen Demoumfragen für die
 Fragen 2–4 statische Vorschau-Inhalte; nur Frage 1 ist für die Demo-Karte
 interaktiv abstimmbar.
 
+<a id="de-voraussetzungen"></a>
+
 ## Voraussetzungen
 
 - [Node.js](https://nodejs.org/) ≥ 18
 - npm (wird mit Node.js installiert)
+
+<a id="de-setup"></a>
 
 ## Setup
 
 ```bash
 npm install
 ```
+
+<a id="de-entwicklung"></a>
 
 ## Entwicklung
 
@@ -46,6 +82,8 @@ npm start
 
 Entspricht `ng serve -o` und öffnet die App im Browser (standardmäßig
 `http://localhost:4200`).
+
+<a id="de-build"></a>
 
 ## Build
 
@@ -69,11 +107,15 @@ Inhalt von `dist/poll-app/browser/` auf den Server unter den Ordner `angular-pro
 Lokales Testen wie auf dem Unterpfad: `npm run start:fz-path` und im Browser
 `http://localhost:4200/angular-projects/pollapp/` aufrufen.
 
+<a id="de-tests"></a>
+
 ## Tests
 
 ```bash
 npm test
 ```
+
+<a id="de-projektstruktur"></a>
 
 ## Projektstruktur
 
@@ -103,6 +145,8 @@ Poll-App/
     └── assets/img/
 ```
 
+<a id="de-user-stories"></a>
+
 ## User-Story-Abdeckung
 
 | Story | Umsetzung |
@@ -112,6 +156,8 @@ Poll-App/
 | US 3 – Neue Umfrage anlegen   | `PollFormController` öffnet `<dialog>` mit Pflicht-/Optionalfeldern und Validierung |
 | US 4 – Detailansicht          | `PollDetailController.open` öffnet die Detailansicht; beendete Umfragen sind nicht klickbar |
 | US 5 – Voten + Live-Ergebnis  | `PollDetailController` rendert Voting links und Auswertung rechts; Live-Update via Service-Subscription |
+
+<a id="de-coding-konventionen"></a>
 
 ## Coding-Konventionen
 
@@ -140,6 +186,8 @@ Poll-App/
 
 ---
 
+<a id="en"></a>
+
 # Poll App (English)
 
 A web application for creating, managing, and participating in surveys.
@@ -149,6 +197,8 @@ UI logic currently runs as existing controller classes, wired through
 
 Styles live modularly under `src/styles/` with entry point `main.css` (registered
 in `angular.json` as the global stylesheet).
+
+<a id="en-demo-survey-cards"></a>
 
 ## Demo survey cards
 
@@ -168,16 +218,22 @@ with Supabase configured, they appear **alongside** real surveys in the overview
 On the survey page, demo surveys show static preview content for questions 2–4;
 only question 1 is interactively votable for the demo card.
 
+<a id="en-prerequisites"></a>
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) ≥ 18
 - npm (included with Node.js)
+
+<a id="en-setup"></a>
 
 ## Setup
 
 ```bash
 npm install
 ```
+
+<a id="en-development"></a>
 
 ## Development
 
@@ -187,6 +243,8 @@ npm start
 
 Equivalent to `ng serve -o` and opens the app in the browser (default
 `http://localhost:4200`).
+
+<a id="en-build"></a>
 
 ## Build
 
@@ -213,11 +271,15 @@ Deploy `dist/poll-app/browser/` to `angular-projects/pollapp/` on the server.
 Test locally like on the subpath: `npm run start:fz-path` and open
 `http://localhost:4200/angular-projects/pollapp/`.
 
+<a id="en-tests"></a>
+
 ## Tests
 
 ```bash
 npm test
 ```
+
+<a id="en-project-structure"></a>
 
 ## Project structure
 
@@ -247,6 +309,8 @@ Poll-App/
     └── assets/img/
 ```
 
+<a id="en-user-stories"></a>
+
 ## User story coverage
 
 | Story | Implementation |
@@ -256,6 +320,8 @@ Poll-App/
 | US 3 – Create new survey | `PollFormController` opens `<dialog>` with required/optional fields and validation |
 | US 4 – Detail view | `PollDetailController.open` opens detail view; ended surveys are not clickable |
 | US 5 – Vote + live results | `PollDetailController` renders voting left and results right; live update via service subscription |
+
+<a id="en-coding-conventions"></a>
 
 ## Coding conventions
 

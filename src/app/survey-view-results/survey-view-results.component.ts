@@ -16,7 +16,13 @@ import {
   validateCompleteSurveyForm,
 } from './survey-view-results-form.helpers';
 import { resolveDisplayQuestions } from './survey-view-results-questions.helpers';
-import { toggleVoteForQuestion } from './survey-view-results-vote.helpers';
+import { loadRoutedPoll } from './survey-view-results-route.helpers';
+import {
+  resolvePollVoteContext,
+  toggleVoteForQuestion,
+  type PollVoteContext,
+  type VoteToggleResult,
+} from './survey-view-results-vote.helpers';
 import type { PollService } from '../../services/poll-service';
 import { type Poll, type SurveyQuestion, type VoterChoicesByQuestion } from '../../types/poll';
 import {
@@ -226,16 +232,29 @@ export class SurveyViewResultsComponent {
   /** Loads a poll by route id and subscribes to live updates. */
   private async bindPollRoute(pollId: string): Promise<void> {
     const service = getSharedPollService();
-    await service.initialize();
-    const poll = await service.ensurePollDetail(pollId);
+    const poll = await loadRoutedPoll(pollId, service);
     if (poll === undefined) {
       void this.router.navigateByUrl('/');
       return;
     }
+    await this.attachPollView(poll, pollId, service);
+  }
+
+  /** Binds loaded poll data and restores voter choices. */
+  private async attachPollView(
+    poll: Poll,
+    pollId: string,
+    service: PollService,
+  ): Promise<void> {
     this.viewMode = 'poll';
     this.currentPoll = poll;
     this.applyPollFields(poll);
     await this.restoreVoterChoices(pollId, service);
+    this.subscribeToPollUpdates(pollId, service);
+  }
+
+  /** Subscribes to live poll updates for the active route. */
+  private subscribeToPollUpdates(pollId: string, service: PollService): void {
     this.pollListenerUnsubHolder.unsubscribe = service.subscribeToSurvey(
       pollId,
       () => {
@@ -297,24 +316,49 @@ export class SurveyViewResultsComponent {
     questionId: string,
     optionId: string,
   ): Promise<void> {
-    const poll = this.currentPoll;
-    if (poll === null || this.viewMode !== 'poll') {
+    const context = this.resolveVoteContext(questionId);
+    if (context === undefined) {
       return;
     }
-    const question = this.displayQuestions(poll).find((entry) => entry.id === questionId);
-    if (question === undefined) {
-      return;
-    }
-    const result = await toggleVoteForQuestion(
-      poll,
-      question,
-      optionId,
-      this.chosenOptionsForQuestion(questionId),
-      getSharedPollService(),
-    );
+    const result = await this.toggleQuestionVote(context, optionId);
     if (result === undefined) {
       return;
     }
+    this.commitVoteResult(questionId, result, context.poll);
+  }
+
+  /** Resolves poll view state needed before toggling a vote. */
+  private resolveVoteContext(questionId: string): PollVoteContext | undefined {
+    const poll = this.currentPoll;
+    return resolvePollVoteContext(
+      poll,
+      this.viewMode,
+      questionId,
+      this.chosenOptionsForQuestion(questionId),
+      poll === null ? [] : this.displayQuestions(poll),
+    );
+  }
+
+  /** Delegates one option toggle to the poll service. */
+  private toggleQuestionVote(
+    context: PollVoteContext,
+    optionId: string,
+  ): Promise<VoteToggleResult | undefined> {
+    return toggleVoteForQuestion(
+      context.poll,
+      context.question,
+      optionId,
+      context.currentChoices,
+      getSharedPollService(),
+    );
+  }
+
+  /** Writes vote results into component state and example storage. */
+  private commitVoteResult(
+    questionId: string,
+    result: VoteToggleResult,
+    poll: Poll,
+  ): void {
     this.currentPoll = result.poll;
     this.pollChosenByQuestion.update((choices) => ({
       ...choices,

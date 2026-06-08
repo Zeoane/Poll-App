@@ -1,3 +1,66 @@
+const MIN_END_DATE_LEAD_DAYS = 1;
+
+export type SurveyEndDateIssue = 'invalid' | 'tooSoon';
+
+/** Returns the earliest allowed end date (tomorrow, local midnight). */
+export function minimumSurveyEndDate(reference = new Date()): Date {
+  const min = new Date(reference);
+  min.setHours(0, 0, 0, 0);
+  min.setDate(min.getDate() + MIN_END_DATE_LEAD_DAYS);
+  return min;
+}
+
+/** True when the deadline falls on or after the minimum allowed calendar day. */
+export function isAllowedSurveyEndDate(deadline: Date, reference = new Date()): boolean {
+  const min = minimumSurveyEndDate(reference);
+  const day = new Date(deadline);
+  day.setHours(0, 0, 0, 0);
+  return day.getTime() >= min.getTime();
+}
+
+/** Validates optional end-date text; empty input is allowed. */
+export function validateSurveyEndDateRaw(
+  raw: string,
+  reference = new Date(),
+): SurveyEndDateIssue | null {
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) {
+    return null;
+  }
+  const parsed = parseSurveyEndDate(trimmed);
+  if (parsed === null) {
+    return 'invalid';
+  }
+  if (!isAllowedSurveyEndDate(parsed, reference)) {
+    return 'tooSoon';
+  }
+  return null;
+}
+
+/** User-facing message for one end-date validation issue. */
+export function surveyEndDateErrorMessage(issue: SurveyEndDateIssue): string {
+  if (issue === 'invalid') {
+    return 'Please enter a valid end date.';
+  }
+  return 'End date must be at least one day in the future.';
+}
+
+/** True when the full trimmed string is exactly dd.mm.yyyy. */
+export function looksLikeGermanDmyDate(raw: string): boolean {
+  return /^(\d{2})\.(\d{2})\.(\d{4})$/.test(raw.trim());
+}
+
+/** Parses a strict dd.mm.yyyy string into an end-of-day Date. */
+export function parseGermanDmyDate(raw: string): Date | null {
+  const trimmed = raw.trim();
+  const parsed = tryParseDeDmy(trimmed);
+  if (parsed === null || !isValidCalendarDay(parsed.y, parsed.m, parsed.d)) {
+    return null;
+  }
+  const { y, m, d } = parsed;
+  return new Date(y, m - 1, d, 23, 59, 59, 999);
+}
+
 /** Parses ISO or German date strings into an end-of-day deadline. */
 export function parseSurveyEndDate(raw: string): Date | null {
   const s = raw.trim();

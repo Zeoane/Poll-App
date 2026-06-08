@@ -152,6 +152,12 @@
                   name="endDate"
                   autocomplete="off"
                   [(ngModel)]="endDate"
+                  [class.create-field__input--error]="hasFieldError('endDate')"
+                  [placeholder]="
+                    hasFieldError('endDate') ? endDateFieldErrorMessage() : ''
+                  "
+                  [attr.aria-invalid]="hasFieldError('endDate')"
+                  (ngModelChange)="clearFieldErrorKey('endDate')"
                 />
                 <button
                   type="button"
@@ -251,10 +257,19 @@
                   <span class="create-answer-list__letter">{{ optionLetter(ai) }}</span>
                   <div class="create-field__row create-field__row--answer">
                     <input
+                      [id]="'create-a-' + qi + '-' + ai"
                       class="create-field__input"
                       type="text"
                       [name]="'a-' + qi + '-' + ai"
                       [(ngModel)]="a.text"
+                      [class.create-field__input--error]="hasFieldError(answerFieldKey(qi, ai))"
+                      [placeholder]="
+                        hasFieldError(answerFieldKey(qi, ai))
+                          ? answerFieldErrorMessage(qi, ai)
+                          : ''
+                      "
+                      [attr.aria-invalid]="hasFieldError(answerFieldKey(qi, ai))"
+                      (ngModelChange)="clearFieldErrorKey(answerFieldKey(qi, ai))"
                     />
                     <button
                       type="button"

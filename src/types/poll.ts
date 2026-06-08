@@ -80,4 +80,4 @@ export interface NewPollInput {
 }
 
 /** Field-level validation messages for the legacy poll form. */
-export type ValidationErrors = Partial<Record<'title' | 'options', string>>;
+export type ValidationErrors = Partial<Record<'title' | 'options' | 'deadline', string>>;

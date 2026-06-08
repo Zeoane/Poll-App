@@ -1,3 +1,8 @@
+import {
+  isAllowedSurveyEndDate,
+  minimumSurveyEndDate,
+  surveyEndDateErrorMessage,
+} from '../app/create-survey/create-survey-end-date';
 import type { PollService } from '../services/poll-service';
 import {
   type NewPollInput,
@@ -34,6 +39,30 @@ function validationTitleError(title: string): string | undefined {
   return undefined;
 }
 
+/** Returns a deadline validation message or undefined when valid or empty. */
+function validationDeadlineError(deadline: Date | null): string | undefined {
+  if (deadline === null) {
+    return undefined;
+  }
+  if (Number.isNaN(deadline.getTime())) {
+    return surveyEndDateErrorMessage('invalid');
+  }
+  if (!isAllowedSurveyEndDate(deadline)) {
+    return surveyEndDateErrorMessage('tooSoon');
+  }
+  return undefined;
+}
+
+/** Formats a Date for datetime-local min attributes. */
+function formatDatetimeLocalMin(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 /** Returns an options validation message or undefined when valid. */
 function validationOptionsError(options: ReadonlyArray<string>): string | undefined {
   const uniqueOptions = new Set(options.map((option) => option.toLowerCase()));
@@ -46,7 +75,7 @@ function validationOptionsError(options: ReadonlyArray<string>): string | undefi
   return undefined;
 }
 
-type RequiredField = 'title' | 'options';
+type RequiredField = 'title' | 'options' | 'deadline';
 
 export interface PollFormControllerOptions {
   readonly pollService: PollService;
@@ -83,6 +112,7 @@ function readNewSurveyFields(): {
   deadlineInput: HTMLInputElement;
   titleError: HTMLElement;
   optionsError: HTMLElement;
+  deadlineError: HTMLElement;
 } {
   return {
     titleInput: requireElementById('poll-title', HTMLInputElement),
@@ -91,6 +121,7 @@ function readNewSurveyFields(): {
     deadlineInput: requireElementById('poll-deadline', HTMLInputElement),
     titleError: requireElementById('poll-title-error', HTMLElement),
     optionsError: requireElementById('poll-options-error', HTMLElement),
+    deadlineError: requireElementById('poll-deadline-error', HTMLElement),
   };
 }
 
@@ -107,6 +138,7 @@ export class PollFormController {
   private deadlineInput!: HTMLInputElement;
   private titleError!: HTMLElement;
   private optionsError!: HTMLElement;
+  private deadlineError!: HTMLElement;
 
   /** Wires the modal form to the poll service and DOM nodes. */
   public constructor(options: PollFormControllerOptions) {
@@ -138,6 +170,7 @@ export class PollFormController {
     this.deadlineInput = fields.deadlineInput;
     this.titleError = fields.titleError;
     this.optionsError = fields.optionsError;
+    this.deadlineError = fields.deadlineError;
   }
 
   /** Registers dialog, submit, and field input handlers. */
@@ -151,6 +184,7 @@ export class PollFormController {
     });
     this.titleInput.addEventListener('input', () => this.clearError('title'));
     this.optionsInput.addEventListener('input', () => this.clearError('options'));
+    this.deadlineInput.addEventListener('input', () => this.clearError('deadline'));
   }
 
   /** Resets errors and opens the modal with focus on title. */
@@ -158,6 +192,8 @@ export class PollFormController {
     this.form.reset();
     this.clearError('title');
     this.clearError('options');
+    this.clearError('deadline');
+    this.deadlineInput.min = formatDatetimeLocalMin(minimumSurveyEndDate());
     this.openButton?.classList.remove('button--cta--success');
     this.dialog.showModal();
     this.titleInput.focus();
@@ -224,6 +260,10 @@ export class PollFormController {
     if (optionsErr !== undefined) {
       errors.options = optionsErr;
     }
+    const deadlineErr = validationDeadlineError(input.deadline);
+    if (deadlineErr !== undefined) {
+      errors.deadline = deadlineErr;
+    }
     return errors;
   }
 
@@ -231,6 +271,7 @@ export class PollFormController {
   private applyErrors(errors: ValidationErrors): void {
     this.applyFieldError('title', errors.title);
     this.applyFieldError('options', errors.options);
+    this.applyFieldError('deadline', errors.deadline);
     this.focusFirstInvalid(errors);
   }
 
@@ -240,16 +281,20 @@ export class PollFormController {
       this.clearError(field);
       return;
     }
-    const errorElement = field === 'title' ? this.titleError : this.optionsError;
-    const inputElement = field === 'title' ? this.titleInput : this.optionsInput;
+    const errorElement = this.errorElementForField(field);
+    const inputElement = this.inputElementForField(field);
     errorElement.textContent = message;
     inputElement.setAttribute('aria-invalid', 'true');
   }
 
-  /** Focuses title, then options, based on which error exists. */
+  /** Focuses title, then deadline, then options, based on which error exists. */
   private focusFirstInvalid(errors: ValidationErrors): void {
     if (errors.title !== undefined) {
       this.titleInput.focus();
+      return;
+    }
+    if (errors.deadline !== undefined) {
+      this.deadlineInput.focus();
       return;
     }
     if (errors.options !== undefined) {
@@ -259,9 +304,31 @@ export class PollFormController {
 
   /** Clears inline error state for one field. */
   private clearError(field: RequiredField): void {
-    const errorElement = field === 'title' ? this.titleError : this.optionsError;
-    const inputElement = field === 'title' ? this.titleInput : this.optionsInput;
+    const errorElement = this.errorElementForField(field);
+    const inputElement = this.inputElementForField(field);
     errorElement.textContent = '';
     inputElement.removeAttribute('aria-invalid');
+  }
+
+  /** Resolves the inline error host for one form field. */
+  private errorElementForField(field: RequiredField): HTMLElement {
+    if (field === 'title') {
+      return this.titleError;
+    }
+    if (field === 'deadline') {
+      return this.deadlineError;
+    }
+    return this.optionsError;
+  }
+
+  /** Resolves the input control for one form field. */
+  private inputElementForField(field: RequiredField): HTMLInputElement | HTMLTextAreaElement {
+    if (field === 'title') {
+      return this.titleInput;
+    }
+    if (field === 'deadline') {
+      return this.deadlineInput;
+    }
+    return this.optionsInput;
   }
 }

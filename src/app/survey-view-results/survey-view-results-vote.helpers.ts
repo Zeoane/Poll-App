@@ -8,6 +8,30 @@ export interface VoteToggleResult {
   readonly choices: QuestionChoices;
 }
 
+export interface PollVoteContext {
+  readonly poll: Poll;
+  readonly question: SurveyQuestion;
+  readonly currentChoices: QuestionChoices;
+}
+
+/** Resolves poll, question, and current choices for one vote action. */
+export function resolvePollVoteContext(
+  poll: Poll | null,
+  viewMode: 'template' | 'poll',
+  questionId: string,
+  currentChoices: QuestionChoices,
+  questionsForPoll: ReadonlyArray<SurveyQuestion>,
+): PollVoteContext | undefined {
+  if (poll === null || viewMode !== 'poll') {
+    return undefined;
+  }
+  const question = questionsForPoll.find((entry) => entry.id === questionId);
+  if (question === undefined) {
+    return undefined;
+  }
+  return { poll, question, currentChoices };
+}
+
 /** Toggles one option for single- or multi-select questions. */
 export async function toggleVoteForQuestion(
   poll: Poll,

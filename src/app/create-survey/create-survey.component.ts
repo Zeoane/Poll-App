@@ -14,7 +14,11 @@ import { CategoryListDropdown } from '../../components/category-list-dropdown';
 import { getSharedPollService } from '../app-legacy-bootstrap';
 
 import { attachCreateSurveyCategoryDropdown } from './create-survey-category-bridge';
-import { parseSurveyEndDate } from './create-survey-end-date';
+import {
+  parseSurveyEndDate,
+  surveyEndDateErrorMessage,
+  validateSurveyEndDateRaw,
+} from './create-survey-end-date';
 import {
   answerRowClearAriaLabel,
   appendEmptyQuestion,
@@ -29,6 +33,11 @@ import {
 } from './create-survey.models';
 import { mapQuestionsForPublish } from './create-survey-publish.helpers';
 import {
+  germanAnswerDateErrorMessage,
+  validateGermanAnswerDateRaw,
+} from './create-survey-answer-date.helpers';
+import {
+  answerFieldErrorKey,
   computeCreateSurveyFieldErrors,
   stripQuestionPromptErrorKeys,
 } from './create-survey-validation.helpers';
@@ -94,6 +103,13 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
   /** Clears the optional end date field. */
   protected clearEndDate(): void {
     this.endDate = '';
+    this.clearFieldErrorKey('endDate');
+  }
+
+  /** Returns the end-date error copy when that field is invalid. */
+  protected endDateFieldErrorMessage(): string {
+    const issue = validateSurveyEndDateRaw(this.endDate);
+    return issue === null ? '' : surveyEndDateErrorMessage(issue);
   }
 
   /** Deletes, resets, or ignores a question based on list state. */
@@ -144,6 +160,7 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
     if (row) {
       row.text = '';
     }
+    this.clearFieldErrorKey(answerFieldErrorKey(qIndex, aIndex));
   }
 
   /** Returns the accessible label for an answer clear button. */
@@ -214,7 +231,11 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
   /** Validates the form and starts publishing when valid. */
   protected tryPublish(): void {
     this.publishError.set(null);
-    const errors = computeCreateSurveyFieldErrors(this.surveyName, this.questions);
+    const errors = computeCreateSurveyFieldErrors(
+      this.surveyName,
+      this.questions,
+      this.endDate,
+    );
     this.fieldErrors.set(errors);
     if (Object.keys(errors).length > 0) {
       this.publishError.set(this.fieldFillErrorMessage);
@@ -227,6 +248,21 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
   /** Returns the letter prefix for one answer option index. */
   protected optionLetter(index: number): string {
     return `${String.fromCharCode(65 + index)}.`;
+  }
+
+  /** Returns the publish-validation key for one answer field. */
+  protected answerFieldKey(questionIndex: number, answerIndex: number): string {
+    return answerFieldErrorKey(questionIndex, answerIndex);
+  }
+
+  /** Returns answer-date error copy when that field failed publish validation. */
+  protected answerFieldErrorMessage(questionIndex: number, answerIndex: number): string {
+    const answer = this.questions[questionIndex]?.answers[answerIndex];
+    if (answer === undefined) {
+      return '';
+    }
+    const issue = validateGermanAnswerDateRaw(answer.text);
+    return issue === null ? '' : germanAnswerDateErrorMessage(issue);
   }
 
   /** Persists the survey when the first question block exists. */
@@ -275,11 +311,33 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
       this.focusAndScroll('survey-name');
       return;
     }
+    if (errors['endDate'] === true) {
+      this.focusAndScroll('survey-end');
+      return;
+    }
     const questionIndex = this.questions.findIndex(
       (_, index) => errors[`q-prompt-${index}`] === true,
     );
     if (questionIndex >= 0) {
       this.focusAndScroll(`create-q-prompt-${questionIndex}`);
+      return;
+    }
+    this.focusFirstAnswerPublishError(errors);
+  }
+
+  /** Focuses the first invalid answer field flagged during publish. */
+  private focusFirstAnswerPublishError(errors: Record<string, boolean>): void {
+    for (let qi = 0; qi < this.questions.length; qi += 1) {
+      const question = this.questions[qi];
+      if (question === undefined) {
+        continue;
+      }
+      for (let ai = 0; ai < question.answers.length; ai += 1) {
+        if (errors[answerFieldErrorKey(qi, ai)] === true) {
+          this.focusAndScroll(`create-a-${qi}-${ai}`);
+          return;
+        }
+      }
     }
   }
 
