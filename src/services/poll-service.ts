@@ -11,6 +11,7 @@ import {
   mapLegacyPollToSurveyInput,
 } from './poll-service-create.helpers';
 import {
+  refreshPollDetail,
   resolvePollDetail,
   resolveVoterChoices,
 } from './poll-service-detail.helpers';
@@ -184,6 +185,16 @@ export class PollService {
    */
   public async ensurePollDetail(pollId: string): Promise<Poll | undefined> {
     return resolvePollDetail(pollId, this.detailLookupDeps());
+  }
+
+  /**
+   * Reloads survey detail from Supabase and refreshes the cache.
+   * @param pollId - Survey or example poll id.
+   * @returns Fresh poll with aggregated vote totals.
+   * @remarks Bypasses the in-memory detail cache so live results reflect all voters.
+   */
+  public async refreshSurveyDetail(pollId: string): Promise<Poll | undefined> {
+    return refreshPollDetail(pollId, this.detailLookupDeps());
   }
 
   /**

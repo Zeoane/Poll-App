@@ -1,18 +1,18 @@
 const VOTER_TOKEN_KEY = 'poll-app:voter-token';
 
 /**
- * Returns a stable anonymous voter token stored in localStorage.
- * @returns Existing or newly created voter token string.
- * @remarks Falls back to an in-memory token when localStorage is unavailable.
+ * Returns a stable anonymous voter token stored in sessionStorage.
+ * @returns Existing or newly created voter token string for this browser tab.
+ * @remarks Each tab gets its own token so team members can vote independently on one device.
  */
 export function getVoterToken(): string {
   try {
-    const existing = window.localStorage.getItem(VOTER_TOKEN_KEY);
+    const existing = window.sessionStorage.getItem(VOTER_TOKEN_KEY);
     if (existing !== null && existing.length >= 8) {
       return existing;
     }
     const created = createVoterToken();
-    window.localStorage.setItem(VOTER_TOKEN_KEY, created);
+    window.sessionStorage.setItem(VOTER_TOKEN_KEY, created);
     return created;
   } catch {
     return createVoterToken();

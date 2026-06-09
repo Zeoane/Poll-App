@@ -38,21 +38,33 @@
       <div class="end-date-picker__header">
         <button
           type="button"
-          class="end-date-picker__nav"
+          class="end-date-picker__nav end-date-picker__nav--prev"
           aria-label="Previous month"
           [disabled]="!canShowPreviousMonth()"
           (click)="showPreviousMonth()"
         >
-          <img src="assets/img/icons/chevrons/up.svg" alt="" width="20" height="20" />
+          <img
+            class="end-date-picker__nav-icon"
+            src="assets/img/icons/chevrons/right.svg"
+            alt=""
+            width="20"
+            height="20"
+          />
         </button>
         <p class="end-date-picker__title">{{ calendarTitle() }}</p>
         <button
           type="button"
-          class="end-date-picker__nav"
+          class="end-date-picker__nav end-date-picker__nav--next"
           aria-label="Next month"
           (click)="showNextMonth()"
         >
-          <img src="assets/img/icons/chevrons/down.svg" alt="" width="20" height="20" />
+          <img
+            class="end-date-picker__nav-icon"
+            src="assets/img/icons/chevrons/left.svg"
+            alt=""
+            width="20"
+            height="20"
+          />
         </button>
       </div>
 

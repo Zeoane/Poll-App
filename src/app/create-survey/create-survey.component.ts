@@ -337,7 +337,7 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
       return;
     }
     try {
-      await this.completePublish(first);
+      await this.completePublish();
     } catch {
       this.publishError.set('Could not publish survey. Please try again.');
     }
@@ -373,11 +373,10 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
 
   /**
    * Creates the published survey in Supabase and shows the overlay.
-   * @param first - First question block used for description fallback.
    */
-  private async completePublish(first: QuestionBlock): Promise<void> {
+  private async completePublish(): Promise<void> {
     const title = this.surveyName.trim();
-    const description = resolvePublishedDescription(this.describingText, first);
+    const description = resolvePublishedDescription(this.describingText);
     await persistPublishedSurvey(
       title,
       description,

@@ -186,6 +186,19 @@
     justify-self: end;
   }
 
+  .create-field.create-field--date-category
+    > app-create-survey-end-date-field
+    .end-date-picker {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    position: relative;
+    top: auto;
+    left: auto;
+    width: min(100%, 280px);
+    justify-self: start;
+    margin-top: 4px;
+  }
+
   .create-field--describe {
     margin-left: 0;
     padding-top: 3.5px;
@@ -269,26 +282,24 @@
   }
 
   .create-q-block__head {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: nowrap;
+    display: block;
   }
 
   .create-q-block__title {
     width: auto;
     max-width: 100%;
-    grid-column: 1;
-  }
-
-  .create-q-block__head-actions {
-    grid-column: 2;
-    margin-left: 0;
   }
 
   .create-q-block__head + .create-field {
     margin-top: -20px;
+  }
+
+  .create-q-block .create-field:not(.create-field--date-category) {
+    display: block;
+  }
+
+  .create-q-block .create-field:not(.create-field--date-category) > .create-field__row {
+    display: flex;
   }
 
   .create-answer-list__item {
@@ -344,10 +355,14 @@
     margin-top: 12px;
   }
 
+  .create-field__row--q-prompt-only {
+    width: 100%;
+  }
+
   .create-field__row--q-prompt-only .create-field__input--q-prompt {
     width: 100%;
     max-width: none;
-    flex: none;
+    flex: 1;
   }
 
   .create-survey-page__publish {

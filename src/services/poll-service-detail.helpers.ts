@@ -43,6 +43,33 @@ export async function resolvePollDetail(
 }
 
 /**
+ * Reloads survey detail from Supabase and refreshes the cache.
+ * @param pollId - Survey or example poll id.
+ * @param deps - Cache lookup and persistence helpers.
+ * @returns Fresh poll detail, or `undefined` when not found remotely.
+ * @remarks Skips the in-memory detail cache so vote totals stay aggregated across voters.
+ */
+export async function refreshPollDetail(
+  pollId: string,
+  deps: PollDetailLookupDeps,
+): Promise<Poll | undefined> {
+  const cached = deps.findPollById(pollId);
+  if (isExamplePoll(cached)) {
+    return cached;
+  }
+  if (!deps.repo.isAvailable()) {
+    return cached;
+  }
+  const detail = await deps.repo.fetchSurveyDetail(pollId);
+  if (detail === null) {
+    return undefined;
+  }
+  deps.upsertPoll(detail);
+  deps.notify();
+  return detail;
+}
+
+/**
  * Loads stored option choices for the current voter on one survey.
  * @param pollId - Survey or example poll id.
  * @param deps - Poll detail lookup and repository access.

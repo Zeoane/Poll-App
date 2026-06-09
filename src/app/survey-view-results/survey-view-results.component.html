@@ -58,7 +58,9 @@
             </div>
 
             <h1 class="create-card__title">{{ surveyName }}</h1>
+            @if (surveyDescription.trim()) {
             <p class="create-card__desc">{{ surveyDescription }}</p>
+            }
 
             <div class="create-card__questions">
               @if (viewMode === 'poll' && currentPoll; as poll) {
@@ -176,7 +178,7 @@
 
   <app-create-publish-overlay
     [open]="demoOverlayOpen()"
-    message="Demo only"
+    message="Demo only- create your own survey to get live results!"
     titleId="survey-demo-only-overlay-title"
     closeIconSrc="assets/img/survey-view/close-mobile.svg"
     (closed)="demoOverlayOpen.set(false)"

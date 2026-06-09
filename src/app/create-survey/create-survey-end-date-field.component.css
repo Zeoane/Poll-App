@@ -69,6 +69,13 @@
   outline-offset: 2px;
 }
 
+.end-date-picker__nav-icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 .end-date-picker__weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);

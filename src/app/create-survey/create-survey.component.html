@@ -191,14 +191,6 @@
               <h2 class="create-q-block__title" [id]="'q-label-' + qi">
                 {{ qi + 1 }}. Question
               </h2>
-              <div class="create-q-block__head-actions">
-                <button
-                  type="button"
-                  class="create-field__clear create-field__clear--q-head"
-                  [attr.aria-label]="questionRemoveAriaLabel(qi)"
-                  (click)="removeQuestion(qi)"
-                ></button>
-              </div>
             </div>
 
             <div class="create-field">
@@ -219,6 +211,12 @@
                   [attr.aria-invalid]="hasFieldError('q-prompt-' + qi)"
                   (ngModelChange)="clearFieldErrorKey('q-prompt-' + qi)"
                 />
+                <button
+                  type="button"
+                  class="create-field__clear"
+                  [attr.aria-label]="questionRemoveAriaLabel(qi)"
+                  (click)="removeQuestion(qi)"
+                ></button>
               </div>
             </div>
 

@@ -1,6 +1,5 @@
 import { deadlineToEndsOnInput } from './survey-view-results-form.helpers';
 import { loadRoutedPoll } from './survey-view-results-route.helpers';
-import { PREVIEW_DESCRIPTION } from './survey-view-results-template.constants';
 import type { PollService } from '../../services/poll-service';
 import type { Poll, VoterChoicesByQuestion } from '../../types/poll';
 
@@ -50,10 +49,7 @@ export async function attachSurveyPollView(
  */
 export function applySurveyPollFields(target: SurveyRouteBindTarget, poll: Poll): void {
   target.setSurveyName(poll.title);
-  const description = poll.description.trim();
-  target.setSurveyDescription(
-    description.length > 0 ? description : PREVIEW_DESCRIPTION,
-  );
+  target.setSurveyDescription(poll.description.trim());
   target.setCategory(poll.category?.trim() ?? '—');
   target.setEndsOn(deadlineToEndsOnInput(poll.deadline));
   target.setCompleteError(null);
@@ -83,7 +79,7 @@ export async function syncSurveyPollFromService(
   pollId: string,
   service: PollService,
 ): Promise<void> {
-  const poll = await service.ensurePollDetail(pollId);
+  const poll = await service.refreshSurveyDetail(pollId);
   if (poll !== undefined) {
     target.setCurrentPoll(poll);
     applySurveyPollFields(target, poll);

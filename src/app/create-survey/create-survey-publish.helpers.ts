@@ -48,7 +48,7 @@ function withExtraQuestionBlock(description: string, extra: string): string {
  * Builds the stored poll description from describing text and extra questions.
  * @param describingText - Primary optional description field.
  * @param questions - All question blocks; prompts from index 1 onward are appended.
- * @returns Final description string, with a fallback when all inputs are empty.
+ * @returns Final description string, or empty when describing text and extras are absent.
  */
 export function buildPublishedDescription(
   describingText: string,
@@ -59,9 +59,7 @@ export function buildPublishedDescription(
   if (extra.length > 0) {
     description = withExtraQuestionBlock(description, extra);
   }
-  return description.length > 0
-    ? description
-    : defaultDescriptionFallback(questions[0]);
+  return description.length > 0 ? description : '';
 }
 
 /**
@@ -78,14 +76,4 @@ function formatExtraQuestionLines(questions: QuestionBlock[]): string {
     })
     .filter((x): x is string => x !== null);
   return lines.join('\n');
-}
-
-/**
- * Uses the first question prompt when no describing text is available.
- * @param first - First question block, if present.
- * @returns Trimmed first prompt or a generic fallback string.
- */
-function defaultDescriptionFallback(first: QuestionBlock | undefined): string {
-  const p = first?.prompt.trim() ?? '';
-  return p.length > 0 ? p : 'Survey without description.';
 }

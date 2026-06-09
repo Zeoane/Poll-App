@@ -7,19 +7,10 @@ import type { QuestionBlock } from './create-survey.models';
 /**
  * Builds the stored survey description from optional describing text.
  * @param describingText - Optional survey describing field value.
- * @param first - First question block supplying prompt fallback text.
- * @returns Trimmed describing text, first prompt, or a generic fallback.
+ * @returns Trimmed describing text, or an empty string when omitted.
  */
-export function resolvePublishedDescription(
-  describingText: string,
-  first: QuestionBlock,
-): string {
-  const describing = describingText.trim();
-  if (describing.length > 0) {
-    return describing;
-  }
-  const prompt = first.prompt.trim();
-  return prompt.length > 0 ? prompt : 'Survey without description.';
+export function resolvePublishedDescription(describingText: string): string {
+  return describingText.trim();
 }
 
 /**

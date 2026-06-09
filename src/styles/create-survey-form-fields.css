@@ -33,8 +33,11 @@
 }
 
 .create-field__row--q-prompt-only {
+  box-sizing: border-box;
   align-items: center;
-  gap: 0;
+  gap: 10px;
+  width: 473px;
+  max-width: 100%;
 }
 
 .create-field__input {
@@ -64,9 +67,10 @@
 
 .create-field__input--q-prompt {
   box-sizing: border-box;
-  flex: 0 0 auto;
-  width: 429px;
-  max-width: 100%;
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  max-width: none;
   height: 37px;
   padding: 7px 13px;
   border-radius: 5px 20px 5px 5px;
