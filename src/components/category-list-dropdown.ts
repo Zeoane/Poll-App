@@ -16,15 +16,14 @@ export interface CategoryListDropdownOptions {
   readonly selectionCaption?: HTMLElement | null;
 }
 
-const CHEVRON_WRAP_SELECTOR = '.category-dropdown__chevron-wrap';
-
 export class CategoryListDropdown {
   private readonly opts: CategoryListDropdownOptions;
   private isOpen = false;
   private readonly onTriggerClick = (event: MouseEvent): void => {
-    if (!this.isChevronInteraction(event.target)) {
-      return;
-    }
+    event.stopPropagation();
+    this.toggle();
+  };
+  private readonly onSelectionCaptionClick = (event: MouseEvent): void => {
     event.stopPropagation();
     this.toggle();
   };
@@ -45,7 +44,10 @@ export class CategoryListDropdown {
     this.handleKeydown(event);
   };
 
-  /** Binds trigger/menu listeners and renders category options. */
+  /**
+   * Binds trigger/menu listeners and renders category options.
+   * @param options - Dropdown DOM nodes, category list, and selection callbacks.
+   */
   public constructor(options: CategoryListDropdownOptions) {
     this.opts = options;
     this.renderOptions();
@@ -53,15 +55,19 @@ export class CategoryListDropdown {
     this.close();
     this.opts.trigger.addEventListener('click', this.onTriggerClick);
     this.opts.trigger.addEventListener('keydown', this.onTriggerKeydown);
+    this.opts.selectionCaption?.addEventListener('click', this.onSelectionCaptionClick);
     this.opts.menu.addEventListener('click', this.onMenuClick);
     document.addEventListener('pointerdown', this.onDocumentPointerDown, true);
     document.addEventListener('keydown', this.onDocumentKeydown);
   }
 
-  /** Removes document listeners (call from Angular OnDestroy or route teardown). */
+  /**
+   * Removes document listeners (call from Angular OnDestroy or route teardown).
+   */
   public destroy(): void {
     this.opts.trigger.removeEventListener('click', this.onTriggerClick);
     this.opts.trigger.removeEventListener('keydown', this.onTriggerKeydown);
+    this.opts.selectionCaption?.removeEventListener('click', this.onSelectionCaptionClick);
     this.opts.menu.removeEventListener('click', this.onMenuClick);
     document.removeEventListener(
       'pointerdown',
@@ -80,7 +86,11 @@ export class CategoryListDropdown {
     }
   }
 
-  /** Creates one selectable listbox option element. */
+  /**
+   * Creates one selectable listbox option element.
+   * @param category - Category label and dataset id for the option.
+   * @returns List item configured as a listbox option.
+   */
   private createOption(category: string): HTMLLIElement {
     const item = document.createElement('li');
     item.className = 'category-dropdown__option';
@@ -89,15 +99,6 @@ export class CategoryListDropdown {
     item.dataset['category'] = category;
     item.textContent = category;
     return item;
-  }
-
-  /** Returns true when the click target is inside the chevron control. */
-  private isChevronInteraction(target: EventTarget | null): boolean {
-    if (!(target instanceof Node)) {
-      return false;
-    }
-    const wrap = this.opts.trigger.querySelector(CHEVRON_WRAP_SELECTOR);
-    return wrap !== null && wrap.contains(target);
   }
 
   /** Opens or closes the dropdown menu. */
@@ -123,7 +124,10 @@ export class CategoryListDropdown {
     this.opts.trigger.setAttribute('aria-expanded', 'false');
   }
 
-  /** Applies a category selection from a listbox option click. */
+  /**
+   * Applies a category selection from a listbox option click.
+   * @param event - Click event from the options menu.
+   */
   private handleOptionClick(event: Event): void {
     const category = this.readClickedCategory(event);
     if (category === null) {
@@ -132,7 +136,11 @@ export class CategoryListDropdown {
     this.applyCategorySelection(category);
   }
 
-  /** Reads the category id from a listbox option click target. */
+  /**
+   * Reads the category id from a listbox option click target.
+   * @param event - Click event from the options menu.
+   * @returns Category id from the nearest option, or `null` when not on an option.
+   */
   private readClickedCategory(event: Event): string | null {
     const target = event.target;
     if (!(target instanceof HTMLElement)) {
@@ -142,7 +150,12 @@ export class CategoryListDropdown {
     return option?.dataset['category'] ?? null;
   }
 
-  /** Stores the next category value and refreshes dropdown UI. */
+  /**
+   * Stores the next category value and refreshes dropdown UI.
+   * @param category - Category chosen from the listbox.
+   * @remarks Retoggling the current category clears the selection when
+   * {@link CategoryListDropdownOptions.allowClearByRetoggle} is enabled.
+   */
   private applyCategorySelection(category: string): void {
     const current = this.opts.getSelection();
     const next =
@@ -161,7 +174,10 @@ export class CategoryListDropdown {
     this.syncOptionStates(selected);
   }
 
-  /** Resets the trigger label to the placeholder text. */
+  /**
+   * Resets the trigger label to the placeholder text.
+   * @param selected - Currently selected category, if any.
+   */
   private syncTriggerLabel(selected: string | null): void {
     this.opts.label.textContent = this.opts.placeholder;
     this.opts.trigger.classList.toggle(
@@ -170,7 +186,10 @@ export class CategoryListDropdown {
     );
   }
 
-  /** Updates the optional second-line selection caption. */
+  /**
+   * Updates the optional second-line selection caption.
+   * @param selected - Currently selected category, if any.
+   */
   private syncSelectionCaption(selected: string | null): void {
     const caption = this.opts.selectionCaption;
     if (caption === undefined || caption === null) {
@@ -185,7 +204,10 @@ export class CategoryListDropdown {
     caption.hidden = false;
   }
 
-  /** Toggles the optional active class on the trigger button. */
+  /**
+   * Toggles the optional active class on the trigger button.
+   * @param selected - Currently selected category, if any.
+   */
   private syncTriggerActiveClass(selected: string | null): void {
     const activeClass = this.opts.triggerActiveClass;
     if (activeClass === undefined || activeClass.length === 0) {
@@ -194,7 +216,10 @@ export class CategoryListDropdown {
     this.opts.trigger.classList.toggle(activeClass, selected !== null);
   }
 
-  /** Marks the matching listbox option as selected. */
+  /**
+   * Marks the matching listbox option as selected.
+   * @param selected - Currently selected category, if any.
+   */
   private syncOptionStates(selected: string | null): void {
     for (const node of this.opts.menu.querySelectorAll<HTMLElement>(
       '.category-dropdown__option',
@@ -205,7 +230,11 @@ export class CategoryListDropdown {
     }
   }
 
-  /** Closes the menu when the user clicks outside the dropdown. */
+  /**
+   * Closes the menu when the user clicks outside the dropdown.
+   * @param event - Document-level pointer down used for outside-click detection.
+   * @remarks Uses capture phase and ignores non-primary buttons.
+   */
   private handleDocumentPointerDown(event: PointerEvent): void {
     if (!this.isOpen) {
       return;
@@ -214,13 +243,21 @@ export class CategoryListDropdown {
       return;
     }
     const path = event.composedPath();
-    if (path.includes(this.opts.trigger) || path.includes(this.opts.menu)) {
+    const caption = this.opts.selectionCaption;
+    if (
+      path.includes(this.opts.trigger) ||
+      path.includes(this.opts.menu) ||
+      (caption !== undefined && caption !== null && path.includes(caption))
+    ) {
       return;
     }
     this.close();
   }
 
-  /** Closes the menu on Escape and returns focus to the trigger. */
+  /**
+   * Closes the menu on Escape and returns focus to the trigger.
+   * @param event - Document-level keydown handler.
+   */
   private handleKeydown(event: KeyboardEvent): void {
     if (this.isOpen && event.key === 'Escape') {
       this.close();

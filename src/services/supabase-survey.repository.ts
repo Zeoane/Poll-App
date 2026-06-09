@@ -24,17 +24,27 @@ type ClientGetter = () => DbClient | null;
 export class SupabaseSurveyRepository {
   private readonly getClient: ClientGetter;
 
-  /** Stores the client getter used for each repository call. */
+  /**
+   * Stores the client getter used for each repository call.
+   * @param getClient - Lazy accessor for the shared Supabase client.
+   */
   public constructor(getClient: ClientGetter) {
     this.getClient = getClient;
   }
 
-  /** Lists published surveys for the home screen. */
+  /**
+   * Lists published surveys for the home screen.
+   * @returns Published surveys as list-level polls without question detail.
+   */
   public async fetchPublishedSurveys(): Promise<ReadonlyArray<Poll>> {
     return this.fetchSurveysByStatus('published');
   }
 
-  /** Loads option ids the current voter chose on one survey. */
+  /**
+   * Loads option ids the current voter chose on one survey.
+   * @param surveyId - Survey id to query responses for.
+   * @returns Question id to selected option id lists for the current voter token.
+   */
   public async fetchVoterResponses(surveyId: string): Promise<VoterChoicesByQuestion> {
     const client = this.requireClient();
     const { data, error } = await client
@@ -46,7 +56,11 @@ export class SupabaseSurveyRepository {
     return groupResponsesByQuestion(data ?? []);
   }
 
-  /** Loads one survey with questions, options, and vote stats. */
+  /**
+   * Loads one survey with questions, options, and vote stats.
+   * @param surveyId - Survey id to load.
+   * @returns Full poll detail, or null when the survey row does not exist.
+   */
   public async fetchSurveyDetail(surveyId: string): Promise<Poll | null> {
     const client = this.requireClient();
     const survey = await this.fetchSurveyRow(client, surveyId);
@@ -59,7 +73,11 @@ export class SupabaseSurveyRepository {
     return mapSurveyDetailToPoll(survey, questions, options, stats);
   }
 
-  /** Persists a full survey graph and returns the stored detail. */
+  /**
+   * Persists a full survey graph and returns the stored detail.
+   * @param input - Survey metadata and question graph from the create form.
+   * @returns Reloaded poll with nested questions and options.
+   */
   public async createSurvey(input: CreateSurveyInput): Promise<Poll> {
     const client = this.requireClient();
     const surveyId = await this.insertSurveyRow(client, input);
@@ -71,7 +89,12 @@ export class SupabaseSurveyRepository {
     return detail;
   }
 
-  /** Records one vote through the cast_survey_vote RPC. */
+  /**
+   * Records one vote through the cast_survey_vote RPC.
+   * @param surveyId - Target survey id.
+   * @param questionId - Question receiving the vote.
+   * @param optionId - Selected option id.
+   */
   public async castVote(
     surveyId: string,
     questionId: string,
@@ -87,7 +110,11 @@ export class SupabaseSurveyRepository {
     throwOnSupabaseError(error);
   }
 
-  /** Removes one vote through the retract_survey_vote RPC. */
+  /**
+   * Removes one vote through the retract_survey_vote RPC.
+   * @param questionId - Question losing the vote.
+   * @param optionId - Option id to retract.
+   */
   public async retractVote(questionId: string, optionId: string): Promise<void> {
     const client = this.requireClient();
     const { error } = await client.rpc('retract_survey_vote', {
@@ -98,7 +125,13 @@ export class SupabaseSurveyRepository {
     throwOnSupabaseError(error);
   }
 
-  /** Subscribes to response changes for one survey. */
+  /**
+   * Subscribes to response changes for one survey.
+   * @param surveyId - Survey id to watch via realtime.
+   * @param onChange - Callback invoked on any `survey_responses` change.
+   * @returns Unsubscribe function that removes the realtime channel.
+   * @remarks Returns a no-op unsubscribe when the Supabase client is unavailable.
+   */
   public subscribeToSurveyResponses(
     surveyId: string,
     onChange: () => void,
@@ -113,12 +146,18 @@ export class SupabaseSurveyRepository {
     };
   }
 
-  /** True when a Supabase client is available. */
+  /**
+   * True when a Supabase client is available.
+   * @returns True when `getClient()` returns a non-null client.
+   */
   public isAvailable(): boolean {
     return this.getClient() !== null;
   }
 
-  /** Returns the client or throws when Supabase is not configured. */
+  /**
+   * Returns the client or throws when Supabase is not configured.
+   * @returns Active Supabase browser client.
+   */
   private requireClient(): DbClient {
     const client = this.getClient();
     if (client === null) {
@@ -127,7 +166,11 @@ export class SupabaseSurveyRepository {
     return client;
   }
 
-  /** Lists surveys filtered by publication status. */
+  /**
+   * Lists surveys filtered by publication status.
+   * @param status - Survey status to filter on (currently `published` only).
+   * @returns Matching surveys as list-level polls, newest first.
+   */
   private async fetchSurveysByStatus(status: 'published'): Promise<ReadonlyArray<Poll>> {
     const client = this.requireClient();
     const { data, error } = await client
@@ -139,7 +182,12 @@ export class SupabaseSurveyRepository {
     return (data ?? []).map(mapSurveyRowToListPoll);
   }
 
-  /** Loads one survey row by id. */
+  /**
+   * Loads one survey row by id.
+   * @param client - Supabase client for the query.
+   * @param surveyId - Survey id to fetch.
+   * @returns Survey row, or null when no row matches.
+   */
   private async fetchSurveyRow(
     client: DbClient,
     surveyId: string,
@@ -153,7 +201,12 @@ export class SupabaseSurveyRepository {
     return data;
   }
 
-  /** Loads all questions for one survey. */
+  /**
+   * Loads all questions for one survey.
+   * @param client - Supabase client for the query.
+   * @param surveyId - Parent survey id.
+   * @returns Question rows sorted by `sort_order` ascending.
+   */
   private async fetchQuestionRows(
     client: DbClient,
     surveyId: string,
@@ -167,7 +220,12 @@ export class SupabaseSurveyRepository {
     return data ?? [];
   }
 
-  /** Loads options for the given question ids. */
+  /**
+   * Loads options for the given question ids.
+   * @param client - Supabase client for the query.
+   * @param questions - Question rows whose options to load.
+   * @returns Option rows sorted by `sort_order`; empty when there are no questions.
+   */
   private async fetchOptionRows(
     client: DbClient,
     questions: ReadonlyArray<Database['public']['Tables']['questions']['Row']>,
@@ -185,7 +243,12 @@ export class SupabaseSurveyRepository {
     return data ?? [];
   }
 
-  /** Loads aggregated vote stats for one survey. */
+  /**
+   * Loads aggregated vote stats for one survey.
+   * @param client - Supabase client for the query.
+   * @param surveyId - Survey id to load stats for.
+   * @returns Rows from the `question_result_stats` view.
+   */
   private async fetchResultStats(
     client: DbClient,
     surveyId: string,
@@ -198,7 +261,12 @@ export class SupabaseSurveyRepository {
     return data ?? [];
   }
 
-  /** Inserts the survey header row and returns its id. */
+  /**
+   * Inserts the survey header row and returns its id.
+   * @param client - Supabase client for the insert.
+   * @param input - Survey metadata from the create form.
+   * @returns Id of the newly inserted survey row.
+   */
   private async insertSurveyRow(
     client: DbClient,
     input: CreateSurveyInput,
@@ -215,7 +283,12 @@ export class SupabaseSurveyRepository {
     return data.id;
   }
 
-  /** Inserts all questions and options for one survey. */
+  /**
+   * Inserts all questions and options for one survey.
+   * @param client - Supabase client for the inserts.
+   * @param surveyId - Parent survey id.
+   * @param questions - Question graph from the create form.
+   */
   private async insertQuestionGraph(
     client: DbClient,
     surveyId: string,
@@ -226,7 +299,13 @@ export class SupabaseSurveyRepository {
     }
   }
 
-  /** Inserts one question row and its answer options. */
+  /**
+   * Inserts one question row and its answer options.
+   * @param client - Supabase client for the inserts.
+   * @param surveyId - Parent survey id.
+   * @param question - One question from the create form.
+   * @param sortOrder - One-based display order within the survey.
+   */
   private async insertQuestionWithOptions(
     client: DbClient,
     surveyId: string,
@@ -245,7 +324,12 @@ export class SupabaseSurveyRepository {
     await this.insertOptionRows(client, data.id, question.answers);
   }
 
-  /** Inserts answer options for one question. */
+  /**
+   * Inserts answer options for one question.
+   * @param client - Supabase client for the insert.
+   * @param questionId - Parent question id.
+   * @param answers - Answer label strings from the create form.
+   */
   private async insertOptionRows(
     client: DbClient,
     questionId: string,

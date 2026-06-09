@@ -7,47 +7,43 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
+import { CreatePublishOverlayComponent } from '../create-survey/create-publish-overlay.component';
 import { getSharedPollService } from '../app-legacy-bootstrap';
+import {
+  isDemoSurveyView,
+  shouldShowDemoInteractionGuard,
+} from './survey-view-results-demo-overlay.helpers';
 import { SurveyViewResultsDemoQuestionsComponent } from './survey-view-results-demo-questions.component';
 import { SurveyViewResultsLivePanelComponent } from './survey-view-results-live-panel.component';
 import {
-  deadlineToEndsOnInput,
+  attachSurveyPollView,
+  loadSurveyRoutePoll,
+  type SurveyRouteBindTarget,
+} from './survey-view-results-bind.helpers';
+import {
   parseEndsOnDate,
   validateCompleteSurveyForm,
 } from './survey-view-results-form.helpers';
 import { resolveDisplayQuestions } from './survey-view-results-questions.helpers';
-import { loadRoutedPoll } from './survey-view-results-route.helpers';
 import {
-  resolvePollVoteContext,
-  toggleVoteForQuestion,
-  type PollVoteContext,
-  type VoteToggleResult,
-} from './survey-view-results-vote.helpers';
-import type { PollService } from '../../services/poll-service';
+  COMPLETE_POLL_OPTIONS,
+  PREVIEW_DESCRIPTION,
+  TEMPLATE_SURVEY_NAME,
+} from './survey-view-results-template.constants';
+import {
+  commitSurveyVoteResult,
+  resolveSurveyVoteContext,
+  toggleSurveyQuestionVote,
+  type SurveyVoteViewState,
+} from './survey-view-results-vote-state.helpers';
 import { type Poll, type SurveyQuestion, type VoterChoicesByQuestion } from '../../types/poll';
-import {
-  clearUserVoteOnPoll,
-  markUserVotedOnPoll,
-} from '../../utils/poll-vote-storage';
-
-const PREVIEW_DESCRIPTION =
-  'We want to create team activities that everyone will enjoy - share your preferences and ideas in our survey to help us plan better experiences together.';
-
-const COMPLETE_POLL_OPTIONS: readonly string[] = [
-  '19.09.2025, Friday',
-  '10.10.2025, Saturday',
-  '11.10.2025, Saturday',
-  '31.10.2025, Friday',
-];
-
-const TEMPLATE_SURVEY_NAME =
-  "Let's Plan the Next Team Event Together";
 
 @Component({
   selector: 'app-survey-view-results',
   standalone: true,
   imports: [
     RouterLink,
+    CreatePublishOverlayComponent,
     SurveyViewResultsDemoQuestionsComponent,
     SurveyViewResultsLivePanelComponent,
   ],
@@ -70,6 +66,8 @@ export class SurveyViewResultsComponent {
   public completeError: string | null = null;
 
   readonly pollChosenByQuestion = signal<VoterChoicesByQuestion>({});
+  readonly demoOverlayOpen = signal(false);
+  private routePollId: string | null = null;
 
   /** Subscribes to the route poll id and clears listeners on destroy. */
   public constructor() {
@@ -83,32 +81,47 @@ export class SurveyViewResultsComponent {
     });
   }
 
-  /** Returns questions to render for the current poll view. */
   public displayQuestions(poll: Poll): ReadonlyArray<SurveyQuestion> {
     return resolveDisplayQuestions(poll);
   }
 
-  /** First votable question for example polls on the survey page. */
   public primaryQuestion(poll: Poll): SurveyQuestion | undefined {
     return this.displayQuestions(poll)[0];
   }
 
-  /** Example polls from the home list also show demo questions 2–4. */
   public showDemoFollowUpQuestions(): boolean {
-    return this.viewMode === 'template' || this.currentPoll?.isExample === true;
+    return isDemoSurveyView(this.viewMode, this.currentPoll, this.routePollId);
   }
 
-  /** Returns the chosen option ids for one question. */
+  public showDemoInteractionGuard(): boolean {
+    return shouldShowDemoInteractionGuard(
+      isDemoSurveyView(this.viewMode, this.currentPoll, this.routePollId),
+      this.demoOverlayOpen(),
+    );
+  }
+
+  public openDemoOverlay(): void {
+    this.demoOverlayOpen.set(true);
+  }
+
+  /**
+   * Returns the chosen option ids for one question.
+   * @param questionId - Id of the question.
+   * @returns Selected option ids for the question, or an empty array.
+   */
   public chosenOptionsForQuestion(questionId: string): ReadonlyArray<string> {
     return this.pollChosenByQuestion()[questionId] ?? [];
   }
 
-  /** True when the visitor selected one option on a question. */
   public isOptionChosen(questionId: string, optionId: string): boolean {
     return this.chosenOptionsForQuestion(questionId).includes(optionId);
   }
 
-  /** Hint shown under the voting question based on poll state. */
+  /**
+   * Hint shown under the voting question based on poll state.
+   * @param question - Question metadata driving single- vs multi-select copy.
+   * @returns Helper text for voters, or an empty string in template mode.
+   */
   public pollVoteHint(question: SurveyQuestion): string {
     if (this.viewMode !== 'poll' || this.currentPoll === null) {
       return '';
@@ -123,12 +136,19 @@ export class SurveyViewResultsComponent {
     return 'Choose one option to vote. Click again to deselect.';
   }
 
-  /** Toggles vote selection, switch, or deselect for one question option. */
+  /**
+   * Toggles vote selection, switch, or deselect for one question option.
+   * @param questionId - Id of the question receiving the vote.
+   * @param optionId - Id of the option to toggle.
+   */
   public voteForQuestion(questionId: string, optionId: string): void {
     void this.castVoteForQuestion(questionId, optionId);
   }
 
-  /** True when voting must be blocked for closed polls. */
+  /**
+   * True when voting must be blocked for closed polls.
+   * @returns Whether vote controls should be disabled.
+   */
   public pollVoteButtonsDisabled(): boolean {
     if (this.viewMode !== 'poll' || this.currentPoll === null) {
       return false;
@@ -136,17 +156,27 @@ export class SurveyViewResultsComponent {
     return getSharedPollService().isPollEnded(this.currentPoll);
   }
 
-  /** Prefix for option index in the voting list (e.g. "A."). */
+  /**
+   * Prefix for option index in the voting list (e.g. "A.").
+   * @param index - Zero-based option index.
+   * @returns Letter prefix such as `'A.'`.
+   */
   public optionLetter(index: number): string {
     return `${String.fromCharCode(65 + index)}.`;
   }
 
-  /** Sidebar uses instant bar widths when showing a real poll. */
+  /**
+   * Sidebar uses instant bar widths when showing a real poll.
+   * @returns Whether result bars should animate instantly.
+   */
   public get instantResultsClass(): boolean {
     return this.viewMode === 'poll' && this.currentPoll !== null;
   }
 
-  /** True when the routed poll has zero total votes. */
+  /**
+   * True when the routed poll has zero total votes.
+   * @returns Whether the live results panel should show an empty state.
+   */
   public get liveResultsAreEmpty(): boolean {
     if (this.viewMode !== 'poll' || this.currentPoll === null) {
       return false;
@@ -154,7 +184,10 @@ export class SurveyViewResultsComponent {
     return getSharedPollService().getTotalVotes(this.currentPoll) === 0;
   }
 
-  /** True when viewing an ended poll on its public page. */
+  /**
+   * True when viewing an ended poll on its public page.
+   * @returns Whether the poll deadline has passed.
+   */
   public get pollViewClosed(): boolean {
     if (this.viewMode !== 'poll' || this.currentPoll === null) {
       return false;
@@ -162,7 +195,10 @@ export class SurveyViewResultsComponent {
     return getSharedPollService().isPollEnded(this.currentPoll);
   }
 
-  /** Status chip label for template vs live poll views. */
+  /**
+   * Status chip label for template vs live poll views.
+   * @returns `'Closed'`, `'Published'`, or template default label.
+   */
   public statusLabel(): string {
     if (this.viewMode === 'poll' && this.currentPoll !== null) {
       return this.pollViewClosed ? 'Closed' : 'Published';
@@ -170,17 +206,26 @@ export class SurveyViewResultsComponent {
     return 'Published';
   }
 
-  /** Draft-style chip when the poll has ended. */
+  /**
+   * Draft-style chip when the poll has ended.
+   * @returns Whether the status chip uses draft styling.
+   */
   public statusIsDraftStyle(): boolean {
     return this.pollViewClosed;
   }
 
-  /** Published-style chip when not in draft styling. */
+  /**
+   * Published-style chip when not in draft styling.
+   * @returns Whether the status chip uses published styling.
+   */
   public statusIsPublishedStyle(): boolean {
     return !this.statusIsDraftStyle();
   }
 
-  /** Human-readable end date from the yyyy-mm-dd model field. */
+  /**
+   * Human-readable end date from the yyyy-mm-dd model field.
+   * @returns German `dd.mm.yyyy` display string, or `'—'` when invalid.
+   */
   public get endsDisplay(): string {
     const raw = this.endsOn?.trim() ?? '';
     if (raw.length === 0 || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
@@ -205,9 +250,14 @@ export class SurveyViewResultsComponent {
     void this.submitCompletedTemplatePoll();
   }
 
-  /** Switches between template mode and a concrete poll route subscription. */
+  /**
+   * Switches between template mode and a concrete poll route subscription.
+   * @param pollId - Route poll id, or `null` for template mode.
+   */
   private applyRoutePollId(pollId: string | null): void {
     this.detachPollListener();
+    this.routePollId = pollId;
+    this.demoOverlayOpen.set(false);
     if (pollId === null) {
       this.switchToTemplateMode();
       return;
@@ -229,71 +279,57 @@ export class SurveyViewResultsComponent {
     this.resetTemplateDefaults();
   }
 
-  /** Loads a poll by route id and subscribes to live updates. */
+  /**
+   * Loads a poll by route id and subscribes to live updates.
+   * @param pollId - Route parameter identifying the poll.
+   */
   private async bindPollRoute(pollId: string): Promise<void> {
     const service = getSharedPollService();
-    const poll = await loadRoutedPoll(pollId, service);
+    const poll = await loadSurveyRoutePoll(pollId, service);
     if (poll === undefined) {
       void this.router.navigateByUrl('/');
       return;
     }
-    await this.attachPollView(poll, pollId, service);
+    await attachSurveyPollView(this.routeBindTarget(), poll, pollId, service);
   }
 
-  /** Binds loaded poll data and restores voter choices. */
-  private async attachPollView(
-    poll: Poll,
-    pollId: string,
-    service: PollService,
-  ): Promise<void> {
-    this.viewMode = 'poll';
-    this.currentPoll = poll;
-    this.applyPollFields(poll);
-    await this.restoreVoterChoices(pollId, service);
-    this.subscribeToPollUpdates(pollId, service);
-  }
-
-  /** Subscribes to live poll updates for the active route. */
-  private subscribeToPollUpdates(pollId: string, service: PollService): void {
-    this.pollListenerUnsubHolder.unsubscribe = service.subscribeToSurvey(
-      pollId,
-      () => {
-        void this.syncPollFromService(pollId, service);
+  /**
+   * Exposes mutable route-bind fields for helper functions.
+   * @returns Current survey route bind target accessors.
+   */
+  private routeBindTarget(): SurveyRouteBindTarget {
+    return {
+      viewMode: this.viewMode,
+      currentPoll: this.currentPoll,
+      surveyName: this.surveyName,
+      surveyDescription: this.surveyDescription,
+      category: this.category,
+      endsOn: this.endsOn,
+      completeError: this.completeError,
+      pollChosenByQuestion: this.pollChosenByQuestion,
+      pollListenerUnsubHolder: this.pollListenerUnsubHolder,
+      setViewMode: (mode) => {
+        this.viewMode = mode;
       },
-    );
-  }
-
-  /** Refreshes bound poll data after service notifications. */
-  private async syncPollFromService(
-    pollId: string,
-    service: PollService,
-  ): Promise<void> {
-    const poll = await service.ensurePollDetail(pollId);
-    if (poll !== undefined) {
-      this.currentPoll = poll;
-      this.applyPollFields(poll);
-      await this.restoreVoterChoices(pollId, service);
-    }
-  }
-
-  /** Loads stored voter choices for the bound survey. */
-  private async restoreVoterChoices(
-    pollId: string,
-    service: PollService,
-  ): Promise<void> {
-    const choices = await service.loadVoterChoices(pollId);
-    this.pollChosenByQuestion.set({ ...choices });
-  }
-
-  /** Copies poll fields into the preview model. */
-  private applyPollFields(poll: Poll): void {
-    this.surveyName = poll.title;
-    const description = poll.description.trim();
-    this.surveyDescription =
-      description.length > 0 ? description : PREVIEW_DESCRIPTION;
-    this.category = poll.category?.trim() ?? '—';
-    this.endsOn = deadlineToEndsOnInput(poll.deadline);
-    this.completeError = null;
+      setCurrentPoll: (poll) => {
+        this.currentPoll = poll;
+      },
+      setSurveyName: (value) => {
+        this.surveyName = value;
+      },
+      setSurveyDescription: (value) => {
+        this.surveyDescription = value;
+      },
+      setCategory: (value) => {
+        this.category = value;
+      },
+      setEndsOn: (value) => {
+        this.endsOn = value;
+      },
+      setCompleteError: (value) => {
+        this.completeError = value;
+      },
+    };
   }
 
   /** Persists the preview survey as a new poll in Supabase. */
@@ -311,74 +347,43 @@ export class SurveyViewResultsComponent {
     void this.router.navigateByUrl('/');
   }
 
-  /** Applies async vote logic for one question option. */
+  /**
+   * Applies async vote logic for one question option.
+   * @param questionId - Id of the question receiving the vote.
+   * @param optionId - Id of the option to toggle.
+   */
   private async castVoteForQuestion(
     questionId: string,
     optionId: string,
   ): Promise<void> {
-    const context = this.resolveVoteContext(questionId);
+    const context = resolveSurveyVoteContext(this.voteViewState(), questionId);
     if (context === undefined) {
       return;
     }
-    const result = await this.toggleQuestionVote(context, optionId);
+    const result = await toggleSurveyQuestionVote(
+      context,
+      optionId,
+      getSharedPollService(),
+    );
     if (result === undefined) {
       return;
     }
-    this.commitVoteResult(questionId, result, context.poll);
+    commitSurveyVoteResult(this.voteViewState(), questionId, result, context.poll);
   }
 
-  /** Resolves poll view state needed before toggling a vote. */
-  private resolveVoteContext(questionId: string): PollVoteContext | undefined {
-    const poll = this.currentPoll;
-    return resolvePollVoteContext(
-      poll,
-      this.viewMode,
-      questionId,
-      this.chosenOptionsForQuestion(questionId),
-      poll === null ? [] : this.displayQuestions(poll),
-    );
-  }
-
-  /** Delegates one option toggle to the poll service. */
-  private toggleQuestionVote(
-    context: PollVoteContext,
-    optionId: string,
-  ): Promise<VoteToggleResult | undefined> {
-    return toggleVoteForQuestion(
-      context.poll,
-      context.question,
-      optionId,
-      context.currentChoices,
-      getSharedPollService(),
-    );
-  }
-
-  /** Writes vote results into component state and example storage. */
-  private commitVoteResult(
-    questionId: string,
-    result: VoteToggleResult,
-    poll: Poll,
-  ): void {
-    this.currentPoll = result.poll;
-    this.pollChosenByQuestion.update((choices) => ({
-      ...choices,
-      [questionId]: [...result.choices],
-    }));
-    if (poll.isExample === true) {
-      this.syncExampleVoteStorage(poll.id, result.choices);
-    }
-  }
-
-  /** Persists example survey choices for reload in local storage. */
-  private syncExampleVoteStorage(
-    pollId: string,
-    choices: ReadonlyArray<string>,
-  ): void {
-    if (choices.length === 0) {
-      clearUserVoteOnPoll(pollId);
-      return;
-    }
-    markUserVotedOnPoll(pollId, choices[0]);
+  /**
+   * Exposes mutable vote bindings for helper functions.
+   * @returns Current survey vote view state accessors.
+   */
+  private voteViewState(): SurveyVoteViewState {
+    return {
+      viewMode: this.viewMode,
+      currentPoll: this.currentPoll,
+      pollChosenByQuestion: this.pollChosenByQuestion,
+      setCurrentPoll: (poll) => {
+        this.currentPoll = poll;
+      },
+    };
   }
 
   /** Restores default demo copy for the template route. */

@@ -9,7 +9,11 @@ export interface PollCardOptions {
   readonly highlight?: boolean;
 }
 
-/** Creates a poll card list item, optionally with a stretched-link open button. */
+/**
+ * Creates a poll card list item, optionally with a stretched-link open button.
+ * @param options - Poll data and interaction flags for the card.
+ * @returns List item element containing the rendered poll card.
+ */
 export function createPollCard(options: PollCardOptions): HTMLLIElement {
   const item = createCardItem(options);
   const article = createCardArticle(options.poll);
@@ -20,7 +24,11 @@ export function createPollCard(options: PollCardOptions): HTMLLIElement {
   return item;
 }
 
-/** Creates the outer <li> and applies modifier classes. */
+/**
+ * Creates the outer <li> and applies modifier classes.
+ * @param options - Card flags controlling highlight and interactivity styling.
+ * @returns Outer list item shell for a poll card.
+ */
 function createCardItem(options: PollCardOptions): HTMLLIElement {
   const item = document.createElement('li');
   item.className = 'poll-card';
@@ -33,7 +41,11 @@ function createCardItem(options: PollCardOptions): HTMLLIElement {
   return item;
 }
 
-/** Builds the inner article shell for a poll card. */
+/**
+ * Builds the inner article shell for a poll card.
+ * @param poll - Poll whose category, title, and deadline pill are rendered.
+ * @returns Article element with visible card content.
+ */
 function createCardArticle(poll: Poll): HTMLElement {
   const article = document.createElement('article');
   article.className = 'poll-card__inner';
@@ -50,7 +62,11 @@ function createCardArticle(poll: Poll): HTMLElement {
   return article;
 }
 
-/** Creates the category label rendered above the title. */
+/**
+ * Creates the category label rendered above the title.
+ * @param label - Category display text.
+ * @returns Paragraph element for the category line.
+ */
 function buildCategory(label: string): HTMLParagraphElement {
   const element = document.createElement('p');
   element.className = 'poll-card__category';
@@ -58,7 +74,11 @@ function buildCategory(label: string): HTMLParagraphElement {
   return element;
 }
 
-/** Creates the heading element for a poll card. */
+/**
+ * Creates the heading element for a poll card.
+ * @param text - Poll title text.
+ * @returns Heading element for the card title.
+ */
 function buildTitle(text: string): HTMLHeadingElement {
   const title = document.createElement('h3');
   title.className = 'poll-card__title';
@@ -66,7 +86,11 @@ function buildTitle(text: string): HTMLHeadingElement {
   return title;
 }
 
-/** Creates the bottom "Ends in X Day" pill with asymmetric corner radius. */
+/**
+ * Creates the bottom "Ends in X Day" pill with asymmetric corner radius.
+ * @param text - Preformatted ends-in label from {@link formatEndsIn}.
+ * @returns Span element styled as the deadline pill.
+ */
 function buildPill(text: string): HTMLSpanElement {
   const pill = document.createElement('span');
   pill.className = 'poll-card__pill';
@@ -74,7 +98,12 @@ function buildPill(text: string): HTMLSpanElement {
   return pill;
 }
 
-/** Creates the invisible stretched-link button covering the whole card. */
+/**
+ * Creates the invisible stretched-link button covering the whole card.
+ * @param poll - Poll whose id is passed to {@link onSelect}.
+ * @param onSelect - Callback invoked when the card open control is activated.
+ * @returns Button element that opens the poll detail flow.
+ */
 function createOpenButton(
   poll: Poll,
   onSelect: (pollId: string) => void,

@@ -14,12 +14,18 @@ export class SupabaseService {
     this.client = this.buildClient();
   }
 
-  /** Returns the shared Supabase client or null when not configured. */
+  /**
+   * Returns the shared Supabase client or null when not configured.
+   * @returns Singleton browser client, or null when environment values are missing.
+   */
   public getClient(): SupabaseClient<Database> | null {
     return this.client;
   }
 
-  /** True when both Supabase URL and anon/publishable key are set. */
+  /**
+   * True when both Supabase URL and anon/publishable key are set.
+   * @returns True when `environment.supabaseUrl` and `environment.supabaseAnonKey` are non-empty.
+   */
   public isConfigured(): boolean {
     return (
       environment.supabaseUrl.trim().length > 0 &&
@@ -27,7 +33,10 @@ export class SupabaseService {
     );
   }
 
-  /** Verifies that the Supabase client can reach the project API. */
+  /**
+   * Verifies that the Supabase client can reach the project API.
+   * @returns True when the client is configured and a zero-row `surveys` query succeeds.
+   */
   public async verifyConnection(): Promise<boolean> {
     if (this.client === null) {
       console.warn('[Supabase] Client not configured. Check environment.ts.');
@@ -42,7 +51,11 @@ export class SupabaseService {
     return true;
   }
 
-  /** Builds the browser Supabase client from environment values. */
+  /**
+   * Builds the browser Supabase client from environment values.
+   * @returns Configured client, or null when URL or anon key is missing.
+   * @remarks Auth session persistence and token refresh are disabled for anonymous voting.
+   */
   private buildClient(): SupabaseClient<Database> | null {
     if (!this.isConfigured()) {
       return null;

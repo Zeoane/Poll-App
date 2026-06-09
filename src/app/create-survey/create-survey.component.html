@@ -144,28 +144,12 @@
                 ></ul>
               </div>
 
-              <div class="create-field__date-controls-row">
-                <input
-                  id="survey-end"
-                  class="create-field__input create-field__input--end-date"
-                  type="text"
-                  name="endDate"
-                  autocomplete="off"
-                  [(ngModel)]="endDate"
-                  [class.create-field__input--error]="hasFieldError('endDate')"
-                  [placeholder]="
-                    hasFieldError('endDate') ? endDateFieldErrorMessage() : ''
-                  "
-                  [attr.aria-invalid]="hasFieldError('endDate')"
-                  (ngModelChange)="clearFieldErrorKey('endDate')"
-                />
-                <button
-                  type="button"
-                  class="create-field__clear"
-                  aria-label="Clear end date"
-                  (click)="clearEndDate()"
-                ></button>
-              </div>
+              <app-create-survey-end-date-field
+                [value]="endDate"
+                [hasError]="hasFieldError('endDate')"
+                [errorMessage]="endDateFieldErrorMessage()"
+                (valueChange)="onEndDateChange($event)"
+              />
             </div>
           </div>
 

@@ -336,7 +336,10 @@
   box-sizing: border-box;
 }
 
-.create-field.create-field--date-category > .create-field__date-controls-row {
+.create-field.create-field--date-category > .create-field__date-controls-row,
+.create-field.create-field--date-category
+  > app-create-survey-end-date-field
+  .create-field__date-controls-row {
   grid-column: 1;
   grid-row: 2;
   display: flex;

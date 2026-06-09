@@ -3,7 +3,10 @@ import { Component, Input } from '@angular/core';
 type Q2Key = 'a' | 'b' | 'c' | 'd' | 'e';
 const Q2_KEYS: readonly Q2Key[] = ['a', 'b', 'c', 'd', 'e'];
 
-/** Keeps only the first selected Q2 option when multi-select is disabled. */
+/**
+ * Keeps only the first selected Q2 option when multi-select is disabled.
+ * @param selections - Mutable Q2 checkbox map updated in place.
+ */
 function collapseQ2Selections(
   selections: Record<Q2Key, boolean>,
 ): void {
@@ -45,7 +48,10 @@ export class SurveyViewResultsDemoQuestionsComponent {
 
   q2MultipleEnabled = false;
 
-  /** Toggles one template preview option in question 1. */
+  /**
+   * Toggles one template preview option in question 1.
+   * @param key - Option key within the Q1 preview group.
+   */
   toggleQ1(key: 'a' | 'b' | 'c' | 'd'): void {
     this.previewQ1Checked[key] = !this.previewQ1Checked[key];
   }
@@ -58,7 +64,11 @@ export class SurveyViewResultsDemoQuestionsComponent {
     }
   }
 
-  /** Toggles one option in demo question 2. */
+  /**
+   * Toggles one option in demo question 2.
+   * @param key - Option key within the Q2 demo group.
+   * @remarks In single-select mode, selecting one option clears the others.
+   */
   toggleQ2(key: Q2Key): void {
     if (this.q2MultipleEnabled) {
       this.demoPreview.q2[key] = !this.demoPreview.q2[key];
@@ -73,12 +83,18 @@ export class SurveyViewResultsDemoQuestionsComponent {
     }
   }
 
-  /** Toggles one option in demo question 3. */
+  /**
+   * Toggles one option in demo question 3.
+   * @param key - Option key within the Q3 demo group.
+   */
   toggleQ3(key: 'a' | 'b' | 'c' | 'd'): void {
     this.demoPreview.q3[key] = !this.demoPreview.q3[key];
   }
 
-  /** Toggles one option in demo question 4. */
+  /**
+   * Toggles one option in demo question 4.
+   * @param key - Option key within the Q4 demo group.
+   */
   toggleQ4(key: 'a' | 'b' | 'c'): void {
     this.demoPreview.q4[key] = !this.demoPreview.q4[key];
   }

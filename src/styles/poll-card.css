@@ -87,6 +87,7 @@
 .poll-card__pill {
   position: relative;
   z-index: 1;
+  pointer-events: none;
 }
 
 .poll-card__category {

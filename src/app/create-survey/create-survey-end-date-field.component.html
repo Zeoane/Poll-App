@@ -1,0 +1,83 @@
+<div class="create-field__date-controls-row">
+  <input
+    id="survey-end"
+    class="create-field__input create-field__input--end-date"
+    type="text"
+    name="endDate"
+    autocomplete="off"
+    inputmode="numeric"
+    [ngModel]="value"
+    (ngModelChange)="onValueInput($event)"
+    (keydown)="onKeyDown($event)"
+    (paste)="onPaste($event)"
+    (blur)="onInputBlur()"
+    (focus)="openCalendar()"
+    (click)="openCalendar()"
+    [class.create-field__input--error]="showInputError()"
+    [placeholder]="inputPlaceholder()"
+    [attr.aria-invalid]="showInputError()"
+    aria-haspopup="dialog"
+    [attr.aria-expanded]="calendarOpen"
+    [attr.aria-controls]="calendarOpen ? 'survey-end-calendar' : null"
+  />
+  <button
+    type="button"
+    class="create-field__clear"
+    aria-label="Clear end date"
+    (click)="clearEndDate()"
+  ></button>
+
+  @if (calendarOpen) {
+    <div
+      id="survey-end-calendar"
+      class="end-date-picker"
+      role="dialog"
+      aria-label="Choose end date"
+      aria-modal="false"
+    >
+      <div class="end-date-picker__header">
+        <button
+          type="button"
+          class="end-date-picker__nav"
+          aria-label="Previous month"
+          [disabled]="!canShowPreviousMonth()"
+          (click)="showPreviousMonth()"
+        >
+          <img src="assets/img/icons/chevrons/up.svg" alt="" width="20" height="20" />
+        </button>
+        <p class="end-date-picker__title">{{ calendarTitle() }}</p>
+        <button
+          type="button"
+          class="end-date-picker__nav"
+          aria-label="Next month"
+          (click)="showNextMonth()"
+        >
+          <img src="assets/img/icons/chevrons/down.svg" alt="" width="20" height="20" />
+        </button>
+      </div>
+
+      <div class="end-date-picker__weekdays" aria-hidden="true">
+        @for (label of weekdayLabels; track label) {
+          <span class="end-date-picker__weekday">{{ label }}</span>
+        }
+      </div>
+
+      <div class="end-date-picker__grid" role="grid">
+        @for (cell of calendarCells(); track cell.date.getTime()) {
+          <button
+            type="button"
+            class="end-date-picker__day"
+            role="gridcell"
+            [class.end-date-picker__day--outside]="!cell.inMonth"
+            [class.end-date-picker__day--selected]="cell.selected"
+            [disabled]="cell.disabled"
+            [attr.aria-label]="cell.day"
+            (click)="selectDay(cell)"
+          >
+            {{ cell.day }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

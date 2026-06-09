@@ -2,7 +2,10 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
 
-/** Logs a failed Angular bootstrap attempt to the console. */
+/**
+ * Logs a failed Angular bootstrap attempt to the console.
+ * @param err - Rejection value from {@link bootstrapApplication}.
+ */
 function logBootstrapError(err: unknown): void {
   console.error(err);
 }

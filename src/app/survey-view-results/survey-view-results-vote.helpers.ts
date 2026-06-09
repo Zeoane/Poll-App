@@ -14,7 +14,15 @@ export interface PollVoteContext {
   readonly currentChoices: QuestionChoices;
 }
 
-/** Resolves poll, question, and current choices for one vote action. */
+/**
+ * Resolves poll, question, and current choices for one vote action.
+ * @param poll - Current poll, or `null` in template mode.
+ * @param viewMode - Active page mode (`'template'` or `'poll'`).
+ * @param questionId - Id of the question being voted on.
+ * @param currentChoices - Option ids currently selected for the question.
+ * @param questionsForPoll - Questions returned by {@link resolveDisplayQuestions}.
+ * @returns Vote context when voting is allowed, otherwise `undefined`.
+ */
 export function resolvePollVoteContext(
   poll: Poll | null,
   viewMode: 'template' | 'poll',
@@ -32,7 +40,15 @@ export function resolvePollVoteContext(
   return { poll, question, currentChoices };
 }
 
-/** Toggles one option for single- or multi-select questions. */
+/**
+ * Toggles one option for single- or multi-select questions.
+ * @param poll - Poll receiving the vote.
+ * @param question - Target question metadata.
+ * @param optionId - Option id to toggle.
+ * @param currentChoices - Option ids currently selected for the question.
+ * @param service - Poll service handling persistence.
+ * @returns Updated poll and choices, or `undefined` when the poll has ended or the service rejects the action.
+ */
 export async function toggleVoteForQuestion(
   poll: Poll,
   question: SurveyQuestion,
@@ -49,7 +65,15 @@ export async function toggleVoteForQuestion(
   return toggleSingleChoice(poll, question.id, optionId, currentChoices, service);
 }
 
-/** Handles select, switch, or deselect for one single-choice question. */
+/**
+ * Handles select, switch, or deselect for one single-choice question.
+ * @param poll - Poll receiving the vote.
+ * @param questionId - Target question id.
+ * @param optionId - Option id to toggle.
+ * @param currentChoices - Option ids currently selected for the question.
+ * @param service - Poll service handling persistence.
+ * @returns Updated poll and choices, or `undefined` when the service rejects the action.
+ */
 async function toggleSingleChoice(
   poll: Poll,
   questionId: string,
@@ -66,7 +90,15 @@ async function toggleSingleChoice(
   return castChoice(poll, questionId, optionId, service);
 }
 
-/** Adds or removes one option on a multi-select question. */
+/**
+ * Adds or removes one option on a multi-select question.
+ * @param poll - Poll receiving the vote.
+ * @param questionId - Target question id.
+ * @param optionId - Option id to toggle.
+ * @param currentChoices - Option ids currently selected for the question.
+ * @param service - Poll service handling persistence.
+ * @returns Updated poll and choices, or `undefined` when the service rejects the action.
+ */
 async function toggleMultiChoice(
   poll: Poll,
   questionId: string,
@@ -80,7 +112,14 @@ async function toggleMultiChoice(
   return castChoice(poll, questionId, optionId, service);
 }
 
-/** Casts a vote and appends the option id to local choices. */
+/**
+ * Casts a vote and appends the option id to local choices.
+ * @param poll - Poll receiving the vote.
+ * @param questionId - Target question id.
+ * @param optionId - Option id to add.
+ * @param service - Poll service handling persistence.
+ * @returns Updated poll and reloaded choices, or `undefined` when voting fails.
+ */
 async function castChoice(
   poll: Poll,
   questionId: string,
@@ -95,7 +134,14 @@ async function castChoice(
   return { poll: updated, choices: prior[questionId] ?? [optionId] };
 }
 
-/** Retracts a vote and rebuilds local choices from the service. */
+/**
+ * Retracts a vote and rebuilds local choices from the service.
+ * @param poll - Poll losing the vote.
+ * @param questionId - Target question id.
+ * @param optionId - Option id to remove.
+ * @param service - Poll service handling persistence.
+ * @returns Updated poll and reloaded choices, or `undefined` when retraction fails.
+ */
 async function retractChoice(
   poll: Poll,
   questionId: string,
@@ -110,7 +156,15 @@ async function retractChoice(
   return { poll: updated, choices: prior[questionId] ?? [] };
 }
 
-/** Switches a single-choice vote to another option. */
+/**
+ * Switches a single-choice vote to another option.
+ * @param poll - Poll receiving the vote change.
+ * @param questionId - Target question id.
+ * @param fromOptionId - Currently selected option id.
+ * @param toOptionId - New option id to select.
+ * @param service - Poll service handling persistence.
+ * @returns Updated poll and the new single choice, or `undefined` when the change fails.
+ */
 async function changeChoice(
   poll: Poll,
   questionId: string,

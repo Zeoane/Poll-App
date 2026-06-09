@@ -1,4 +1,9 @@
-/** Returns the element with the given ID or throws if missing or of unexpected type. */
+/**
+ * Returns the element with the given ID or throws if missing or of unexpected type.
+ * @param id - DOM element id to look up.
+ * @param expectedType - Constructor used to verify the element instance type.
+ * @returns The typed element when found and matching {@link expectedType}.
+ */
 export function requireElementById<T extends HTMLElement>(
   id: string,
   expectedType: new (...args: never[]) => T,

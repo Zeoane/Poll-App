@@ -15,7 +15,6 @@ import { getSharedPollService } from '../app-legacy-bootstrap';
 
 import { attachCreateSurveyCategoryDropdown } from './create-survey-category-bridge';
 import {
-  parseSurveyEndDate,
   surveyEndDateErrorMessage,
   validateSurveyEndDateRaw,
 } from './create-survey-end-date';
@@ -31,11 +30,16 @@ import {
   nextSurveyRowId,
   type QuestionBlock,
 } from './create-survey.models';
-import { mapQuestionsForPublish } from './create-survey-publish.helpers';
+import {
+  persistPublishedSurvey,
+  resolvePublishedDescription,
+} from './create-survey-publish-run.helpers';
 import {
   germanAnswerDateErrorMessage,
   validateGermanAnswerDateRaw,
 } from './create-survey-answer-date.helpers';
+import { CreateSurveyEndDateFieldComponent } from './create-survey-end-date-field.component';
+import { scrollToFirstPublishError } from './create-survey-publish-focus.helpers';
 import {
   answerFieldErrorKey,
   computeCreateSurveyFieldErrors,
@@ -45,7 +49,7 @@ import {
 @Component({
   selector: 'app-create-survey',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, CreateSurveyEndDateFieldComponent],
   templateUrl: './create-survey.component.html',
   styleUrl: './create-survey.component.css',
 })
@@ -100,19 +104,34 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
     this.describingText = '';
   }
 
-  /** Clears the optional end date field. */
-  protected clearEndDate(): void {
-    this.endDate = '';
+  /**
+   * Updates the optional end date from the date field component.
+   * @param value - Sanitized dd.mm.yyyy text, or empty when cleared.
+   */
+  protected onEndDateChange(value: string): void {
+    this.endDate = value;
     this.clearFieldErrorKey('endDate');
   }
 
-  /** Returns the end-date error copy when that field is invalid. */
+  /**
+   * Returns the end-date error copy when that field is invalid.
+   * @returns User-facing message, or an empty string when valid.
+   */
   protected endDateFieldErrorMessage(): string {
     const issue = validateSurveyEndDateRaw(this.endDate);
-    return issue === null ? '' : surveyEndDateErrorMessage(issue);
+    if (issue === null) {
+      return '';
+    }
+    if (issue === 'invalid') {
+      return 'Please enter a valid end date (dd.mm.yyyy).';
+    }
+    return surveyEndDateErrorMessage(issue);
   }
 
-  /** Deletes, resets, or ignores a question based on list state. */
+  /**
+   * Deletes, resets, or ignores a question based on list state.
+   * @param index - Zero-based index of the question to remove.
+   */
   protected removeQuestion(index: number): void {
     const action = resolveQuestionRemovalAction(
       this.questions,
@@ -134,7 +153,11 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  /** Returns the accessible label for a question remove button. */
+  /**
+   * Returns the accessible label for a question remove button.
+   * @param index - Zero-based index of the question.
+   * @returns Aria label describing delete vs reset behavior.
+   */
   protected questionRemoveAriaLabel(index: number): string {
     return questionRemoveAriaLabel(
       this.questions,
@@ -143,7 +166,11 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
     );
   }
 
-  /** Clears or removes one answer row depending on list length. */
+  /**
+   * Clears or removes one answer row depending on list length.
+   * @param qIndex - Zero-based question index.
+   * @param aIndex - Zero-based answer index within the question.
+   */
   protected clearAnswer(qIndex: number, aIndex: number): void {
     const question = this.questions[qIndex];
     if (!question) {
@@ -163,12 +190,19 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
     this.clearFieldErrorKey(answerFieldErrorKey(qIndex, aIndex));
   }
 
-  /** Returns the accessible label for an answer clear button. */
+  /**
+   * Returns the accessible label for an answer clear button.
+   * @param aIndex - Zero-based answer index.
+   * @returns Aria label for clear vs remove behavior.
+   */
   protected answerRowClearAriaLabel(aIndex: number): string {
     return answerRowClearAriaLabel(aIndex, this.answerRowFullRemoveFromIndex);
   }
 
-  /** Appends one empty answer row when under the per-question limit. */
+  /**
+   * Appends one empty answer row when under the per-question limit.
+   * @param qIndex - Zero-based question index.
+   */
   protected addAnswer(qIndex: number): void {
     const question = this.questions[qIndex];
     if (!question || question.answers.length >= this.maxAnswersPerQuestion) {
@@ -204,19 +238,29 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
     this.publishOverlayOpen.set(false);
   }
 
-  /** Closes the overlay when the backdrop is clicked. */
+  /**
+   * Closes the overlay when the backdrop is clicked.
+   * @param event - Click event from the overlay backdrop.
+   */
   protected onPublishOverlayBackdrop(event: MouseEvent): void {
     if (event.target === event.currentTarget) {
       this.closePublishOverlay();
     }
   }
 
-  /** Returns whether a field key is currently marked invalid. */
+  /**
+   * Returns whether a field key is currently marked invalid.
+   * @param key - Publish validation field key.
+   * @returns Whether the key is flagged in {@link fieldErrors}.
+   */
   protected hasFieldError(key: string): boolean {
     return this.fieldErrors()[key] === true;
   }
 
-  /** Clears one field error flag without cloning when unchanged. */
+  /**
+   * Clears one field error flag without cloning when unchanged.
+   * @param key - Publish validation field key to clear.
+   */
   protected clearFieldErrorKey(key: string): void {
     this.fieldErrors.update((map) => {
       if (map[key] !== true) {
@@ -245,17 +289,31 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
     this.publish();
   }
 
-  /** Returns the letter prefix for one answer option index. */
+  /**
+   * Returns the letter prefix for one answer option index.
+   * @param index - Zero-based answer index.
+   * @returns Letter prefix such as `'A.'`.
+   */
   protected optionLetter(index: number): string {
     return `${String.fromCharCode(65 + index)}.`;
   }
 
-  /** Returns the publish-validation key for one answer field. */
+  /**
+   * Returns the publish-validation key for one answer field.
+   * @param questionIndex - Zero-based question index.
+   * @param answerIndex - Zero-based answer index.
+   * @returns Stable error key for the answer input.
+   */
   protected answerFieldKey(questionIndex: number, answerIndex: number): string {
     return answerFieldErrorKey(questionIndex, answerIndex);
   }
 
-  /** Returns answer-date error copy when that field failed publish validation. */
+  /**
+   * Returns answer-date error copy when that field failed publish validation.
+   * @param questionIndex - Zero-based question index.
+   * @param answerIndex - Zero-based answer index.
+   * @returns User-facing date error message, or an empty string when valid.
+   */
   protected answerFieldErrorMessage(questionIndex: number, answerIndex: number): string {
     const answer = this.questions[questionIndex]?.answers[answerIndex];
     if (answer === undefined) {
@@ -290,7 +348,10 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
     this.fieldErrors.update((map) => stripQuestionPromptErrorKeys(map));
   }
 
-  /** Scrolls to and focuses one question prompt input. */
+  /**
+   * Scrolls to and focuses one question prompt input.
+   * @param index - Zero-based index of the question block.
+   */
   private scrollAndFocusQuestion(index: number): void {
     const doc = this.document;
     doc.getElementById(`create-q-block-${index}`)?.scrollIntoView({
@@ -300,83 +361,31 @@ export class CreateSurveyComponent implements AfterViewInit, OnDestroy {
     doc.getElementById(`create-q-prompt-${index}`)?.focus();
   }
 
-  /** Focuses and scrolls to the first invalid publish field. */
+  /**
+   * Focuses and scrolls to the first invalid publish field.
+   * @param errors - Current publish validation error map.
+   */
   private focusFirstPublishError(errors: Record<string, boolean>): void {
-    queueMicrotask(() => this.scrollToFirstPublishError(errors));
+    queueMicrotask(() => {
+      scrollToFirstPublishError(errors, this.questions, this.document);
+    });
   }
 
-  /** Scrolls the viewport to the first field flagged in errors. */
-  private scrollToFirstPublishError(errors: Record<string, boolean>): void {
-    if (errors['surveyName'] === true) {
-      this.focusAndScroll('survey-name');
-      return;
-    }
-    if (errors['endDate'] === true) {
-      this.focusAndScroll('survey-end');
-      return;
-    }
-    const questionIndex = this.questions.findIndex(
-      (_, index) => errors[`q-prompt-${index}`] === true,
-    );
-    if (questionIndex >= 0) {
-      this.focusAndScroll(`create-q-prompt-${questionIndex}`);
-      return;
-    }
-    this.focusFirstAnswerPublishError(errors);
-  }
-
-  /** Focuses the first invalid answer field flagged during publish. */
-  private focusFirstAnswerPublishError(errors: Record<string, boolean>): void {
-    for (let qi = 0; qi < this.questions.length; qi += 1) {
-      const question = this.questions[qi];
-      if (question === undefined) {
-        continue;
-      }
-      for (let ai = 0; ai < question.answers.length; ai += 1) {
-        if (errors[answerFieldErrorKey(qi, ai)] === true) {
-          this.focusAndScroll(`create-a-${qi}-${ai}`);
-          return;
-        }
-      }
-    }
-  }
-
-  /** Focuses one element id and centers it in the viewport. */
-  private focusAndScroll(elementId: string): void {
-    const element = this.document.getElementById(elementId);
-    element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    element?.focus();
-  }
-
-  /** Creates the published survey in Supabase and shows the overlay. */
+  /**
+   * Creates the published survey in Supabase and shows the overlay.
+   * @param first - First question block used for description fallback.
+   */
   private async completePublish(first: QuestionBlock): Promise<void> {
     const title = this.surveyName.trim();
-    const description = this.resolvePublishedDescription(first);
-    await this.persistNewSurvey(title, description);
-    this.beginPostPublishUi();
-  }
-
-  /** Builds the stored survey description from optional describing text. */
-  private resolvePublishedDescription(first: QuestionBlock): string {
-    const describing = this.describingText.trim();
-    if (describing.length > 0) {
-      return describing;
-    }
-    const prompt = first.prompt.trim();
-    return prompt.length > 0 ? prompt : 'Survey without description.';
-  }
-
-  /** Writes the full survey graph into Supabase as published. */
-  private async persistNewSurvey(title: string, description: string): Promise<void> {
-    const deadline = parseSurveyEndDate(this.endDate.trim());
-    const category = this.category.trim();
-    await getSharedPollService().createSurvey({
+    const description = resolvePublishedDescription(this.describingText, first);
+    await persistPublishedSurvey(
       title,
       description,
-      category: category.length > 0 ? category : null,
-      deadline,
-      questions: mapQuestionsForPublish(this.questions),
-    });
+      this.endDate,
+      this.category,
+      this.questions,
+    );
+    this.beginPostPublishUi();
   }
 
   /** Shows the publish overlay then navigates home after a short delay. */

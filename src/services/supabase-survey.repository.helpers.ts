@@ -5,14 +5,21 @@ import type { CreateSurveyInput, VoterChoicesByQuestion } from '../types/poll';
 
 type DbClient = SupabaseClient<Database>;
 
-/** Throws when Supabase returns a PostgREST or RPC error. */
+/**
+ * Throws when Supabase returns a PostgREST or RPC error.
+ * @param error - Supabase error object, or null when the call succeeded.
+ */
 export function throwOnSupabaseError(error: { message: string } | null): void {
   if (error !== null) {
     throw new Error(error.message);
   }
 }
 
-/** Builds the insert payload for a new survey header row. */
+/**
+ * Builds the insert payload for a new survey header row.
+ * @param input - Survey metadata from the create form.
+ * @returns Insert row for the `surveys` table with trimmed text and `published` status.
+ */
 export function buildSurveyInsertRow(
   input: CreateSurveyInput,
 ): Database['public']['Tables']['surveys']['Insert'] {
@@ -25,7 +32,13 @@ export function buildSurveyInsertRow(
   };
 }
 
-/** Builds the insert payload for one question row. */
+/**
+ * Builds the insert payload for one question row.
+ * @param surveyId - Parent survey id.
+ * @param question - Question prompt and answer labels from the create form.
+ * @param sortOrder - One-based display order within the survey.
+ * @returns Insert row for the `questions` table.
+ */
 export function buildQuestionInsertRow(
   surveyId: string,
   question: CreateSurveyInput['questions'][number],
@@ -39,7 +52,12 @@ export function buildQuestionInsertRow(
   };
 }
 
-/** Builds option insert rows for one question. */
+/**
+ * Builds option insert rows for one question.
+ * @param questionId - Parent question id.
+ * @param answers - Answer label strings from the create form.
+ * @returns Insert rows for `question_options` with one-based `sort_order`.
+ */
 export function buildOptionInsertRows(
   questionId: string,
   answers: ReadonlyArray<string>,
@@ -51,7 +69,11 @@ export function buildOptionInsertRows(
   }));
 }
 
-/** Groups flat response rows into question → option id lists. */
+/**
+ * Groups flat response rows into question → option id lists.
+ * @param rows - `survey_responses` rows with `question_id` and `option_id`.
+ * @returns Map of question id to selected option id arrays.
+ */
 export function groupResponsesByQuestion(
   rows: ReadonlyArray<{ question_id: string; option_id: string }>,
 ): VoterChoicesByQuestion {
@@ -68,7 +90,13 @@ export function groupResponsesByQuestion(
   return result;
 }
 
-/** Subscribes to survey_responses changes for one survey. */
+/**
+ * Subscribes to survey_responses changes for one survey.
+ * @param client - Supabase browser client.
+ * @param surveyId - Survey id to filter realtime events on.
+ * @param onChange - Callback invoked on any insert, update, or delete.
+ * @returns Subscribed realtime channel (caller must remove it on teardown).
+ */
 export function subscribeSurveyResponseChannel(
   client: DbClient,
   surveyId: string,

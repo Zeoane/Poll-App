@@ -110,8 +110,9 @@
 
 .create-publish-overlay__close {
   position: absolute;
-  top: 6px;
-  right: 8px;
+  top: 0;
+  right: 0;
+  margin: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -134,5 +135,22 @@
 .create-publish-overlay__close:focus-visible {
   outline: 2px solid var(--create-accent-title);
   outline-offset: 2px;
+}
+
+.create-publish-overlay__close--svg {
+  width: auto;
+  height: auto;
+  background: transparent;
+  border-radius: 0;
+}
+
+.create-publish-overlay__close--svg:hover {
+  background: transparent;
+  opacity: 0.88;
+}
+
+.create-publish-overlay__close--svg img {
+  display: block;
+  margin: 4px;
 }
 

@@ -15,7 +15,10 @@ export class EndingSoonDragScrollController {
   private startScrollLeft = 0;
   private suppressClick = false;
 
-  /** Resolves the scroll list and wires pointer interactions. */
+  /**
+   * Resolves the scroll list and wires pointer interactions.
+   * @param options - Optional overrides; defaults to `#ending-soon-list`.
+   */
   public constructor(options: EndingSoonDragScrollControllerOptions = {}) {
     this.list = options.list ?? requireElementById('ending-soon-list', HTMLElement);
     this.list.addEventListener('pointerdown', this.onPointerDown);
@@ -30,7 +33,11 @@ export class EndingSoonDragScrollController {
     this.endDrag();
   }
 
-  /** Begins tracking a potential drag on primary mouse/pen button. */
+  /**
+   * Begins tracking a potential drag on primary mouse/pen button.
+   * @param event - Pointer down on the ending-soon list.
+   * @remarks Touch pointers are ignored so native touch scrolling remains available.
+   */
   private readonly onPointerDown = (event: PointerEvent): void => {
     if (event.pointerType === 'touch' || event.button !== 0) {
       return;
@@ -44,7 +51,10 @@ export class EndingSoonDragScrollController {
     document.addEventListener('pointercancel', this.onPointerUp);
   };
 
-  /** Updates scrollLeft once the pointer passes the drag threshold. */
+  /**
+   * Updates scrollLeft once the pointer passes the drag threshold.
+   * @param event - Document-level pointer move while tracking a drag.
+   */
   private readonly onPointerMove = (event: PointerEvent): void => {
     if (!this.isPointerDown) {
       return;
@@ -59,7 +69,9 @@ export class EndingSoonDragScrollController {
     }
   };
 
-  /** Ends the gesture and suppresses the click that follows a drag. */
+  /**
+   * Ends the gesture and suppresses the click that follows a drag.
+   */
   private readonly onPointerUp = (): void => {
     this.detachDocumentListeners();
     if (this.didDrag) {
@@ -68,7 +80,10 @@ export class EndingSoonDragScrollController {
     this.endDrag();
   };
 
-  /** Cancels the card-open click triggered at the end of a drag. */
+  /**
+   * Cancels the card-open click triggered at the end of a drag.
+   * @param event - Captured click on the list after a drag gesture.
+   */
   private readonly onClickCapture = (event: MouseEvent): void => {
     if (!this.suppressClick) {
       return;

@@ -5,3 +5,19 @@
   min-height: 100dvh;
   background: #ffffff;
 }
+
+.survey-view-results-page__demo-guard {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.survey-view-results-page__brand {
+  position: relative;
+  z-index: 260;
+}

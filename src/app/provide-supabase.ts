@@ -8,7 +8,10 @@ import { SupabaseService } from '../services/supabase.service';
 
 import { setSharedSupabaseService } from './app-legacy-bootstrap';
 
-/** Registers Supabase and runs a lightweight startup connectivity check. */
+/**
+ * Registers Supabase and runs a lightweight startup connectivity check.
+ * @returns Angular environment providers wiring Supabase into app bootstrap.
+ */
 export function provideSupabase(): EnvironmentProviders {
   return makeEnvironmentProviders([
     {

@@ -6,7 +6,11 @@ import type {
 } from '../types/database.types';
 import type { Poll, PollOption, SurveyQuestion } from '../types/poll';
 
-/** Maps one survey row to a list-level poll without question details. */
+/**
+ * Maps one survey row to a list-level poll without question details.
+ * @param row - Survey row from the `surveys` table.
+ * @returns List-level poll with empty options and parsed dates.
+ */
 export function mapSurveyRowToListPoll(row: SurveyRow): Poll {
   return {
     id: row.id,
@@ -20,7 +24,13 @@ export function mapSurveyRowToListPoll(row: SurveyRow): Poll {
   };
 }
 
-/** Maps and sorts question rows with options and aggregated vote counts. */
+/**
+ * Maps and sorts question rows with options and aggregated vote counts.
+ * @param questions - Question rows for one survey.
+ * @param options - Option rows for those questions.
+ * @param stats - Aggregated vote stats from `question_result_stats`.
+ * @returns Questions sorted by `sort_order` with nested options and vote totals.
+ */
 function mapSurveyQuestions(
   questions: readonly QuestionRow[],
   options: readonly QuestionOptionRow[],
@@ -33,7 +43,14 @@ function mapSurveyQuestions(
     .map((question) => mapQuestionRow(question, options, voteByOption));
 }
 
-/** Builds a full poll with nested questions and vote counts. */
+/**
+ * Builds a full poll with nested questions and vote counts.
+ * @param survey - Survey header row.
+ * @param questions - Question rows for the survey.
+ * @param options - Option rows for those questions.
+ * @param stats - Aggregated vote stats from `question_result_stats`.
+ * @returns Full poll with nested questions; legacy `options` mirrors the first question.
+ */
 export function mapSurveyDetailToPoll(
   survey: SurveyRow,
   questions: readonly QuestionRow[],
@@ -55,7 +72,13 @@ export function mapSurveyDetailToPoll(
   };
 }
 
-/** Maps one question row with its options and vote totals. */
+/**
+ * Maps one question row with its options and vote totals.
+ * @param question - Question row to map.
+ * @param options - All option rows for the survey (filtered by question id).
+ * @param voteByOption - Option id to vote count lookup.
+ * @returns Survey question with sorted options and vote counts.
+ */
 function mapQuestionRow(
   question: QuestionRow,
   options: readonly QuestionOptionRow[],
@@ -74,7 +97,12 @@ function mapQuestionRow(
   };
 }
 
-/** Maps one option row with an aggregated vote count. */
+/**
+ * Maps one option row with an aggregated vote count.
+ * @param option - Option row from `question_options`.
+ * @param voteByOption - Option id to vote count lookup.
+ * @returns Poll option with label and vote total (zero when no stat row exists).
+ */
 function mapOptionRow(
   option: QuestionOptionRow,
   voteByOption: ReadonlyMap<string, number>,
@@ -86,7 +114,11 @@ function mapOptionRow(
   };
 }
 
-/** Indexes vote counts by option id from result stats rows. */
+/**
+ * Indexes vote counts by option id from result stats rows.
+ * @param stats - Rows from the `question_result_stats` view.
+ * @returns Map of option id to vote count; rows with null `option_id` are skipped.
+ */
 function buildVoteCountMap(
   stats: readonly QuestionResultStatRow[],
 ): ReadonlyMap<string, number> {

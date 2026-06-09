@@ -2,12 +2,22 @@ import { requireElementById } from '../utils/dom';
 
 const THUMB_HEIGHT_PX = 64;
 
-/** Clamps a number to an inclusive min/max range. */
+/**
+ * Clamps a number to an inclusive min/max range.
+ * @param value - Number to constrain.
+ * @param min - Lower bound, inclusive.
+ * @param max - Upper bound, inclusive.
+ * @returns {@link value} limited to the closed interval `[min, max]`.
+ */
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-/** Attaches pointer move/up listeners until the drag ends. */
+/**
+ * Attaches pointer move/up listeners until the drag ends.
+ * @param onMove - Handler invoked on document pointer move while dragging.
+ * @remarks Listeners are removed automatically on pointer up or cancel.
+ */
 function attachDocumentPointerDrag(onMove: (ev: PointerEvent) => void): void {
   const onUp = (): void => {
     document.removeEventListener('pointermove', onMove);
@@ -19,7 +29,12 @@ function attachDocumentPointerDrag(onMove: (ev: PointerEvent) => void): void {
   document.addEventListener('pointercancel', onUp);
 }
 
-/** Queries track and thumb nodes under a scrollbar root. */
+/**
+ * Queries track and thumb nodes under a scrollbar root.
+ * @param scrollbarRoot - Scrollbar container element.
+ * @returns Track and thumb elements required for custom scrollbar behavior.
+ * @remarks Throws when either descendant is missing or not an `HTMLElement`.
+ */
 function resolveTrackThumb(scrollbarRoot: HTMLElement): {
   track: HTMLElement;
   thumb: HTMLElement;
@@ -43,7 +58,10 @@ export class ActivePanelScrollbarController {
   private readonly track: HTMLElement;
   private readonly thumb: HTMLElement;
 
-  /** Resolves scroll viewport, track, and thumb with optional overrides. */
+  /**
+   * Resolves scroll viewport, track, and thumb with optional overrides.
+   * @param options - Optional scroll view and scrollbar root overrides.
+   */
   public constructor(options: ActivePanelScrollbarControllerOptions = {}) {
     this.scrollView =
       options.scrollView ??
@@ -79,7 +97,11 @@ export class ActivePanelScrollbarController {
     this.sync();
   }
 
-  /** Toggles visibility and track height from scroll need. */
+  /**
+   * Toggles visibility and track height from scroll need.
+   * @param needsScroll - Whether the viewport content overflows vertically.
+   * @param clientHeight - Visible height of the scroll viewport.
+   */
   private applyPresence(needsScroll: boolean, clientHeight: number): void {
     this.scrollbarRoot.hidden = !needsScroll;
     if (!needsScroll) {
@@ -92,7 +114,12 @@ export class ActivePanelScrollbarController {
     }
   }
 
-  /** Converts scrollTop to a translated thumb position. */
+  /**
+   * Converts scrollTop to a translated thumb position.
+   * @param scrollTop - Current vertical scroll offset.
+   * @param scrollHeight - Total scrollable content height.
+   * @param clientHeight - Visible viewport height.
+   */
   private positionThumb(scrollTop: number, scrollHeight: number, clientHeight: number): void {
     const maxScroll = scrollHeight - clientHeight;
     const trackH = this.track.clientHeight;
@@ -101,7 +128,11 @@ export class ActivePanelScrollbarController {
     this.thumb.style.transform = `translateY(${ratio * maxThumbTop}px)`;
   }
 
-  /** Captures geometry for mapping thumb delta to scrollTop. */
+  /**
+   * Captures geometry for mapping thumb delta to scrollTop.
+   * @param scrollTop - Current vertical scroll offset at drag start.
+   * @returns Scroll and thumb bounds used while dragging.
+   */
   private readThumbDragStart(scrollTop: number): {
     maxScroll: number;
     maxThumbTop: number;
@@ -116,7 +147,11 @@ export class ActivePanelScrollbarController {
     return { maxScroll, maxThumbTop, startThumbTop };
   }
 
-  /** Starts a thumb drag that updates scrollTop on pointer move. */
+  /**
+   * Starts a thumb drag that updates scrollTop on pointer move.
+   * @param startY - Pointer client Y at drag start.
+   * @param startScrollTop - Scroll offset at drag start.
+   */
   private attachThumbDrag(startY: number, startScrollTop: number): void {
     const geom = this.readThumbDragStart(startScrollTop);
     const onMove = (ev: PointerEvent): void => {
@@ -129,7 +164,10 @@ export class ActivePanelScrollbarController {
     attachDocumentPointerDrag(onMove);
   }
 
-  /** Begins thumb tracking on primary-button pointer down. */
+  /**
+   * Begins thumb tracking on primary-button pointer down.
+   * @param event - Pointer down on the scrollbar thumb.
+   */
   private readonly onThumbPointerDown = (event: PointerEvent): void => {
     if (event.button !== 0) {
       return;
@@ -139,7 +177,10 @@ export class ActivePanelScrollbarController {
     this.attachThumbDrag(event.clientY, this.scrollView.scrollTop);
   };
 
-  /** Jumps scroll when the track is clicked away from the thumb. */
+  /**
+   * Jumps scroll when the track is clicked away from the thumb.
+   * @param clickOffsetY - Click offset from the top of the track.
+   */
   private scrollTowardTrackOffset(clickOffsetY: number): void {
     const { scrollHeight, clientHeight } = this.scrollView;
     const maxScroll = Math.max(0, scrollHeight - clientHeight);
@@ -154,7 +195,10 @@ export class ActivePanelScrollbarController {
     }
   }
 
-  /** Handles track clicks while ignoring clicks on the thumb element. */
+  /**
+   * Handles track clicks while ignoring clicks on the thumb element.
+   * @param event - Click on the scrollbar track.
+   */
   private readonly onTrackClick = (event: MouseEvent): void => {
     if (event.target === this.thumb || this.thumb.contains(event.target as Node)) {
       return;

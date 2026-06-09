@@ -164,4 +164,21 @@
       </div>
     </section>
   </main>
+
+  @if (showDemoInteractionGuard()) {
+    <button
+      type="button"
+      class="survey-view-results-page__demo-guard"
+      aria-label="Show demo notice"
+      (click)="openDemoOverlay()"
+    ></button>
+  }
+
+  <app-create-publish-overlay
+    [open]="demoOverlayOpen()"
+    message="Demo only"
+    titleId="survey-demo-only-overlay-title"
+    closeIconSrc="assets/img/survey-view/close-mobile.svg"
+    (closed)="demoOverlayOpen.set(false)"
+  />
 </div>

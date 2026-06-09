@@ -26,7 +26,10 @@ export class PollListController {
   private readonly tabPanels: Readonly<Record<PollTab, HTMLElement>>;
   private currentTab: PollTab = 'active';
 
-  /** Reads list roots from the DOM and attaches tab handlers. */
+  /**
+   * Reads list roots from the DOM and attaches tab handlers.
+   * @param options - Poll service and poll-selection callback.
+   */
   public constructor(options: PollListControllerOptions) {
     this.pollService = options.pollService;
     this.onPollSelect = options.onPollSelect;
@@ -43,7 +46,10 @@ export class PollListController {
     this.renderPast();
   }
 
-  /** Looks up all DOM elements that hold the poll lists. */
+  /**
+   * Looks up all DOM elements that hold the poll lists.
+   * @returns Cached references to ending-soon, active, and past list containers.
+   */
   private queryListElements(): ListElements {
     return {
       endingSoonSection: requireElementById('ending-soon-section', HTMLElement),
@@ -55,7 +61,10 @@ export class PollListController {
     };
   }
 
-  /** Looks up the two tab buttons. */
+  /**
+   * Looks up the two tab buttons.
+   * @returns Active and past tab button elements.
+   */
   private queryTabButtons(): ReadonlyArray<HTMLButtonElement> {
     return [
       requireElementById('tab-active', HTMLButtonElement),
@@ -63,7 +72,10 @@ export class PollListController {
     ];
   }
 
-  /** Looks up the two tab panels keyed by tab name. */
+  /**
+   * Looks up the two tab panels keyed by tab name.
+   * @returns Panel elements for the active and past tabs.
+   */
   private queryTabPanels(): Readonly<Record<PollTab, HTMLElement>> {
     return {
       active: requireElementById('tab-panel-active', HTMLElement),
@@ -99,7 +111,13 @@ export class PollListController {
     this.appendCards(this.elements.pastList, polls, false, false);
   }
 
-  /** Appends a card per poll to the target list. */
+  /**
+   * Appends a card per poll to the target list.
+   * @param list - Target list element receiving poll cards.
+   * @param polls - Polls to render as cards.
+   * @param isInteractive - Whether cards should include open controls.
+   * @param highlight - Whether cards receive the highlight modifier class.
+   */
   private appendCards(
     list: HTMLUListElement,
     polls: ReadonlyArray<Poll>,
@@ -124,7 +142,10 @@ export class PollListController {
     }
   }
 
-  /** Handles a click on a tab button. */
+  /**
+   * Handles a click on a tab button.
+   * @param button - Tab button that was clicked.
+   */
   private handleTabClick(button: HTMLButtonElement): void {
     const tabValue = button.dataset['tab'];
     if (tabValue === 'active' || tabValue === 'past') {
@@ -132,7 +153,10 @@ export class PollListController {
     }
   }
 
-  /** Switches tabs on left/right arrow keys. */
+  /**
+   * Switches tabs on left/right arrow keys.
+   * @param event - Keyboard event from a tab button.
+   */
   private handleTabKey(event: KeyboardEvent): void {
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
       return;
@@ -142,7 +166,10 @@ export class PollListController {
     this.activateTab(nextTab);
   }
 
-  /** Activates the given tab and updates ARIA, focus, and visibility. */
+  /**
+   * Activates the given tab and updates ARIA, focus, and visibility.
+   * @param tab - Tab id to activate.
+   */
   private activateTab(tab: PollTab): void {
     if (tab === this.currentTab) {
       return;
@@ -153,7 +180,10 @@ export class PollListController {
     this.tabPanels.past.hidden = tab !== 'past';
   }
 
-  /** Updates active/inactive state on every tab button. */
+  /**
+   * Updates active/inactive state on every tab button.
+   * @param activeTab - Tab id that should be marked active.
+   */
   private updateTabButtonStates(activeTab: PollTab): void {
     for (const button of this.tabButtons) {
       const isActive = button.dataset['tab'] === activeTab;

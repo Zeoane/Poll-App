@@ -25,7 +25,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     void this.bootstrapHome();
   }
 
-  /** Initializes poll data and wires the legacy home screen. */
+  /**
+   * Initializes poll data and wires the legacy home screen.
+   * @remarks Runs outside Angular zone for legacy DOM wiring; navigation uses {@link NgZone.run}.
+   */
   private async bootstrapHome(): Promise<void> {
     await getSharedPollService().initialize();
     this.homeCleanup = bootstrapPollAppHome((pollId) => {

@@ -6,7 +6,12 @@ export interface CategorySelectionHandlers {
   setSelection: (value: string | null) => void;
 }
 
-/** Returns wired dropdown or null when DOM nodes are missing. */
+/**
+ * Returns wired dropdown or null when DOM nodes are missing.
+ * @param doc - Document containing create-survey category markup.
+ * @param handlers - Getter and setter bridging Angular state to the dropdown.
+ * @returns Initialized dropdown controller, or `null` when required elements are absent.
+ */
 export function attachCreateSurveyCategoryDropdown(
   doc: Document,
   handlers: CategorySelectionHandlers,
@@ -33,7 +38,11 @@ type CategoryDom = {
   selectionCaption: HTMLElement;
 };
 
-/** Reads create-survey category dropdown nodes from the document. */
+/**
+ * Reads create-survey category dropdown nodes from the document.
+ * @param doc - Document to query for category dropdown element ids.
+ * @returns DOM node bundle, or `null` when any required element is missing.
+ */
 function queryCategoryElements(doc: Document): CategoryDom | null {
   const trigger = doc.getElementById(
     'survey-category-button',

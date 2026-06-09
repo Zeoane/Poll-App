@@ -1,128 +1,18 @@
-import {
-  isAllowedSurveyEndDate,
-  minimumSurveyEndDate,
-  surveyEndDateErrorMessage,
-} from '../app/create-survey/create-survey-end-date';
+import { minimumSurveyEndDate } from '../app/create-survey/create-survey-end-date';
 import type { PollService } from '../services/poll-service';
+import { type NewPollInput, type ValidationErrors } from '../types/poll';
+import { readNewSurveyFields, readNewSurveyShell } from './poll-form.dom.helpers';
 import {
-  type NewPollInput,
-  type ValidationErrors,
-  POLL_TITLE_MAX_CHARS,
-  POLL_TITLE_MAX_WORDS,
-} from '../types/poll';
-
-import { requireElementById } from '../utils/dom';
-
-const MIN_TITLE_LENGTH = 3;
-const MIN_OPTIONS = 2;
-
-/** Counts non-empty trimmed words in a title string. */
-function countTitleWords(title: string): number {
-  const trimmed = title.trim();
-  if (trimmed.length === 0) {
-    return 0;
-  }
-  return trimmed.split(/\s+/).length;
-}
-
-/** Returns a title validation message or undefined when valid. */
-function validationTitleError(title: string): string | undefined {
-  if (title.length < MIN_TITLE_LENGTH) {
-    return `Please enter a title with at least ${MIN_TITLE_LENGTH} characters.`;
-  }
-  if (title.length > POLL_TITLE_MAX_CHARS) {
-    return `Title must be at most ${POLL_TITLE_MAX_CHARS} characters long.`;
-  }
-  if (countTitleWords(title) > POLL_TITLE_MAX_WORDS) {
-    return `Title must be at most ${POLL_TITLE_MAX_WORDS} words.`;
-  }
-  return undefined;
-}
-
-/** Returns a deadline validation message or undefined when valid or empty. */
-function validationDeadlineError(deadline: Date | null): string | undefined {
-  if (deadline === null) {
-    return undefined;
-  }
-  if (Number.isNaN(deadline.getTime())) {
-    return surveyEndDateErrorMessage('invalid');
-  }
-  if (!isAllowedSurveyEndDate(deadline)) {
-    return surveyEndDateErrorMessage('tooSoon');
-  }
-  return undefined;
-}
-
-/** Formats a Date for datetime-local min attributes. */
-function formatDatetimeLocalMin(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-
-/** Returns an options validation message or undefined when valid. */
-function validationOptionsError(options: ReadonlyArray<string>): string | undefined {
-  const uniqueOptions = new Set(options.map((option) => option.toLowerCase()));
-  if (options.length < MIN_OPTIONS) {
-    return `Please enter at least ${MIN_OPTIONS} answer options (one per line).`;
-  }
-  if (uniqueOptions.size !== options.length) {
-    return 'Answer options must be unique.';
-  }
-  return undefined;
-}
+  formatDatetimeLocalMin,
+  validationDeadlineError,
+  validationOptionsError,
+  validationTitleError,
+} from './poll-form.validation.helpers';
 
 type RequiredField = 'title' | 'options' | 'deadline';
 
 export interface PollFormControllerOptions {
   readonly pollService: PollService;
-}
-
-/** Resolves optional open-button element for the new-survey dialog. */
-function readOpenButton(): HTMLButtonElement | null {
-  const openEl = document.getElementById('new-survey-button');
-  return openEl instanceof HTMLButtonElement ? openEl : null;
-}
-
-/** Loads dialog shell elements for the new-survey modal. */
-function readNewSurveyShell(): {
-  dialog: HTMLDialogElement;
-  form: HTMLFormElement;
-  openButton: HTMLButtonElement | null;
-  closeButton: HTMLButtonElement;
-  cancelButton: HTMLButtonElement;
-} {
-  return {
-    dialog: requireElementById('new-survey-dialog', HTMLDialogElement),
-    form: requireElementById('new-survey-form', HTMLFormElement),
-    openButton: readOpenButton(),
-    closeButton: requireElementById('new-survey-close', HTMLButtonElement),
-    cancelButton: requireElementById('new-survey-cancel', HTMLButtonElement),
-  };
-}
-
-/** Loads form fields and error targets for the new-survey modal. */
-function readNewSurveyFields(): {
-  titleInput: HTMLInputElement;
-  optionsInput: HTMLTextAreaElement;
-  descriptionInput: HTMLTextAreaElement;
-  deadlineInput: HTMLInputElement;
-  titleError: HTMLElement;
-  optionsError: HTMLElement;
-  deadlineError: HTMLElement;
-} {
-  return {
-    titleInput: requireElementById('poll-title', HTMLInputElement),
-    optionsInput: requireElementById('poll-options', HTMLTextAreaElement),
-    descriptionInput: requireElementById('poll-description', HTMLTextAreaElement),
-    deadlineInput: requireElementById('poll-deadline', HTMLInputElement),
-    titleError: requireElementById('poll-title-error', HTMLElement),
-    optionsError: requireElementById('poll-options-error', HTMLElement),
-    deadlineError: requireElementById('poll-deadline-error', HTMLElement),
-  };
 }
 
 export class PollFormController {
@@ -140,7 +30,10 @@ export class PollFormController {
   private optionsError!: HTMLElement;
   private deadlineError!: HTMLElement;
 
-  /** Wires the modal form to the poll service and DOM nodes. */
+  /**
+   * Wires the modal form to the poll service and DOM nodes.
+   * @param options - Controller dependencies, including the poll service.
+   */
   public constructor(options: PollFormControllerOptions) {
     this.pollService = options.pollService;
     this.assignNewSurveyDom();
@@ -153,7 +46,10 @@ export class PollFormController {
     this.assignFields(readNewSurveyFields());
   }
 
-  /** Assigns dialog shell controls to instance fields. */
+  /**
+   * Assigns dialog shell controls to instance fields.
+   * @param shell - Dialog shell elements from {@link readNewSurveyShell}.
+   */
   private assignShell(shell: ReturnType<typeof readNewSurveyShell>): void {
     this.dialog = shell.dialog;
     this.form = shell.form;
@@ -162,7 +58,10 @@ export class PollFormController {
     this.cancelButton = shell.cancelButton;
   }
 
-  /** Assigns inputs and error hosts to instance fields. */
+  /**
+   * Assigns inputs and error hosts to instance fields.
+   * @param fields - Form field elements from {@link readNewSurveyFields}.
+   */
   private assignFields(fields: ReturnType<typeof readNewSurveyFields>): void {
     this.titleInput = fields.titleInput;
     this.optionsInput = fields.optionsInput;
@@ -215,14 +114,20 @@ export class PollFormController {
     void this.submitPoll(input);
   }
 
-  /** Persists a new poll asynchronously and closes the modal on success. */
+  /**
+   * Persists a new poll asynchronously and closes the modal on success.
+   * @param input - Validated new-poll payload from the form.
+   */
   private async submitPoll(input: NewPollInput): Promise<void> {
     await this.pollService.createPoll(input);
     this.openButton?.classList.add('button--cta--success');
     this.close();
   }
 
-  /** Reads trimmed form values into a new-poll payload. */
+  /**
+   * Reads trimmed form values into a new-poll payload.
+   * @returns Collected form values ready for validation and submission.
+   */
   private collectInput(): NewPollInput {
     const rawOptions = this.readTrimmedOptionLines();
     const deadline = this.readDeadlineFromInput();
@@ -235,7 +140,10 @@ export class PollFormController {
     };
   }
 
-  /** Parses non-empty option lines from the textarea. */
+  /**
+   * Parses non-empty option lines from the textarea.
+   * @returns Trimmed option labels with blank lines removed.
+   */
   private readTrimmedOptionLines(): string[] {
     return this.optionsInput.value
       .split('\n')
@@ -243,13 +151,20 @@ export class PollFormController {
       .filter((line) => line.length > 0);
   }
 
-  /** Parses deadline input, or null when empty. */
+  /**
+   * Parses deadline input, or null when empty.
+   * @returns Parsed deadline date, or `null` when the field is blank.
+   */
   private readDeadlineFromInput(): Date | null {
     const deadlineValue = this.deadlineInput.value;
     return deadlineValue.length > 0 ? new Date(deadlineValue) : null;
   }
 
-  /** Runs title and options validation rules. */
+  /**
+   * Runs title and options validation rules.
+   * @param input - Collected form payload to validate.
+   * @returns Field-specific validation errors, possibly empty.
+   */
   private validate(input: NewPollInput): ValidationErrors {
     const errors: ValidationErrors = {};
     const titleErr = validationTitleError(input.title);
@@ -267,7 +182,10 @@ export class PollFormController {
     return errors;
   }
 
-  /** Surfaces field errors and focuses the first invalid control. */
+  /**
+   * Surfaces field errors and focuses the first invalid control.
+   * @param errors - Validation errors keyed by form field.
+   */
   private applyErrors(errors: ValidationErrors): void {
     this.applyFieldError('title', errors.title);
     this.applyFieldError('options', errors.options);
@@ -275,7 +193,11 @@ export class PollFormController {
     this.focusFirstInvalid(errors);
   }
 
-  /** Writes one inline error or clears that field. */
+  /**
+   * Writes one inline error or clears that field.
+   * @param field - Form field receiving the error state.
+   * @param message - Error text to show, or `undefined` to clear the field.
+   */
   private applyFieldError(field: RequiredField, message: string | undefined): void {
     if (message === undefined) {
       this.clearError(field);
@@ -287,7 +209,10 @@ export class PollFormController {
     inputElement.setAttribute('aria-invalid', 'true');
   }
 
-  /** Focuses title, then deadline, then options, based on which error exists. */
+  /**
+   * Focuses title, then deadline, then options, based on which error exists.
+   * @param errors - Validation errors keyed by form field.
+   */
   private focusFirstInvalid(errors: ValidationErrors): void {
     if (errors.title !== undefined) {
       this.titleInput.focus();
@@ -302,7 +227,10 @@ export class PollFormController {
     }
   }
 
-  /** Clears inline error state for one field. */
+  /**
+   * Clears inline error state for one field.
+   * @param field - Form field whose error state should be reset.
+   */
   private clearError(field: RequiredField): void {
     const errorElement = this.errorElementForField(field);
     const inputElement = this.inputElementForField(field);
@@ -310,7 +238,11 @@ export class PollFormController {
     inputElement.removeAttribute('aria-invalid');
   }
 
-  /** Resolves the inline error host for one form field. */
+  /**
+   * Resolves the inline error host for one form field.
+   * @param field - Form field whose error element is needed.
+   * @returns Inline error container for {@link field}.
+   */
   private errorElementForField(field: RequiredField): HTMLElement {
     if (field === 'title') {
       return this.titleError;
@@ -321,7 +253,11 @@ export class PollFormController {
     return this.optionsError;
   }
 
-  /** Resolves the input control for one form field. */
+  /**
+   * Resolves the input control for one form field.
+   * @param field - Form field whose input element is needed.
+   * @returns Input or textarea control for {@link field}.
+   */
   private inputElementForField(field: RequiredField): HTMLInputElement | HTMLTextAreaElement {
     if (field === 'title') {
       return this.titleInput;
