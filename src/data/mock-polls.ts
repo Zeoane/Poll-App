@@ -3,11 +3,6 @@ import type { Poll } from '../types/poll';
 const HOUR_IN_MS = 60 * 60 * 1000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
 
-/** Returns a date offset from the current moment by the given milliseconds. */
-function relativeDate(offsetMs: number): Date {
-  return new Date(Date.now() + offsetMs);
-}
-
 export const MOCK_POLLS: ReadonlyArray<Poll> = [
   {
     id: 'poll-1',
@@ -131,3 +126,8 @@ export const MOCK_POLLS: ReadonlyArray<Poll> = [
     deadline: relativeDate(-7 * DAY_IN_MS),
   },
 ];
+
+/** Returns a date offset from the current moment by the given milliseconds. */
+function relativeDate(offsetMs: number): Date {
+  return new Date(Date.now() + offsetMs);
+}

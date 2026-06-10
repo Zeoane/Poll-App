@@ -36,7 +36,7 @@
   flex: 1;
   text-align: center;
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-primary-purple);
 }
@@ -86,7 +86,7 @@
 .end-date-picker__weekday {
   text-align: center;
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 700;
   color: rgba(53, 39, 58, 0.65);
 }
@@ -103,7 +103,7 @@
   border-radius: 4px;
   background: transparent;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--color-primary-purple);
   cursor: pointer;
 }

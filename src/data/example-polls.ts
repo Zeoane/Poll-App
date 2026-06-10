@@ -2,6 +2,8 @@ import type { Poll, PollOption, SurveyQuestion } from '../types/poll';
 
 import { MOCK_POLLS } from './mock-polls';
 
+const EXAMPLE_POLL_IDS = new Set(MOCK_POLLS.map((poll) => poll.id));
+
 /**
  * Returns demo surveys for the home lists and preview routes.
  * @returns Published example polls derived from {@link MOCK_POLLS}.
@@ -18,8 +20,6 @@ export function buildExamplePolls(): ReadonlyArray<Poll> {
 export function isExamplePoll(poll: Poll | undefined): boolean {
   return poll?.isExample === true;
 }
-
-const EXAMPLE_POLL_IDS = new Set(MOCK_POLLS.map((poll) => poll.id));
 
 /**
  * True when a route id belongs to a built-in demo survey.

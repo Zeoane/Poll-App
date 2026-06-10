@@ -20,10 +20,9 @@ export class CategoryListDropdown {
   private readonly opts: CategoryListDropdownOptions;
   private isOpen = false;
   private readonly onTriggerClick = (event: MouseEvent): void => {
-    event.stopPropagation();
-    this.toggle();
-  };
-  private readonly onSelectionCaptionClick = (event: MouseEvent): void => {
+    if (!this.isToggleClickTarget(event)) {
+      return;
+    }
     event.stopPropagation();
     this.toggle();
   };
@@ -55,7 +54,6 @@ export class CategoryListDropdown {
     this.close();
     this.opts.trigger.addEventListener('click', this.onTriggerClick);
     this.opts.trigger.addEventListener('keydown', this.onTriggerKeydown);
-    this.opts.selectionCaption?.addEventListener('click', this.onSelectionCaptionClick);
     this.opts.menu.addEventListener('click', this.onMenuClick);
     document.addEventListener('pointerdown', this.onDocumentPointerDown, true);
     document.addEventListener('keydown', this.onDocumentKeydown);
@@ -67,7 +65,6 @@ export class CategoryListDropdown {
   public destroy(): void {
     this.opts.trigger.removeEventListener('click', this.onTriggerClick);
     this.opts.trigger.removeEventListener('keydown', this.onTriggerKeydown);
-    this.opts.selectionCaption?.removeEventListener('click', this.onSelectionCaptionClick);
     this.opts.menu.removeEventListener('click', this.onMenuClick);
     document.removeEventListener(
       'pointerdown',
@@ -99,6 +96,25 @@ export class CategoryListDropdown {
     item.dataset['category'] = category;
     item.textContent = category;
     return item;
+  }
+
+  /**
+   * True when a trigger click landed on the label text or the chevron icon.
+   * @param event - Click event from the trigger button.
+   * @returns Whether the click may toggle the menu; empty button areas are ignored.
+   */
+  private isToggleClickTarget(event: MouseEvent): boolean {
+    const target = event.target;
+    if (!(target instanceof Node)) {
+      return false;
+    }
+    if (this.opts.label.contains(target)) {
+      return true;
+    }
+    const chevronWrap = this.opts.trigger.querySelector(
+      '.category-dropdown__chevron-wrap',
+    );
+    return chevronWrap?.contains(target) ?? false;
   }
 
   /** Opens or closes the dropdown menu. */
@@ -243,12 +259,7 @@ export class CategoryListDropdown {
       return;
     }
     const path = event.composedPath();
-    const caption = this.opts.selectionCaption;
-    if (
-      path.includes(this.opts.trigger) ||
-      path.includes(this.opts.menu) ||
-      (caption !== undefined && caption !== null && path.includes(caption))
-    ) {
+    if (path.includes(this.opts.trigger) || path.includes(this.opts.menu)) {
       return;
     }
     this.close();

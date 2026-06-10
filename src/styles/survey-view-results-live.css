@@ -8,8 +8,8 @@
   --live-gap-q-inline: 0.35em; 
   
   --live-column-width: var(--survey-results-live-column-width, 315px);
-  --live-bar-track-width: var(--survey-results-live-bar-track-width, 255px);
-  --live-bar-pct-width: var(--survey-results-live-bar-pct-width, 31px);
+  --live-bar-track-width: var(--survey-results-live-bar-track-width, 240px);
+  --live-bar-pct-width: var(--survey-results-live-bar-pct-width, 42px);
 }
 
 .create-card__live-toggle {
@@ -144,7 +144,7 @@
 
 .create-bar__letter {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 700;
   color: #35273a;
 }
@@ -177,9 +177,9 @@
   justify-content: flex-end;
   width: var(--live-bar-pct-width);
   min-width: var(--live-bar-pct-width);
-  height: 15px;
+  height: auto;
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 800;
   line-height: 100%;
   letter-spacing: 0;

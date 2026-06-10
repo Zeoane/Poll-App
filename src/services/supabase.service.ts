@@ -47,7 +47,6 @@ export class SupabaseService {
       console.error('[Supabase] Schema check failed:', error.message);
       return false;
     }
-    console.info('[Supabase] Client and survey schema ready:', environment.supabaseUrl);
     return true;
   }
 

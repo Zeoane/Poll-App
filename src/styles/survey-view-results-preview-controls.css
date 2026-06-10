@@ -200,7 +200,7 @@ button.create-check--preview.create-check--preview-on .create-check__box {
   margin: 0;
   max-width: 420px;
   text-align: right;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--color-danger);
 }

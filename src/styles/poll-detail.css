@@ -33,7 +33,7 @@
 .poll-detail__meta {
   margin: 0;
   color: var(--color-text-on-card-muted);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .poll-detail__description {
@@ -64,7 +64,7 @@
 .poll-detail__total {
   margin: 0 0 var(--spacing-md);
   color: var(--color-text-on-card-muted);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .poll-detail__footer {
@@ -93,7 +93,7 @@
 .poll-results__meta {
   display: flex;
   justify-content: space-between;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .poll-results__bar {

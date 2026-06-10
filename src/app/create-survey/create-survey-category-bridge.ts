@@ -6,6 +6,13 @@ export interface CategorySelectionHandlers {
   setSelection: (value: string | null) => void;
 }
 
+type CategoryDom = {
+  trigger: HTMLButtonElement;
+  menu: HTMLUListElement;
+  label: HTMLElement;
+  selectionCaption: HTMLElement;
+};
+
 /**
  * Returns wired dropdown or null when DOM nodes are missing.
  * @param doc - Document containing create-survey category markup.
@@ -30,13 +37,6 @@ export function attachCreateSurveyCategoryDropdown(
     triggerActiveClass: 'create-category-trigger__button--filled',
   });
 }
-
-type CategoryDom = {
-  trigger: HTMLButtonElement;
-  menu: HTMLUListElement;
-  label: HTMLElement;
-  selectionCaption: HTMLElement;
-};
 
 /**
  * Reads create-survey category dropdown nodes from the document.

@@ -1,5 +1,8 @@
 const MIN_END_DATE_LEAD_DAYS = 1;
 
+/** Inline rejection copy when a complete typed end date is not allowed. */
+export const SURVEY_END_DATE_REJECTED_INPUT_MESSAGE = 'Enter valid date.';
+
 export type SurveyEndDateIssue = 'invalid' | 'tooSoon';
 
 /**
@@ -92,9 +95,6 @@ export function formatGermanDmy(date: Date): string {
 export function sanitizeGermanDateRawInput(raw: string): string {
   return raw.replace(/[-:]/g, '');
 }
-
-/** Inline rejection copy when a complete typed end date is not allowed. */
-export const SURVEY_END_DATE_REJECTED_INPUT_MESSAGE = 'Enter valid date.';
 
 /**
  * True when typed text is a complete dd.mm.yyyy date before the minimum end day.

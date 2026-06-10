@@ -82,7 +82,7 @@
 
 .create-preview-layout {
   --create-card-padding: 40px;
-  --create-meta-row-line: 21px;
+  --create-meta-row-line: 24px;
   --create-live-offset: 194px;
   
   --create-live-offset-instant-adjust: 52px;
@@ -92,8 +92,8 @@
   --survey-text-line: calc(16px * 1.55);
   
   --survey-results-live-column-width: 315px;
-  --survey-results-live-bar-track-width: 255px;
-  --survey-results-live-bar-pct-width: 31px;
+  --survey-results-live-bar-track-width: 240px;
+  --survey-results-live-bar-pct-width: 42px;
 
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--survey-results-live-column-width);
@@ -180,7 +180,7 @@
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 8px 16px;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
   min-height: var(--create-meta-row-line);
   color: #35273a;
@@ -225,7 +225,7 @@
     var(--survey-q-title-margin-below) + var(--survey-text-line)
   );
 
-  --survey-q-hint-size: 12px;
+  --survey-q-hint-size: 16px;
   --survey-q-hint-line-height: 1.5;
   --survey-q-hint-margin-below: calc(12px + 1lh);
 
