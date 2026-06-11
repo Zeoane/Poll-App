@@ -1,7 +1,7 @@
 .create-field__label {
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 100%;
   letter-spacing: 0;
   color: #fefdff;
@@ -15,7 +15,7 @@
 .create-field__label--with-arrow {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.625rem;
 }
 
 .create-field__label--with-arrow img {
@@ -25,7 +25,7 @@
 .create-field__row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.625rem;
 }
 
 .create-field__row--top {
@@ -35,8 +35,8 @@
 .create-field__row--q-prompt-only {
   box-sizing: border-box;
   align-items: center;
-  gap: 10px;
-  width: 473px;
+  gap: 0.625rem;
+  width: 29.5625rem;
   max-width: 100%;
 }
 
@@ -44,12 +44,12 @@
   flex: 1;
   min-width: 0;
   border: none;
-  border-radius: 5px 20px 5px 5px;
+  border-radius: 0.3125rem 1.25rem 0.3125rem 0.3125rem;
   background: #ffffff;
   color: var(--color-primary-purple);
   font-family: var(--font-body);
-  font-size: 16px;
-  padding: 10px 14px;
+  font-size: 1rem;
+  padding: 0.625rem 0.875rem;
 }
 
 .create-field__input:hover,
@@ -60,9 +60,9 @@
 .create-field__input--end-date {
   flex: 0 0 auto;
   box-sizing: border-box;
-  width: 222px;
-  height: 37px;
-  padding: 7px 13px;
+  width: 13.875rem;
+  height: 2.3125rem;
+  padding: 0.4375rem 0.8125rem;
 }
 
 .create-field__input--q-prompt {
@@ -71,12 +71,12 @@
   min-width: 0;
   width: auto;
   max-width: none;
-  height: 37px;
-  padding: 7px 13px;
-  border-radius: 5px 20px 5px 5px;
+  height: 2.3125rem;
+  padding: 0.4375rem 0.8125rem;
+  border-radius: 0.3125rem 1.25rem 0.3125rem 0.3125rem;
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 100%;
   letter-spacing: 0;
   color: #35273a;
@@ -92,7 +92,7 @@
   color: var(--color-danger, #e5484d);
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .create-field__input--error.create-field__input--q-prompt::placeholder {
@@ -101,7 +101,7 @@
 }
 
 .create-field__input--textarea {
-  min-height: 108px;
+  min-height: 6.75rem;
   resize: vertical;
   background-color: #ffffff;
 }
@@ -111,7 +111,7 @@
   min-width: 0;
   min-height: 0;
   max-width: none;
-  border-radius: 5px 20px 5px 5px;
+  border-radius: 0.3125rem 1.25rem 0.3125rem 0.3125rem;
   padding: 0;
 }
 
@@ -124,18 +124,18 @@
 .create-field__clear {
   box-sizing: border-box;
   flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  padding: 4px;
+  width: 2.125rem;
+  height: 2.125rem;
+  padding: 0.25rem;
   border: none;
-  border-radius: 3px;
+  border-radius: 0.1875rem;
   appearance: none;
   -webkit-appearance: none;
   background-color: transparent;
   background-image: url("../assets/img/icons/actions/delete.svg");
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 26px 26px;
+  background-size: 1.625rem 1.625rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;

@@ -2,14 +2,14 @@
   border: none;
   border-radius: var(--radius-md);
   padding: 0;
-  max-width: 540px;
+  max-width: 33.75rem;
   width: calc(100% - 2 * var(--spacing-md));
   background: var(--color-bg-card);
   color: var(--color-text-on-card);
 }
 
 .modal--detail {
-  max-width: 920px;
+  max-width: 57.5rem;
 }
 
 .modal::backdrop {

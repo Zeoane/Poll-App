@@ -1,9 +1,9 @@
 @media (max-width: 900px) {
   :root {
-    --font-size-hero: 62px;
-    --font-size-section-title: 54px;
-    --font-size-subsection: 24px;
-    --font-size-body: 18px;
+    --font-size-hero: 3.875rem;
+    --font-size-section-title: 3.375rem;
+    --font-size-subsection: 1.5rem;
+    --font-size-body: 1.125rem;
   }
 
   .surveys {
@@ -15,12 +15,12 @@
   }
 
   .poll-section--ending-soon .poll-card {
-    flex: 0 0 250px;
+    flex: 0 0 15.625rem;
   }
 
   .poll-card--highlight .poll-card__inner {
-    width: 250px;
-    height: 233px;
+    width: 15.625rem;
+    height: 14.5625rem;
   }
 
   .hero {
@@ -40,9 +40,9 @@
   .hero__visual {
     order: 2;
     flex: none;
-    width: 343px;
+    width: 21.4375rem;
     max-width: 100%;
-    height: 250px;
+    height: 15.625rem;
   }
 
   .hero__body {
@@ -65,18 +65,18 @@
   }
 
   .category-dropdown.category-dropdown--sort {
-    width: 206px;
+    width: 12.875rem;
     max-width: 100%;
   }
 
   .create-field.create-field--date-category > .category-dropdown.create-category-trigger {
     width: 100%;
-    max-width: 320px;
+    max-width: 20rem;
   }
 
   .sort {
     width: 100%;
-    max-width: 206px;
+    max-width: 12.875rem;
   }
 
   #tab-panel-active.tabs__panel--active-scroll,
@@ -99,8 +99,8 @@
 
   
   .survey-view-results-page__main {
-    padding-top: 24px;
-    padding-bottom: 40px;
+    padding-top: 1.5rem;
+    padding-bottom: 2.5rem;
     padding-inline: clamp(var(--spacing-md), 5vw, var(--spacing-lg));
   }
 
@@ -116,18 +116,18 @@
     display: block;
     position: absolute;
     
-    top: 25px;
-    right: 20px;
-    width: 39px;
-    height: 32px;
+    top: 1.5625rem;
+    right: 1.25rem;
+    width: 2.4375rem;
+    height: 2rem;
     line-height: 0;
-    border-radius: 10px;
+    border-radius: 0.625rem;
   }
 
   .create-card__close-mobile img {
     display: block;
-    width: 39px;
-    height: 32px;
+    width: 2.4375rem;
+    height: 2rem;
   }
 
   .create-card__close-mobile:focus-visible {
@@ -141,16 +141,16 @@
 
   .survey-view-results-page__complete-btn-graphic {
     display: block;
-    width: 147px;
-    height: 48px;
+    width: 9.1875rem;
+    height: 3rem;
   }
 
   .survey-view-results-page__complete-btn,
   .survey-view-results-page__complete-btn:hover {
-    width: 147px;
-    height: 48px;
+    width: 9.1875rem;
+    height: 3rem;
     padding: 0;
-    margin-bottom: 22px;
+    margin-bottom: 1.375rem;
     background: transparent;
     box-shadow: none;
   }

@@ -21,3 +21,14 @@
   position: relative;
   z-index: 260;
 }
+
+@media (max-width: 900px) {
+  /*
+   * Demo guard is a full-screen click layer (z-index 250). Lift the live-results
+   * block above it so "See results" stays usable on demo surveys.
+   */
+  .survey-view-results-page--demo-guard-active app-survey-view-results-live-panel {
+    position: relative;
+    z-index: 251;
+  }
+}

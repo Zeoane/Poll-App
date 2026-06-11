@@ -23,41 +23,41 @@
   --font-body: "Mulish", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 
-  --font-size-hero: 80px;
-  --font-size-section-title: 72px;
-  --font-size-subsection: 32px;
-  --font-size-card-title: 26px;
-  --font-size-card-meta: 16px;
-  --font-size-body: 24px;
-  --font-size-base: 16px;
+  --font-size-hero: 5rem;
+  --font-size-section-title: 4.5rem;
+  --font-size-subsection: 2rem;
+  --font-size-card-title: 1.625rem;
+  --font-size-card-meta: 1rem;
+  --font-size-body: 1.5rem;
+  --font-size-base: 1rem;
 
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
 
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-  --spacing-2xl: 48px;
-  --spacing-3xl: 80px;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 5rem;
 
   
-  --create-survey-spacing-ref: 18px;
+  --create-survey-spacing-ref: 1.125rem;
   --create-survey-q-gap: var(--spacing-sm);
-  --create-survey-answers-above-extra: calc(var(--create-survey-spacing-ref) * 0.78 + 8px);
+  --create-survey-answers-above-extra: calc(var(--create-survey-spacing-ref) * 0.78 + 0.5rem);
   --create-survey-answers-below-adjust: calc(var(--create-survey-spacing-ref) * -0.24);
 
-  --content-max-width: 1218px;
-  --surveys-max-width: 1042px;
+  --content-max-width: 76.125rem;
+  --surveys-max-width: 65.125rem;
 
   
-  --category-dropdown-width: 206px;
-  --category-dropdown-trigger-padding-inline-start: 10px;
-  --category-dropdown-trigger-padding-inline-end: 6px;
+  --category-dropdown-width: 12.875rem;
+  --category-dropdown-trigger-padding-inline-start: 0.625rem;
+  --category-dropdown-trigger-padding-inline-end: 0.375rem;
   
-  --category-dropdown-chip-padding-inline: 8px;
+  --category-dropdown-chip-padding-inline: 0.5rem;
   --category-dropdown-caption-offset-inline-start: 0px;
 }
 

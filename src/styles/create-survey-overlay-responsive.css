@@ -16,7 +16,7 @@
   .create-survey-page__main {
     padding-inline: clamp(var(--spacing-md), 5vw, var(--spacing-lg));
     background: var(--color-bg);
-    border-radius: 0 48px 0 0;
+    border-radius: 0 3rem 0 0;
   }
 
   .create-survey-card {
@@ -28,7 +28,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-md);
-    padding-right: 47px;
+    padding-right: 2.9375rem;
   }
 
   .create-survey-card__cancel {
@@ -38,9 +38,9 @@
     grid-column: unset;
     grid-row: unset;
     align-self: auto;
-    width: 39px;
-    min-width: 39px;
-    height: 32px;
+    width: 2.4375rem;
+    min-width: 2.4375rem;
+    height: 2rem;
     padding: 0;
     gap: 0;
     background: transparent;
@@ -58,8 +58,8 @@
 
   .create-survey-card__cancel-icon--mobile {
     display: block;
-    width: 39px;
-    height: 32px;
+    width: 2.4375rem;
+    height: 2rem;
   }
 
   .create-survey-card__grid-top {
@@ -69,14 +69,14 @@
   }
 
   .create-survey-card__grid-top > .create-survey-card__col:last-child {
-    margin-top: calc((var(--spacing-xl) - 10px) / 2 * 0.7);
+    margin-top: calc((var(--spacing-xl) - 0.625rem) / 2 * 0.7);
   }
 
   .create-field:not(.create-field--date-category) {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 10px;
-    row-gap: 10px;
+    column-gap: 0.625rem;
+    row-gap: 0.625rem;
     align-items: center;
   }
 
@@ -112,8 +112,8 @@
   .create-field.create-field--date-category {
     width: 100%;
     grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 10px;
-    row-gap: 10px;
+    column-gap: 0.625rem;
+    row-gap: 0.625rem;
     --category-dropdown-trigger-padding-inline-start: 0;
     --category-dropdown-chip-padding-inline: 0;
   }
@@ -133,7 +133,7 @@
     margin-inline: 0;
     padding-inline: 0;
     margin-top: 0;
-    margin-bottom: calc((10px + 10px * 0.12) * 1.5 - 10px);
+    margin-bottom: calc((0.625rem + 0.625rem * 0.12) * 1.5 - 0.625rem);
   }
 
   .create-field.create-field--date-category
@@ -194,14 +194,14 @@
     position: relative;
     top: auto;
     left: auto;
-    width: min(100%, 280px);
+    width: min(100%, 17.5rem);
     justify-self: start;
-    margin-top: 4px;
+    margin-top: 0.25rem;
   }
 
   .create-field--describe {
     margin-left: 0;
-    padding-top: 3.5px;
+    padding-top: 0.21875rem;
   }
 
   .create-field--describe > .create-field__label {
@@ -212,16 +212,16 @@
     width: 100%;
     max-width: 100%;
     min-height: unset;
-    font-size: 56px;
+    font-size: 3.5rem;
     line-height: 100%;
     white-space: normal;
   }
 
   .create-survey-card__body {
     min-height: unset;
-    padding: 28px 20px;
+    padding: 1.75rem 1.25rem;
     gap: var(--spacing-2xl);
-    border-radius: 5px 48px 5px 5px;
+    border-radius: 0.3125rem 3rem 0.3125rem 0.3125rem;
   }
 
   .create-survey-card__questions-grid--single .create-survey-card__add-next-wrap {
@@ -249,168 +249,21 @@
     text-align: center;
   }
 
-  .create-btn-add-next {
-    margin-top: 42px;
-  }
-
-  .create-answers-head {
-    width: 100%;
-    margin: 0;
-  }
-
-  
-  .create-q-block > .create-field + .create-answers-head {
-    margin-top: var(--create-survey-answers-above-extra);
-  }
-
-  .create-answers-head + .create-answer-list {
-    margin-top: var(--create-survey-answers-below-adjust);
-  }
-
   .create-survey-card__grid-top + .create-survey-card__questions-grid {
     margin-top: calc(
       -1 * var(--spacing-2xl) + 0.7 * (var(--spacing-2xl) - var(--spacing-md))
     );
   }
 
-  .create-q-block {
-    gap: var(--create-survey-q-gap);
-  }
-
-  .create-q-block .create-answer-list {
-    gap: var(--create-survey-q-gap);
-  }
-
-  .create-q-block__head {
-    display: block;
-  }
-
-  .create-q-block__title {
-    width: auto;
-    max-width: 100%;
-  }
-
-  .create-q-block__head + .create-field {
-    margin-top: -20px;
-  }
-
-  .create-q-block .create-field:not(.create-field--date-category) {
-    display: block;
-  }
-
-  .create-q-block .create-field:not(.create-field--date-category) > .create-field__row {
-    display: flex;
-  }
-
-  .create-answer-list__item {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: auto auto;
-    column-gap: 10px;
-    align-items: center;
-    width: 100%;
-    height: auto;
-    min-height: unset;
-  }
-
-  .create-answer-list__letter {
-    grid-column: 1;
-    grid-row: 1;
-    width: auto;
-    align-self: center;
-  }
-
-  .create-answer-list__item .create-field__row--answer {
-    display: contents;
-  }
-
-  .create-answer-list__item .create-field__row--answer .create-field__input {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    width: 100%;
-    height: 37px;
-  }
-
-  .create-answer-list__item .create-field__row--answer .create-field__clear {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
-    align-self: center;
-  }
-
-  .create-answer-list + .create-q-block__add-answer-row {
-    margin: 8px;
-  }
-
-  .create-q-block__add-answer-row .create-link-add {
-    box-sizing: border-box;
-    width: fit-content;
-    max-width: 100%;
-    height: auto;
-    min-height: 0;
-    padding: 0 0 2px;
-    gap: 8px;
-    font-size: 16px;
-    line-height: 1;
-    margin-top: 12px;
-  }
-
-  .create-field__row--q-prompt-only {
-    width: 100%;
-  }
-
-  .create-field__row--q-prompt-only .create-field__input--q-prompt {
-    width: 100%;
-    max-width: none;
-    flex: 1;
-  }
-
-  .create-survey-page__publish {
-    align-items: center;
-    padding-left: 0;
-    padding-right: 0;
-    margin-top: var(--spacing-2xl);
-  }
-
-  .create-btn-publish__label {
-    display: none;
-  }
-
-  .create-btn-publish__graphic {
-    display: block;
-    width: 123px;
-    height: 48px;
-  }
-
-  .create-btn-publish {
-    width: 123px;
-    min-width: 123px;
-    height: 48px;
-    padding: 0;
-    background: transparent;
-  }
-
-  .create-btn-publish:hover {
-    filter: brightness(1.04);
-  }
-
   .create-field__row--top.create-field__row--describe {
     width: 100%;
     height: auto;
-    min-height: 108px;
-    padding: 7px 13px;
+    min-height: 6.75rem;
+    padding: 0.4375rem 0.8125rem;
   }
 
   .create-field__input--textarea.create-field__input--describe {
     width: 100%;
-    min-height: 94px;
-  }
-
-  .create-publish-overlay__panel {
-    width: 357px;
-    max-width: min(357px, calc(100vw - 2 * var(--spacing-md)));
-    height: 169px;
-    min-height: 169px;
-    border-radius: 5px 50px 5px 5px;
+    min-height: 5.875rem;
   }
 }
